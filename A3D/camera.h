@@ -14,6 +14,7 @@ public:
 	};
 	
 	Camera();
+	~Camera();
 	
 	// View matrix
 	

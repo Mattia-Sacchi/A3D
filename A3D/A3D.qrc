@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>A3D/Basic2DMaterial.frag</file>
+        <file>A3D/Basic2DMaterial.vert</file>
+        <file>A3D/Basic3DMaterial.frag</file>
+        <file>A3D/Basic3DMaterial.vert</file>
+    </qresource>
+</RCC>

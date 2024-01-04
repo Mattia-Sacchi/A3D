@@ -21,11 +21,19 @@ inline void normalizeAngleVector(QVector3D& angle) {
 Camera::Camera()
 	: m_viewMatrixIsDirty(true),
 		m_projMatrixIsDirty(true),
+		m_projectionMode(PM_PERSPECTIVE),
 		m_nearPlane(0.1f),
 		m_farPlane(1000.f),
 		m_perspVerticalFOV(45.f),
 		m_perspAspectRatio(16.f/9.f)
-{}
+{
+	dbgConstruct("Camera")
+}
+
+Camera::~Camera()
+{
+	dbgDestruct("Camera")
+}
 
 QVector3D const& Camera::position() const {
 	return m_position;
@@ -41,6 +49,7 @@ QMatrix4x4 Camera::orientation() const {
 	matrix.rotate(m_angle.x(), QVector3D(1.f, 0.f, 0.f));
 	matrix.rotate(m_angle.y(), QVector3D(0.f, 1.f, 0.f));
 	matrix.rotate(m_angle.z(), QVector3D(0.f, 0.f, 1.f));
+	qDebug() << m_angle;
 	return matrix;
 }
 QVector3D const& Camera::angle() const {
@@ -49,11 +58,15 @@ QVector3D const& Camera::angle() const {
 void Camera::setOrientationTarget(QVector3D const& target) {
 	if(target == m_position)
 		return;
-	QVector3D direction = (target - m_position);
-	direction.normalize();
+	QVector3D const direction = (target - m_position);
+	float const length = direction.length();
+	
+	float const pitch = qAsin(-direction.y() / length);
+	float const yaw = qAtan2(direction.x(), -direction.z());
+	
 	QVector3D newAngle(
-		qDegreesToRadians(qAsin(-direction.y())),
-		-qDegreesToRadians(qAtan2(-direction.x(), -direction.y())),
+		qRadiansToDegrees(pitch),
+		qRadiansToDegrees(yaw),
 		0.f
 	);
 	normalizeAngleVector(newAngle);
