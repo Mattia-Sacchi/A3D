@@ -49,7 +49,6 @@ QMatrix4x4 Camera::orientation() const {
 	matrix.rotate(m_angle.x(), QVector3D(1.f, 0.f, 0.f));
 	matrix.rotate(m_angle.y(), QVector3D(0.f, 1.f, 0.f));
 	matrix.rotate(m_angle.z(), QVector3D(0.f, 0.f, 1.f));
-	qDebug() << m_angle;
 	return matrix;
 }
 QVector3D const& Camera::angle() const {

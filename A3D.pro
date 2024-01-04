@@ -14,6 +14,7 @@ SOURCES += \
     A3D/material.cpp \
     A3D/materialcache.cpp \
     A3D/materialcacheogl.cpp \
+    A3D/materialproperties.cpp \
     A3D/mesh.cpp \
     A3D/meshcache.cpp \
     A3D/meshcacheogl.cpp \
@@ -30,6 +31,7 @@ HEADERS += \
 	A3D/material.h \
 	A3D/materialcache.h \
 	A3D/materialcacheogl.h \
+	A3D/materialproperties.h \
 	A3D/mesh.h \
 	A3D/meshcache.h \
 	A3D/meshcacheogl.h \

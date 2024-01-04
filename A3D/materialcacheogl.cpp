@@ -10,7 +10,64 @@ MaterialCacheOGL::MaterialCacheOGL(Material* parent)
 	: MaterialCache{parent}
 {}
 
-void MaterialCacheOGL::render(CoreGLFunctions*, QMatrix4x4 const& model, QMatrix4x4 const& view, QMatrix4x4 const& proj) {
+void MaterialCacheOGL::applyUniform(QString const& name, QVariant const& value) {
+	auto prevEntry = m_uniformCachedInfo.try_emplace(name);
+	UniformCachedInfo& uci = prevEntry.first->second;
+	if(prevEntry.second)
+		uci.m_uniformID = m_program->uniformLocation(name);
+	
+	if(uci.m_uniformID == -1)
+		return;
+	
+	if(uci.m_lastValue == value)
+		return;
+	
+	uci.m_lastValue = value;
+	
+	int const uniformLocation = uci.m_uniformID;
+	
+	switch(value.userType()) {
+	case QMetaType::Double:
+	case QMetaType::Float:
+		m_program->setUniformValue(uniformLocation, value.toFloat());
+		break;
+	case QMetaType::LongLong:
+	case QMetaType::Long:
+	case QMetaType::Int:
+	case QMetaType::Short:
+		m_program->setUniformValue(uniformLocation, static_cast<GLint>(value.toInt()));
+		break;
+	case QMetaType::ULongLong:
+	case QMetaType::ULong:
+	case QMetaType::UInt:
+	case QMetaType::UShort:
+		m_program->setUniformValue(uniformLocation, static_cast<GLuint>(value.toUInt()));
+		break;
+		
+#define BIND_MT(metaType, cppType) case metaType: m_program->setUniformValue(uniformLocation, value.value<cppType>()); break
+		
+	BIND_MT(QMetaType::QColor, QColor);
+	BIND_MT(QMetaType::QPoint, QPoint);
+	BIND_MT(QMetaType::QPointF, QPointF);
+	BIND_MT(QMetaType::QSize, QSize);
+	BIND_MT(QMetaType::QSizeF, QSizeF);
+	BIND_MT(QMetaType::QMatrix4x4, QMatrix4x4);
+	BIND_MT(QMetaType::QTransform, QTransform);
+	BIND_MT(QMetaType::QVector2D, QVector2D);
+	BIND_MT(QMetaType::QVector3D, QVector3D);
+	BIND_MT(QMetaType::QVector4D, QVector4D);
+		
+#undef BIND_MT
+	}
+}
+
+void MaterialCacheOGL::applyUniforms(std::map<QString, QVariant> const& uniforms) {
+	for(auto it = uniforms.begin(); it != uniforms.end(); ++it) {
+		applyUniform(it->first, it->second);
+	}
+}
+
+void MaterialCacheOGL::render(CoreGLFunctions*, MaterialProperties const& materialProperties, QMatrix4x4 const& model, QMatrix4x4 const& view, QMatrix4x4 const& proj) {
 	if(!m_program)
 		return;
 	
@@ -20,73 +77,13 @@ void MaterialCacheOGL::render(CoreGLFunctions*, QMatrix4x4 const& model, QMatrix
 	
 	m_program->bind();
 	
-	std::map<QString, QVariant> const& values = m->shaderValues(Material::GLSL);
-	if(values != m_uniformValues) {
-		m_uniformValues = values;
-		for(auto it = m_uniformValues.begin(); it != m_uniformValues.end(); ++it) {
-			QString const& name = it->first;
-			QVariant const& v = it->second;
-			
-			int uniformLocation = -1;
-			
-			auto cachedEntry = m_uniformIDs.find(name);
-			if(cachedEntry == m_uniformIDs.end()) {
-				uniformLocation = m_program->uniformLocation(name);
-				m_uniformIDs[name] = uniformLocation;
-			} else {
-				uniformLocation = cachedEntry->second;
-			}
-			
-			if(uniformLocation == -1)
-				continue;
-			
-			switch(v.userType()) {
-			case QMetaType::Double:
-			case QMetaType::Float:
-				m_program->setUniformValue(uniformLocation, v.toFloat());
-				break;
-			case QMetaType::LongLong:
-			case QMetaType::Long:
-			case QMetaType::Int:
-			case QMetaType::Short:
-				m_program->setUniformValue(uniformLocation, static_cast<GLint>(v.toInt()));
-				break;
-			case QMetaType::ULongLong:
-			case QMetaType::ULong:
-			case QMetaType::UInt:
-			case QMetaType::UShort:
-				m_program->setUniformValue(uniformLocation, static_cast<GLuint>(v.toUInt()));
-				break;
-				
-#define BIND_MT(metaType, cppType) case metaType: m_program->setUniformValue(uniformLocation, v.value<cppType>()); break
-				
-			BIND_MT(QMetaType::QColor, QColor);
-			BIND_MT(QMetaType::QPoint, QPoint);
-			BIND_MT(QMetaType::QPointF, QPointF);
-			BIND_MT(QMetaType::QSize, QSize);
-			BIND_MT(QMetaType::QSizeF, QSizeF);
-			BIND_MT(QMetaType::QMatrix4x4, QMatrix4x4);
-			BIND_MT(QMetaType::QTransform, QTransform);
-			BIND_MT(QMetaType::QVector2D, QVector2D);
-			BIND_MT(QMetaType::QVector3D, QVector3D);
-			BIND_MT(QMetaType::QVector4D, QVector4D);
-				
-#undef BIND_MT
-			}
-		}
-	}
+	applyUniforms(materialProperties.values());
+	applyUniforms(materialProperties.modeSpecificValues(Material::GLSL));
 	
-	if(m_uidMVP != -1)
-		m_program->setUniformValue(m_uidMVP, (proj * view * model));
-	
-	if(m_uidM != -1)
-		m_program->setUniformValue(m_uidM, model);
-	
-	if(m_uidV != -1)
-		m_program->setUniformValue(m_uidV, view);
-	
-	if(m_uidP != -1)
-		m_program->setUniformValue(m_uidP, proj);
+	applyUniform("mvpMatrix", (proj * view * model));
+	applyUniform("mMatrix", model);
+	applyUniform("vMatrix", view);
+	applyUniform("pMatrix", proj);
 }
 
 void MaterialCacheOGL::update(CoreGLFunctions*) {
@@ -111,11 +108,7 @@ void MaterialCacheOGL::update(CoreGLFunctions*) {
 		m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fxShader);
 	m_program->link();
 	
-	m_uniformIDs.clear();
-	m_uidMVP = m_program->uniformLocation("mvpMatrix");
-	m_uidM = m_program->uniformLocation("modelMatrix");
-	m_uidV = m_program->uniformLocation("viewMatrix");
-	m_uidP = m_program->uniformLocation("projMatrix");
+	m_uniformCachedInfo.clear();
 	
 	markClean();
 }

@@ -23,13 +23,18 @@ Material* Material::standardMaterial(StandardMaterial stdMat) {
 		newMat.setShaderFile(GLSL, VertexShader,   ":/A3D/Basic3DMaterial.vert");
 		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/Basic3DMaterial.frag");
 		break;
+	case SampleTranslucentMaterial:
+		newMat.setShaderFile(GLSL, VertexShader,   ":/A3D/SampleTranslucentMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/SampleTranslucentMaterial.frag");
+		newMat.setRenderOptions(newMat.renderOptions() | Translucent);
 	}
 	newMat.invalidateMaterialCache();
 	return &newMat;
 }
 
 Material::Material(QObject *parent)
-	: QObject{parent}
+	: QObject{parent},
+	  m_renderOptions(NoOptions)
 {
 	dbgConstruct("Material")
 }
@@ -51,9 +56,16 @@ Material::~Material() {
 	dbgDestruct("Material finished")
 }
 
+Material::RenderOptions Material::renderOptions() const {
+	return m_renderOptions;
+}
+void Material::setRenderOptions(RenderOptions renderOptions) {
+	m_renderOptions = renderOptions;
+}
+
 void Material::setShader(ShaderMode mode, ShaderType type, QString shaderContents)
 {
-	m_shaders[mode].m_shaderCodes[type] = std::move(shaderContents);
+	m_shaders[mode][type] = std::move(shaderContents);
 }
 
 void Material::setShaderFile(ShaderMode mode, ShaderType type, QString shaderPath)
@@ -64,54 +76,19 @@ void Material::setShaderFile(ShaderMode mode, ShaderType type, QString shaderPat
 	setShader(mode, type, QString::fromUtf8(f.readAll()));
 }
 
-void Material::setShaderValue(ShaderMode mode, QString name, QVariant value)
-{
-	m_shaders[mode].m_values[std::move(name)] = std::move(value);
-}
-
 QString Material::shader(ShaderMode mode, ShaderType type) const
 {
 	auto itSM = m_shaders.find(mode);
 	if(itSM == m_shaders.end())
 		return QString();
 	
-	ShaderData const& sd = itSM->second;
+	std::map<ShaderType, QString> const& shaderCodes = itSM->second;
 	
-	auto itSD = sd.m_shaderCodes.find(type);
-	if(itSD == sd.m_shaderCodes.end())
+	auto itSD =shaderCodes.find(type);
+	if(itSD == shaderCodes.end())
 		return QString();
 	
 	return itSD->second;
-}
-
-QVariant Material::shaderValue(ShaderMode mode, QString const& name) const
-{
-	auto itSM = m_shaders.find(mode);
-	if(itSM == m_shaders.end())
-		return QVariant();
-	
-	ShaderData const& sd = itSM->second;
-	std::map<QString, QVariant> const& sv = sd.m_values;
-	
-	auto itSV = sv.find(name);
-	if(itSV == sv.end())
-		return QVariant();
-	
-	return itSV->second;
-}
-
-std::map<QString, QVariant> Material::shaderValues(ShaderMode mode) const {
-	auto itSM = m_shaders.find(mode);
-	if(itSM == m_shaders.end())
-		return std::map<QString, QVariant>{};
-	
-	ShaderData const& sd = itSM->second;
-	std::map<QString, QVariant> const& sv = sd.m_values;
-	return sv;
-}
-
-std::map<QString, QVariant>& Material::shaderValues(ShaderMode mode) {
-	return m_shaders[mode].m_values;
 }
 
 void Material::invalidateMaterialCache(std::uintptr_t rendererID) {

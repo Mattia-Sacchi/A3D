@@ -2,9 +2,10 @@
 
 namespace A3D {
 
-RendererOGL::RendererOGL(QOpenGLContext* ctx)
+RendererOGL::RendererOGL(QOpenGLContext* ctx, CoreGLFunctions* gl)
 	: Renderer(),
-	  m_context(ctx)
+	  m_context(ctx),
+	  m_gl(gl)
 {
 	dbgConstruct("RendererOGL")
 }
@@ -15,26 +16,46 @@ RendererOGL::~RendererOGL() {
 	dbgDestruct("RendererOGL finished")
 }
 
-void RendererOGL::Draw(CoreGLFunctions* gl, Entity* root, QMatrix4x4 const& parentMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix) {
-	std::vector<QPointer<Entity>> const& entities = root->childrenEntities();
+void RendererOGL::Draw(Entity* e, QMatrix4x4 const& parentMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix) {	
+	if(!e)
+		return;
+	Mesh* mesh = e->mesh();
+	Material* mat = e->material();
+	if(!mesh || !mat)
+		return;
 	
-	for(auto it = entities.begin(); it != entities.end(); ++it) {
-		QPointer<Entity> const& p = *it;
-		if(p.isNull())
-			continue;
-		
-		Entity* e = p.get();
-		Mesh* mesh = e->mesh();
-		Material* mat = e->material();
-		if(!mesh || !mat)
-			continue;
-		
-		MeshCacheOGL* meshCache = buildMeshCache(gl, mesh);
-		MaterialCacheOGL* matCache = buildMaterialCache(gl, mat);
-		
-		matCache->render(gl, parentMatrix * e->modelMatrix(), viewMatrix, projMatrix);
-		meshCache->render(gl);
-	}
+	MeshCacheOGL* meshCache = buildMeshCache(mesh);
+	MaterialCacheOGL* matCache = buildMaterialCache(mat);
+	
+	Mesh::RenderOptions meshRenderOptions = mesh->renderOptions();
+	Material::RenderOptions materialRenderOptions = mat->renderOptions();
+	
+	if(meshRenderOptions & Mesh::DisableCulling || materialRenderOptions & Material::Translucent)
+		m_gl->glDisable(GL_CULL_FACE);
+	
+	matCache->render(m_gl, e->materialProperties(), parentMatrix * e->modelMatrix(), viewMatrix, projMatrix);
+	meshCache->render(m_gl);
+	
+	if(meshRenderOptions & Mesh::DisableCulling || materialRenderOptions & Material::Translucent)
+		m_gl->glEnable(GL_CULL_FACE);
+}
+
+void RendererOGL::BeginOpaque() {
+	m_gl->glEnable(GL_DEPTH_TEST);
+	m_gl->glDepthFunc(GL_LESS);
+}
+void RendererOGL::EndOpaque() {
+	
+}
+void RendererOGL::BeginTranslucent() {
+	m_gl->glDepthMask(GL_FALSE);
+	m_gl->glEnable(GL_BLEND);
+	m_gl->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+}
+void RendererOGL::EndTranslucent() {
+	m_gl->glDepthMask(GL_TRUE);
+	m_gl->glDisable(GL_BLEND);
 }
 
 class ContextSwitcher : public NonCopyable {
@@ -97,11 +118,11 @@ void RendererOGL::DeleteAllResources() {
 	Renderer::runDeleteOnAllResources();
 }
 
-MeshCacheOGL* RendererOGL::buildMeshCache(CoreGLFunctions* gl, Mesh* mesh) {
+MeshCacheOGL* RendererOGL::buildMeshCache(Mesh* mesh) {
 	std::pair<MeshCacheOGL*, bool> mc = mesh->getOrEmplaceMeshCache<MeshCacheOGL>(rendererID());
 	
 	if(mc.first->isDirty())
-		mc.first->update(gl);
+		mc.first->update(m_gl);
 	
 	if(mc.second)
 		addToMeshCaches(mc.first);
@@ -109,11 +130,11 @@ MeshCacheOGL* RendererOGL::buildMeshCache(CoreGLFunctions* gl, Mesh* mesh) {
 	return mc.first;
 }
 
-MaterialCacheOGL* RendererOGL::buildMaterialCache(CoreGLFunctions* gl, Material* material) {
+MaterialCacheOGL* RendererOGL::buildMaterialCache(Material* material) {
 	std::pair<MaterialCacheOGL*, bool> mc = material->getOrEmplaceMaterialCache<MaterialCacheOGL>(rendererID());
 	
 	if(mc.first->isDirty())
-		mc.first->update(gl);
+		mc.first->update(m_gl);
 	
 	if(mc.second)
 		addToMaterialCaches(mc.first);

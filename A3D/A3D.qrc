@@ -4,5 +4,7 @@
         <file>A3D/Basic2DMaterial.vert</file>
         <file>A3D/Basic3DMaterial.frag</file>
         <file>A3D/Basic3DMaterial.vert</file>
+        <file>A3D/SampleTranslucentMaterial.frag</file>
+        <file>A3D/SampleTranslucentMaterial.vert</file>
     </qresource>
 </RCC>

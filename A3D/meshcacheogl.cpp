@@ -63,8 +63,7 @@ void MeshCacheOGL::update(CoreGLFunctions* gl) {
 	m_vao.bind();
 	
 	{
-		std::vector<QVector3D> const& vertices = m->vertices();
-		static_assert(sizeof(QVector3D) == sizeof(GLfloat)*3, "Invalid QVector3D size.");
+		std::vector<float> const& vertices = m->packedVertices();
 		m_vbo.bind();
 		m_vbo.allocate(vertices.data(), static_cast<int>(vertices.size() * sizeof(*vertices.data())));
 	}
@@ -77,8 +76,45 @@ void MeshCacheOGL::update(CoreGLFunctions* gl) {
 		m_ibo.allocate(indices.data(), static_cast<int>(indices.size() * sizeof(*indices.data())));
 	}
 	
-	gl->glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-	gl->glEnableVertexAttribArray(0);
+	Mesh::Contents contents = m->contents();
+	GLsizei stride = static_cast<GLsizei>(m->packedElementCount()) * sizeof(float);
+	std::uint8_t const* dataOffset = 0;
+	
+	if(contents & Mesh::Position2D) {
+		gl->glVertexAttribPointer(Position2DAttribute, 2, GL_FLOAT, false, stride, dataOffset);
+		gl->glEnableVertexAttribArray(Position2DAttribute);
+		dataOffset += 2;
+	}
+	
+	if(contents & Mesh::Position3D) {
+		gl->glVertexAttribPointer(Position3DAttribute, 3, GL_FLOAT, false, stride, dataOffset);
+		gl->glEnableVertexAttribArray(Position3DAttribute);
+		dataOffset += 3;
+	}
+	
+	if(contents & Mesh::TextureCoord2D) {
+		gl->glVertexAttribPointer(TextureCoord2DAttribute, 2, GL_FLOAT, false, stride, dataOffset);
+		gl->glEnableVertexAttribArray(TextureCoord2DAttribute);
+		dataOffset += 2;
+	}
+	
+	if(contents & Mesh::Normal3D) {
+		gl->glVertexAttribPointer(Normal3DAttribute, 3, GL_FLOAT, false, stride, dataOffset);
+		gl->glEnableVertexAttribArray(Normal3DAttribute);
+		dataOffset += 3;
+	}
+	
+	if(contents & Mesh::Color3D) {
+		gl->glVertexAttribPointer(Color3DAttribute, 3, GL_FLOAT, false, stride, dataOffset);
+		gl->glEnableVertexAttribArray(Color3DAttribute);
+		dataOffset += 3;
+	}
+	
+	if(contents & Mesh::Color4D) {
+		gl->glVertexAttribPointer(Color4DAttribute, 4, GL_FLOAT, false, stride, dataOffset);
+		gl->glEnableVertexAttribArray(Color4DAttribute);
+		dataOffset += 4;
+	}
 	
 	m_vao.release();
 	m_vbo.release();

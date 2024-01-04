@@ -15,9 +15,19 @@ class Material : public QObject
 {
 	Q_OBJECT
 public:
+	enum RenderOption {
+		NoOptions = 0x0,
+		
+		// Mark this material as a translucent material.
+		// Will render the entity on a separate draw pass.
+		Translucent = 0x1
+	};
+	Q_DECLARE_FLAGS(RenderOptions, RenderOption)
+	
 	enum StandardMaterial {
 		Basic2DMaterial,
-		Basic3DMaterial
+		Basic3DMaterial,
+		SampleTranslucentMaterial
 	};
 	static Material* standardMaterial(StandardMaterial);
 	
@@ -33,16 +43,13 @@ public:
 	explicit Material(QObject *parent = nullptr);
 	~Material();
 	
+	RenderOptions renderOptions() const;
+	void setRenderOptions(RenderOptions);
+	
 	void setShader(ShaderMode mode, ShaderType type, QString shaderContents);
 	void setShaderFile(ShaderMode mode, ShaderType type, QString shaderPath);
 	
-	void setShaderValue(ShaderMode mode, QString name, QVariant value);
-	
 	QString shader(ShaderMode mode, ShaderType type) const;
-	QVariant shaderValue(ShaderMode mode, QString const& name) const;
-	
-	std::map<QString, QVariant>& shaderValues(ShaderMode mode);	
-	std::map<QString, QVariant> shaderValues(ShaderMode mode) const;
 	
 	void invalidateMaterialCache(std::uintptr_t rendererID = std::numeric_limits<std::uintptr_t>::max());
 	
@@ -71,14 +78,12 @@ public:
 	}
 	
 private:
-	struct ShaderData {
-		std::map<ShaderType, QString> m_shaderCodes;
-		std::map<QString, QVariant> m_values;
-	};
-	
-	std::map<ShaderMode, ShaderData> m_shaders;
+	RenderOptions m_renderOptions;
+	std::map<ShaderMode, std::map<ShaderType, QString>> m_shaders;
 	std::map<std::uintptr_t, QPointer<MaterialCache>> m_materialCache;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Material::RenderOptions)
 
 }
 

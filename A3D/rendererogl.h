@@ -12,19 +12,30 @@ namespace A3D {
 class RendererOGL final : public Renderer
 {
 public:
-	RendererOGL(QOpenGLContext*);
+	RendererOGL(QOpenGLContext*, CoreGLFunctions*);
 	~RendererOGL();
 	
-	virtual void Draw(CoreGLFunctions*, Entity* root, QMatrix4x4 const& parentMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix) override;
+	virtual void Draw(Entity* root, QMatrix4x4 const& parentMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix) override;
 	virtual void Delete(MeshCache*) override;
 	virtual void Delete(MaterialCache*) override;
 	virtual void DeleteAllResources() override;
 	
+protected:
+	virtual void BeginOpaque() override;
+	virtual void EndOpaque() override;
+	virtual void BeginTranslucent() override;
+	virtual void EndTranslucent() override;
+	
 private:
-	MeshCacheOGL* buildMeshCache(CoreGLFunctions*, Mesh*);
-	MaterialCacheOGL* buildMaterialCache(CoreGLFunctions*, Material*);
+	void DrawOpaque(Entity* root, QMatrix4x4 const& parentMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix, std::deque<Entity*>* translucentList);
+	void DrawTranslucent(std::deque<Entity*>& entities, QMatrix4x4 const& parentMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix);
+	
+	MeshCacheOGL* buildMeshCache(Mesh*);
+	MaterialCacheOGL* buildMaterialCache(Material*);
 	
 	QPointer<QOpenGLContext> m_context;
+	CoreGLFunctions* m_gl;
+	std::vector<Entity*> m_translucentEntityBuffer;
 };
 
 }

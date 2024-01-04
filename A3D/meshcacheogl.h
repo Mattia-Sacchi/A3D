@@ -13,6 +13,15 @@ class MeshCacheOGL : public MeshCache
 {
 	Q_OBJECT
 public:
+	enum {
+		Position3DAttribute = 0,
+		Position2DAttribute = 1,
+		TextureCoord2DAttribute = 2,
+		Normal3DAttribute = 3,
+		Color3DAttribute = 4,
+		Color4DAttribute = 5
+	};
+	
 	MeshCacheOGL(Mesh* parent);
 	
 	void update(CoreGLFunctions*);

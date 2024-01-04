@@ -38,6 +38,22 @@ namespace A3D {
 
 	typedef QOpenGLFunctions_3_3_Core CoreGLFunctions;
 	
+	inline void pushToContainer(std::vector<float>& dst, QVector2D const& v) {
+		dst.emplace_back(v.x());
+		dst.emplace_back(v.y());
+	}
+	inline void pushToContainer(std::vector<float>& dst, QVector3D const& v) {
+		dst.emplace_back(v.x());
+		dst.emplace_back(v.y());
+		dst.emplace_back(v.z());
+	}
+	inline void pushToContainer(std::vector<float>& dst, QVector4D const& v) {
+		dst.emplace_back(v.x());
+		dst.emplace_back(v.y());
+		dst.emplace_back(v.z());
+		dst.emplace_back(v.w());
+	}
+	
 	template <typename T>
 	void cleanupQPointers(std::vector<QPointer<T>>& container) {
 		container.erase(

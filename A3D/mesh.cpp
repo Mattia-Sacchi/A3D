@@ -15,20 +15,28 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 	switch(stdMesh) {
 	case Triangle2DMesh:
 		newMesh.setDrawMode(Triangles);
-		newMesh.vertices().push_back(QVector3D( 0.0f,  0.5f, 0.f));
-		newMesh.vertices().push_back(QVector3D(-0.5f, -0.5f, 0.f));
-		newMesh.vertices().push_back(QVector3D( 0.5f, -0.5f, 0.f));
+		
+		newMesh.vertices().resize(3);
+		newMesh.vertices()[0].Position3D = QVector3D( 0.0f,  0.5f, 0.f);
+		newMesh.vertices()[1].Position3D = QVector3D(-0.5f, -0.5f, 0.f);
+		newMesh.vertices()[2].Position3D = QVector3D( 0.5f, -0.5f, 0.f);
+		
+		newMesh.setContents(Position3D);
 		break;
 	case CubeIndexedMesh:
 		newMesh.setDrawMode(IndexedTriangles);
-		newMesh.vertices().push_back(QVector3D(-0.5f, -0.5f, +0.5f));
-		newMesh.vertices().push_back(QVector3D(+0.5f, -0.5f, +0.5f));
-		newMesh.vertices().push_back(QVector3D(+0.5f, +0.5f, +0.5f));
-		newMesh.vertices().push_back(QVector3D(-0.5f, +0.5f, +0.5f));
-		newMesh.vertices().push_back(QVector3D(-0.5f, -0.5f, -0.5f));
-		newMesh.vertices().push_back(QVector3D(+0.5f, -0.5f, -0.5f));
-		newMesh.vertices().push_back(QVector3D(+0.5f, +0.5f, -0.5f));
-		newMesh.vertices().push_back(QVector3D(-0.5f, +0.5f, -0.5f));
+		
+		newMesh.vertices().resize(8);
+		newMesh.vertices()[0].Position3D = QVector3D(-0.5f, -0.5f, +0.5f);
+		newMesh.vertices()[1].Position3D = QVector3D(+0.5f, -0.5f, +0.5f);
+		newMesh.vertices()[2].Position3D = QVector3D(+0.5f, +0.5f, +0.5f);
+		newMesh.vertices()[3].Position3D = QVector3D(-0.5f, +0.5f, +0.5f);
+		newMesh.vertices()[4].Position3D = QVector3D(-0.5f, -0.5f, -0.5f);
+		newMesh.vertices()[5].Position3D = QVector3D(+0.5f, -0.5f, -0.5f);
+		newMesh.vertices()[6].Position3D = QVector3D(+0.5f, +0.5f, -0.5f);
+		newMesh.vertices()[7].Position3D = QVector3D(-0.5f, +0.5f, -0.5f);
+		
+		newMesh.setContents(Position3D);
 		
 		for (std::uint32_t i : {
 			 0, 1, 2,
@@ -45,6 +53,7 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 			 6, 7, 3
 		})
 			newMesh.indices().push_back(i);
+		break;
 	};
 	newMesh.invalidateMeshCache();
 	return &newMesh;
@@ -52,7 +61,8 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 
 Mesh::Mesh(QObject *parent)
 	: QObject{parent},
-	  m_drawMode(Triangles)
+	  m_drawMode(Triangles),
+	  m_renderOptions(NoOptions)
 {
 	dbgConstruct("Mesh")
 }
@@ -74,6 +84,68 @@ Mesh::~Mesh() {
 	dbgDestruct("Mesh finished")
 }
 
+Mesh::RenderOptions Mesh::renderOptions() const {
+	return m_renderOptions;
+}
+void Mesh::setRenderOptions(RenderOptions renderOptions) {
+	m_renderOptions = renderOptions;
+}
+
+Mesh::Contents Mesh::contents() const {
+	return m_contents;
+}
+void Mesh::setContents(Contents contents) {
+	if(m_contents == contents)
+		return;
+	
+	m_contents = contents;
+	m_packedVertices.clear();
+	invalidateMeshCache();
+}
+
+std::size_t Mesh::packedElementCount() const {
+	std::size_t elementCount = 0;
+	if(m_contents & Position2D)
+		elementCount += 2;
+	if(m_contents & Position3D)
+		elementCount += 3;
+	if(m_contents & TextureCoord2D)
+		elementCount += 2;
+	if(m_contents & Normal3D)
+		elementCount += 3;
+	if(m_contents & Color3D)
+		elementCount += 3;
+	if(m_contents & Color4D)
+		elementCount += 4;
+	
+	return elementCount;
+}
+
+std::vector<float> const& Mesh::packedVertices() const {
+	if(m_packedVertices.empty()) {
+		std::size_t const elementCount = packedElementCount();
+		
+		m_packedVertices.reserve(elementCount * m_vertices.size());
+		for(auto it = m_vertices.begin(); it != m_vertices.end(); ++it) {
+			Vertex const& v = *it;
+			
+			if(m_contents & Position2D)
+				pushToContainer(m_packedVertices, v.Position2D);
+			if(m_contents & Position3D)
+				pushToContainer(m_packedVertices, v.Position3D);
+			if(m_contents & TextureCoord2D)
+				pushToContainer(m_packedVertices, v.TextureCoord2D);
+			if(m_contents & Normal3D)
+				pushToContainer(m_packedVertices, v.Normal3D);
+			if(m_contents & Color3D)
+				pushToContainer(m_packedVertices, v.Color3D);
+			if(m_contents & Color4D)
+				pushToContainer(m_packedVertices, v.Color4D);
+		}
+	}
+	return m_packedVertices;
+}
+
 void Mesh::setDrawMode(DrawMode drawMode) {
 	m_drawMode = drawMode;
 }
@@ -81,10 +153,10 @@ Mesh::DrawMode Mesh::drawMode() const {
 	return m_drawMode;
 }
 
-std::vector<QVector3D>& Mesh::vertices() {
+std::vector<Mesh::Vertex>& Mesh::vertices() {
 	return m_vertices;
 }
-std::vector<QVector3D> const& Mesh::vertices() const {
+std::vector<Mesh::Vertex> const& Mesh::vertices() const {
 	return m_vertices;
 }
 
@@ -97,6 +169,7 @@ std::vector<std::uint32_t> const& Mesh::indices() const {
 
 void Mesh::invalidateMeshCache(std::uintptr_t rendererID) {
 	if(rendererID == std::numeric_limits<std::uintptr_t>::max()) {
+		m_packedVertices.clear();
 		for(auto it = m_meshCache.begin(); it != m_meshCache.end();) {
 			if(it->second.isNull())
 				it = m_meshCache.erase(it);

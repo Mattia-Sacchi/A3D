@@ -8,6 +8,7 @@
 #include <vector>
 #include "A3D/mesh.h"
 #include "A3D/material.h"
+#include "A3D/materialproperties.h"
 
 namespace A3D {
 
@@ -15,8 +16,19 @@ class Entity : public QObject
 {
 	Q_OBJECT
 public:
+	enum RenderOption {
+		NoOptions = 0x0,
+		
+		// Hide this object and all connected children
+		Hidden = 0x1
+	};
+	Q_DECLARE_FLAGS(RenderOptions, RenderOption)
+	
 	explicit Entity(Entity *parent);
 	~Entity();
+	
+	RenderOptions renderOptions() const;
+	void setRenderOptions(RenderOptions);
 	
 	Entity* parentEntity() const;
 	
@@ -33,15 +45,25 @@ public:
 		return p;
 	}
 	
+	void setPosition(QVector3D const&);
+	QVector3D position() const;
+	
+	void setRotation(QQuaternion const&);
+	QQuaternion rotation() const;
+	
+	void setScale(QVector3D const& = QVector3D(1.f,1.f,1.f));
+	QVector3D scale() const;
+	
 	QMatrix4x4 const& modelMatrix() const;
-	QMatrix4x4& modelMatrix();
-	void setModelMatrix(QMatrix4x4 const&);
 	
 	Mesh* mesh() const;
 	Material* material() const;
+	MaterialProperties& materialProperties();
+	MaterialProperties const& materialProperties() const;
 	
 	void setMesh(Mesh*);
 	void setMaterial(Material*);
+	void setMaterialProperties(MaterialProperties);
 	
 private:
 	// Adds a child Entity
@@ -49,11 +71,20 @@ private:
 	
 	QPointer<Entity> m_parent;
 	std::vector<QPointer<Entity>> m_entities;
+	RenderOptions m_renderOptions;
 	
-	QMatrix4x4 m_matrix;
+	QVector3D m_position;
+	QQuaternion m_rotation;
+	QVector3D m_scale;
+	mutable bool m_matrixDirty;
+	mutable QMatrix4x4 m_matrix;
+	
 	Mesh* m_mesh;
 	Material* m_material;
+	MaterialProperties m_materialProperties;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Entity::RenderOptions)
 
 }
 

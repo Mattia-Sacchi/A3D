@@ -82,7 +82,7 @@ void View::initializeGL() {
 		return;
 	}
 	
-	m_renderer = std::make_unique<RendererOGL>(context());
+	m_renderer = std::make_unique<RendererOGL>(context(), this);
 	m_initDoneGL = true;
 }
 
@@ -113,8 +113,6 @@ void View::paintGL() {
 	glDisable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
 	
 	static float fVal = 0.f;
 	fVal += 1.f / 60.f;
@@ -169,8 +167,10 @@ void View::paintGL() {
 	if(m_keyPressed[Qt::Key_H])
 		camera().setOrientationTarget(QVector3D(0.f, 0.f, 0.f));
 	
-	m_renderer->Draw(this, m_scene, QMatrix4x4(), camera().getProjection(), camera().getView());
+	m_renderer->DrawAll(m_scene, camera());
 	m_renderer->CleanupRenderCache();
+	
+	emit frameRendered();
 }
 
 void View::keyPressEvent(QKeyEvent* e) {
