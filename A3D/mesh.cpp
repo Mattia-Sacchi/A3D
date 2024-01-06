@@ -46,8 +46,8 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 	return &newMesh;
 }
 
-Mesh::Mesh(QObject* parent)
-	: QObject{ parent },
+Mesh::Mesh(ResourceManager* resourceManager)
+	: Resource{ resourceManager },
 	  m_drawMode(Triangles),
 	  m_renderOptions(NoOptions) {
 	log(LC_Debug, "Constructor: Mesh");
@@ -61,7 +61,7 @@ Mesh::~Mesh() {
 
 		Renderer* r = Renderer::getRenderer(it->first);
 		if(!r) {
-			qDebug() << "Mesh::~Mesh: Potential memory leak? Renderer not available.";
+			log(LC_Info, "Mesh::~Mesh: Potential memory leak? Renderer not available.");
 			continue;
 		}
 

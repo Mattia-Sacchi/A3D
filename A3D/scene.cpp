@@ -11,4 +11,12 @@ Scene::~Scene() {
 	log(LC_Debug, "Destructor: Scene");
 }
 
+ResourceManager& Scene::resourceManager() {
+	return m_resourceManager;
+}
+
+ResourceManager const& Scene::resourceManager() const {
+	return m_resourceManager;
+}
+
 }

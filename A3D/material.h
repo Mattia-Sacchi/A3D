@@ -8,10 +8,11 @@
 #include <cstdint>
 #include <stdexcept>
 #include "A3D/materialcache.h"
+#include "A3D/resource.h"
 
 namespace A3D {
 
-class Material : public QObject {
+class Material : public Resource {
 	Q_OBJECT
 public:
 	enum RenderOption {
@@ -41,7 +42,7 @@ public:
 		FragmentShader,
 	};
 
-	explicit Material(QObject* parent = nullptr);
+	explicit Material(ResourceManager* = nullptr);
 	~Material();
 
 	RenderOptions renderOptions() const;

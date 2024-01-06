@@ -4,6 +4,7 @@
 #include "A3D/common.h"
 #include <QObject>
 #include "A3D/entity.h"
+#include "A3D/resourcemanager.h"
 
 namespace A3D {
 
@@ -12,6 +13,12 @@ class Scene : public Entity {
 public:
 	explicit Scene(QObject* parent = nullptr);
 	~Scene();
+
+	ResourceManager& resourceManager();
+	ResourceManager const& resourceManager() const;
+
+private:
+	ResourceManager m_resourceManager;
 };
 
 }

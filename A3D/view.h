@@ -21,6 +21,8 @@ public:
 	Camera& camera();
 	void setScene(Scene*);
 
+	Renderer* renderer();
+
 	QSize minimumSizeHint() const override;
 	QSize sizeHint() const override;
 

@@ -7,10 +7,11 @@
 #include <limits>
 #include <cstdint>
 #include "A3D/meshcache.h"
+#include "A3D/resource.h"
 
 namespace A3D {
 
-class Mesh : public QObject {
+class Mesh : public Resource {
 	Q_OBJECT
 public:
 	enum RenderOption {
@@ -53,7 +54,7 @@ public:
 		QVector4D Color4D;
 	};
 
-	explicit Mesh(QObject* parent = nullptr);
+	explicit Mesh(ResourceManager* = nullptr);
 	~Mesh();
 
 	RenderOptions renderOptions() const;

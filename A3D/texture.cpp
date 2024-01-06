@@ -1,4 +1,5 @@
 #include "A3D/texture.h"
+#include "A3D/renderer.h"
 
 namespace A3D {
 
@@ -45,13 +46,13 @@ Texture* Texture::standardTexture(StandardTexture stdTex) {
 	return &newTex;
 }
 
-Texture::Texture(QObject* parent)
-	: Texture(QImage(), parent) {
+Texture::Texture(ResourceManager* resourceManager)
+	: Texture(QImage(), resourceManager) {
 	log(LC_Debug, "Constructor: Texture");
 }
 
-Texture::Texture(QImage image, QObject* parent)
-	: QObject{ parent },
+Texture::Texture(QImage image, ResourceManager* resourceManager)
+	: Resource{ resourceManager },
 	  m_image(std::move(image)),
 	  m_minFilter(LinearMipMapLinear),
 	  m_magFilter(Linear),
@@ -62,7 +63,20 @@ Texture::Texture(QImage image, QObject* parent)
 }
 
 Texture::~Texture() {
-	log(LC_Debug, "Destructor: Texture");
+	log(LC_Debug, "Destructor: Texture (start)");
+	for(auto it = m_textureCache.begin(); it != m_textureCache.end(); ++it) {
+		if(it->second.isNull())
+			continue;
+
+		Renderer* r = Renderer::getRenderer(it->first);
+		if(!r) {
+			log(LC_Info, "Texture::~Texture: Potential memory leak? Renderer not available.");
+			continue;
+		}
+
+		r->Delete(it->second);
+	}
+	log(LC_Debug, "Destructor: Texture (end)");
 }
 
 Texture::RenderOptions Texture::renderOptions() const {
@@ -73,8 +87,6 @@ void Texture::setRenderOptions(RenderOptions renderOptions) {
 }
 
 QImage const& Texture::image() const {
-	if(m_image.isNull())
-		return missingTexture();
 	return m_image;
 }
 void Texture::setImage(QImage image) {

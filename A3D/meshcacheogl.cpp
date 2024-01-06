@@ -41,8 +41,10 @@ void MeshCacheOGL::render(CoreGLFunctions* gl) {
 
 void MeshCacheOGL::update(CoreGLFunctions* gl) {
 	Mesh* m = mesh();
-	if(!m)
+	if(!m) {
+		m_elementCount = 0;
 		return;
+	}
 
 	bool isIndexed = (m->drawMode() == Mesh::IndexedTriangles || m->drawMode() == Mesh::IndexedTriangleStrips);
 

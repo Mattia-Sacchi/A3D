@@ -13,20 +13,20 @@ void log(LogChannel channel, QStringView text) {
 	default:
 	case LC_Debug:
 #ifdef _DEBUG
-		qDebug() << timestamp() << "[D] " << text;
+		qDebug().noquote() << timestamp() << "[D] " << text;
 #endif
 		break;
 	case LC_Info:
-		qInfo() << timestamp() << "[I] " << text;
+		qInfo().noquote() << timestamp() << "[I] " << text;
 		break;
 	case LC_Warning:
-		qWarning() << timestamp() << "[W] " << text;
+		qWarning().noquote() << timestamp() << "[W] " << text;
 		break;
 	case LC_Critical:
-		qCritical() << timestamp() << "[C] " << text;
+		qCritical().noquote() << timestamp() << "[C] " << text;
 		break;
 	case LC_Fatal:
-		qFatal() << timestamp() << "[F] " << text;
+		qFatal().noquote() << timestamp() << "[F] " << text;
 		break;
 	}
 }

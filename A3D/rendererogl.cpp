@@ -15,9 +15,10 @@ RendererOGL::~RendererOGL() {
 	log(LC_Debug, "Destructor: RendererOGL (end)");
 }
 
-void RendererOGL::Draw(Entity* e, QMatrix4x4 const& parentMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix) {
+void RendererOGL::Draw(Entity* e, QMatrix4x4 const& calcMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix) {
 	if(!e)
 		return;
+
 	Mesh* mesh    = e->mesh();
 	Material* mat = e->material();
 	if(!mesh || !mat)
@@ -45,7 +46,7 @@ void RendererOGL::Draw(Entity* e, QMatrix4x4 const& parentMatrix, QMatrix4x4 con
 		if(texCache[i])
 			texCache[i]->applyToSlot(m_gl, i);
 	}
-	matCache->install(m_gl, e->materialProperties(), parentMatrix * e->modelMatrix(), viewMatrix, projMatrix);
+	matCache->install(m_gl, e->materialProperties(), calcMatrix, viewMatrix, projMatrix);
 	meshCache->render(m_gl);
 
 	if(meshRenderOptions & Mesh::DisableCulling || materialRenderOptions & Material::Translucent)
@@ -92,7 +93,7 @@ private:
 
 void RendererOGL::Delete(MeshCache* meshCache) {
 	if(m_context.isNull()) {
-		qDebug() << "Couldn't delete MeshCache: OpenGL context is unavailable. A memory leak might have happened.";
+		log(LC_Debug, "Couldn't delete MeshCache: OpenGL context is unavailable. A memory leak might have happened.");
 		return;
 	}
 
@@ -104,7 +105,7 @@ void RendererOGL::Delete(MeshCache* meshCache) {
 
 void RendererOGL::Delete(MaterialCache* matCache) {
 	if(m_context.isNull()) {
-		qDebug() << "Couldn't delete MaterialCache: OpenGL context is unavailable. A memory leak might have happened.";
+		log(LC_Debug, "Couldn't delete MaterialCache: OpenGL context is unavailable. A memory leak might have happened.");
 		return;
 	}
 
@@ -114,9 +115,21 @@ void RendererOGL::Delete(MaterialCache* matCache) {
 	delete matCache;
 }
 
+void RendererOGL::Delete(TextureCache* texCache) {
+	if(m_context.isNull()) {
+		log(LC_Debug, "Couldn't delete TextureCache: OpenGL context is unavailable. A memory leak might have happened.");
+		return;
+	}
+
+	ContextSwitcher switcher(m_context);
+	Q_UNUSED(switcher);
+
+	delete texCache;
+}
+
 void RendererOGL::DeleteAllResources() {
 	if(m_context.isNull()) {
-		qDebug() << "Couldn't delete resources: OpenGL context is unavailable. A memory leak might have happened.";
+		log(LC_Debug, "Couldn't delete resources: OpenGL context is unavailable. A memory leak might have happened.");
 		return;
 	}
 
@@ -124,6 +137,24 @@ void RendererOGL::DeleteAllResources() {
 	Q_UNUSED(switcher);
 
 	Renderer::runDeleteOnAllResources();
+}
+
+void RendererOGL::PreLoadEntity(Entity* e) {
+	if(!e)
+		return;
+	Mesh* mesh    = e->mesh();
+	Material* mat = e->material();
+
+	if(mesh)
+		buildMeshCache(mesh);
+
+	if(mat)
+		buildMaterialCache(mat);
+
+	for(std::size_t i = 0; i < Entity::MaxTextures; ++i) {
+		if(Texture* tex = e->texture(i))
+			buildTextureCache(tex);
+	}
 }
 
 MeshCacheOGL* RendererOGL::buildMeshCache(Mesh* mesh) {

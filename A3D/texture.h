@@ -5,10 +5,11 @@
 #include <QObject>
 #include <QImage>
 #include "A3D/texturecache.h"
+#include "A3D/resource.h"
 
 namespace A3D {
 
-class Texture : public QObject {
+class Texture : public Resource {
 	Q_OBJECT
 public:
 	enum RenderOption {
@@ -44,8 +45,8 @@ public:
 		Clamp,
 	};
 
-	explicit Texture(QObject* parent = nullptr);
-	explicit Texture(QImage image, QObject* parent = nullptr);
+	explicit Texture(ResourceManager* = nullptr);
+	explicit Texture(QImage image, ResourceManager* = nullptr);
 	~Texture();
 
 	RenderOptions renderOptions() const;

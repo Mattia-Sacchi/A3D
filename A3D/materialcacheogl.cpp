@@ -16,6 +16,9 @@ MaterialCacheOGL::~MaterialCacheOGL() {
 }
 
 void MaterialCacheOGL::applyUniform(QString const& name, QVariant const& value) {
+	if(!m_program)
+		return;
+
 	auto prevEntry         = m_uniformCachedInfo.try_emplace(name);
 	UniformCachedInfo& uci = prevEntry.first->second;
 	if(prevEntry.second)
@@ -72,6 +75,9 @@ void MaterialCacheOGL::applyUniform(QString const& name, QVariant const& value) 
 }
 
 void MaterialCacheOGL::applyUniforms(std::map<QString, QVariant> const& uniforms) {
+	if(!m_program)
+		return;
+
 	for(auto it = uniforms.begin(); it != uniforms.end(); ++it) {
 		applyUniform(it->first, it->second);
 	}
@@ -98,17 +104,20 @@ void MaterialCacheOGL::install(CoreGLFunctions*, MaterialProperties const& mater
 
 void MaterialCacheOGL::update(CoreGLFunctions*) {
 	Material* m = material();
-	if(!m)
+	if(!m) {
+		m_program.reset();
 		return;
+	}
 
 	QString vxShader = m->shader(Material::GLSL, Material::VertexShader);
 	QString fxShader = m->shader(Material::GLSL, Material::FragmentShader);
 
-	if(vxShader.isEmpty() || fxShader.isEmpty())
+	if(vxShader.isEmpty() || fxShader.isEmpty()) {
+		m_program.reset();
 		return;
+	}
 
-	if(!m_program)
-		m_program = std::make_unique<QOpenGLShaderProgram>();
+	m_program = std::make_unique<QOpenGLShaderProgram>();
 
 	// TODO: Evaluate caching?
 

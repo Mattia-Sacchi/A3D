@@ -72,6 +72,17 @@ private:
 	Camera const& m_camera;
 };
 
+void Renderer::PreLoadEntityTree(Entity* root) {
+	this->PreLoadEntity(root);
+
+	std::vector<QPointer<Entity>> const& subEntities = root->childrenEntities();
+	for(auto it = subEntities.begin(); it != subEntities.end(); ++it) {
+		if(it->isNull())
+			continue;
+		PreLoadEntityTree(*it);
+	}
+}
+
 void Renderer::DrawAll(Entity* root, Camera const& camera) {
 	m_opaqueEntityBuffer.clear();
 	m_translucentEntityBuffer.clear();

@@ -42,8 +42,10 @@ inline QOpenGLTexture::Filter translateFilter(Texture::Filter f) {
 }
 void TextureCacheOGL::update(CoreGLFunctions*) {
 	Texture* t = texture();
-	if(!t)
+	if(!t || t->image().isNull()) {
+		m_texture.reset();
 		return;
+	}
 
 	m_texture = std::make_unique<QOpenGLTexture>(QOpenGLTexture::Target2D);
 	m_texture->setWrapMode(QOpenGLTexture::DirectionS, translateWrapMode(t->wrapMode(Texture::WrapDirectionX)));

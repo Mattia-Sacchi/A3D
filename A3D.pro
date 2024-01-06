@@ -22,6 +22,8 @@ SOURCES += \
     A3D/meshcacheogl.cpp \
     A3D/renderer.cpp \
     A3D/rendererogl.cpp \
+    A3D/resource.cpp \
+    A3D/resourcemanager.cpp \
     A3D/scene.cpp \
     A3D/texture.cpp \
     A3D/texturecache.cpp \
@@ -42,6 +44,8 @@ HEADERS += \
 	A3D/meshcacheogl.h \
 	A3D/renderer.h \
 	A3D/rendererogl.h \
+	A3D/resource.h \
+	A3D/resourcemanager.h \
 	A3D/scene.h \
 	A3D/texture.h \
 	A3D/texturecache.h \

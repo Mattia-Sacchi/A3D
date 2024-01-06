@@ -60,6 +60,10 @@ Camera const& View::camera() const {
 	return m_camera;
 }
 
+Renderer* View::renderer() {
+	return m_renderer.get();
+}
+
 void View::setScene(Scene* newScene) {
 	m_scene = newScene;
 }
@@ -77,7 +81,8 @@ void View::initializeGL() {
 		return;
 
 	if(!initializeOpenGLFunctions()) {
-		qDebug() << "initializeOpenGLFunctions failed (OpenGL 3.3 Core required).";
+		log(LC_Debug, "initializeOpenGLFunctions failed.");
+		log(LC_Fatal, "OpenGL 3.3 Core is required to run this software.");
 		return;
 	}
 

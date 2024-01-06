@@ -42,8 +42,8 @@ Material* Material::standardMaterial(StandardMaterial stdMat) {
 	return &newMat;
 }
 
-Material::Material(QObject* parent)
-	: QObject{ parent },
+Material::Material(ResourceManager* resourceManager)
+	: Resource{ resourceManager },
 	  m_renderOptions(NoOptions) {
 	log(LC_Debug, "Constructor: Material");
 }
@@ -56,7 +56,7 @@ Material::~Material() {
 
 		Renderer* r = Renderer::getRenderer(it->first);
 		if(!r) {
-			qDebug() << "Material::~Material: Potential memory leak? Renderer not available.";
+			log(LC_Info, "Material::~Material: Potential memory leak? Renderer not available.");
 			continue;
 		}
 

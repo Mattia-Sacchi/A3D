@@ -15,9 +15,12 @@ public:
 	RendererOGL(QOpenGLContext*, CoreGLFunctions*);
 	~RendererOGL();
 
-	virtual void Draw(Entity* root, QMatrix4x4 const& parentMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix) override;
+	virtual void Draw(Entity* root, QMatrix4x4 const& calcMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix) override;
+
+	virtual void PreLoadEntity(Entity*) override;
 	virtual void Delete(MeshCache*) override;
 	virtual void Delete(MaterialCache*) override;
+	virtual void Delete(TextureCache*) override;
 	virtual void DeleteAllResources() override;
 
 protected:

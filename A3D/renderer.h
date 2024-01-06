@@ -17,11 +17,15 @@ public:
 
 	std::uintptr_t rendererID() const;
 
-	virtual void Draw(Entity* root, QMatrix4x4 const& parentMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix) = 0;
-	virtual void Delete(MeshCache*)                                                                                             = 0;
-	virtual void Delete(MaterialCache*)                                                                                         = 0;
-	virtual void DeleteAllResources()                                                                                           = 0;
+	virtual void Draw(Entity*, QMatrix4x4 const& parent, QMatrix4x4 const& proj, QMatrix4x4 const& view) = 0;
 
+	virtual void PreLoadEntity(Entity*) = 0;
+	virtual void Delete(MeshCache*)     = 0;
+	virtual void Delete(MaterialCache*) = 0;
+	virtual void Delete(TextureCache*)  = 0;
+	virtual void DeleteAllResources()   = 0;
+
+	void PreLoadEntityTree(Entity*);
 	void CleanupRenderCache();
 	void DrawAll(Entity* root, Camera const& camera);
 
