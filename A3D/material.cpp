@@ -65,6 +65,13 @@ Material::~Material() {
 	log(LC_Debug, "Destructor: Material (end)");
 }
 
+Material* Material::clone() const {
+	Material* newMaterial        = new Material(resourceManager());
+	newMaterial->m_renderOptions = m_renderOptions;
+	newMaterial->m_shaders       = m_shaders;
+	return newMaterial;
+}
+
 Material::RenderOptions Material::renderOptions() const {
 	return m_renderOptions;
 }

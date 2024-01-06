@@ -2,11 +2,22 @@
 #include "A3D/mesh.h"
 #include "A3D/material.h"
 #include "A3D/texture.h"
+#include "A3D/model.h"
+
+#include <QFile>
+#include <QFileInfo>
 
 namespace A3D {
 
 ResourceManager::ResourceManager(QObject* parent)
 	: QObject{ parent } {}
+
+Model* ResourceManager::getLoadedModel(QString const& name) const {
+	auto it = m_models.find(name);
+	if(it == m_models.end() || !it->second)
+		return nullptr; // TODO: Fallback?
+	return it->second;
+}
 
 Mesh* ResourceManager::getLoadedMesh(QString const& name) const {
 	auto it = m_meshes.find(name);
@@ -29,6 +40,13 @@ Texture* ResourceManager::getLoadedTexture(QString const& name) const {
 	return it->second;
 }
 
+Model* ResourceManager::registerModel(QString name, Model* model) {
+	QPointer<Model>& m = m_models[std::move(name)];
+	if(m)
+		delete m;
+	return m = model;
+}
+
 Mesh* ResourceManager::registerMesh(QString name, Mesh* resource) {
 	QPointer<Mesh>& m = m_meshes[std::move(name)];
 	if(m)
@@ -48,6 +66,15 @@ Texture* ResourceManager::registerTexture(QString name, Texture* resource) {
 	if(t)
 		delete t;
 	return t = resource;
+}
+
+QStringList ResourceManager::registeredModels() const {
+	QStringList sl;
+	sl.reserve(m_models.size());
+	for(auto it = m_models.begin(); it != m_models.end(); ++it) {
+		sl << it->first;
+	}
+	return sl;
 }
 
 QStringList ResourceManager::registeredMeshes() const {
@@ -75,6 +102,36 @@ QStringList ResourceManager::registeredTextures() const {
 		sl << it->first;
 	}
 	return sl;
+}
+
+ResourceManager::OpenFileResult ResourceManager::openFile(QString name, QString const& path) {
+	OpenFileResult r;
+	r.name = std::move(name);
+
+	QFile* f = new QFile(path);
+	if(!f->open(QFile::ReadOnly)) {
+		delete f;
+		return r;
+	}
+
+	r.stream.reset(f);
+	r.uri = QFileInfo(*f).absoluteFilePath();
+
+	return r;
+}
+
+Model* ResourceManager::loadModel(QString name, QString const& path, InputFormat fmt) {
+	OpenFileResult ofr = openFile(name, path);
+	if(!ofr.stream)
+		return nullptr;
+
+	switch(fmt) {
+	default:
+	case IF_OBJ:
+		return loadModel_OBJ(std::move(ofr));
+	}
+
+	return nullptr;
 }
 
 }

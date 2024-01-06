@@ -79,6 +79,18 @@ Texture::~Texture() {
 	log(LC_Debug, "Destructor: Texture (end)");
 }
 
+Texture* Texture::clone() const {
+	Texture* newTexture         = new Texture(resourceManager());
+	newTexture->m_image         = m_image;
+	newTexture->m_wrapMode      = m_wrapMode;
+	newTexture->m_minFilter     = m_minFilter;
+	newTexture->m_magFilter     = m_magFilter;
+	newTexture->m_lodBias       = m_lodBias;
+	newTexture->m_maxAnisotropy = m_maxAnisotropy;
+	newTexture->m_renderOptions = m_renderOptions;
+	return newTexture;
+}
+
 Texture::RenderOptions Texture::renderOptions() const {
 	return m_renderOptions;
 }

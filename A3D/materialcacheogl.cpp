@@ -1,6 +1,6 @@
 #include "A3D/materialcacheogl.h"
 #include "A3D/material.h"
-#include "A3D/entity.h"
+#include "A3D/group.h"
 #include <QColor>
 #include <QTransform>
 
@@ -129,7 +129,7 @@ void MaterialCacheOGL::update(CoreGLFunctions*) {
 
 	m_uniformCachedInfo.clear();
 
-	for(GLuint i = 0; i < Entity::MaxTextures; ++i) {
+	for(GLuint i = 0; i < Group::MaxTextures; ++i) {
 		applyUniform(QString("TextureSlot") + QString::number(i), GLuint(i));
 	}
 

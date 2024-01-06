@@ -4,6 +4,38 @@ namespace A3D {
 
 MaterialProperties::MaterialProperties() {}
 
+MaterialProperties& MaterialProperties::append(MaterialProperties const& other, bool overwrite) {
+	if(overwrite) {
+		for(auto it = other.m_values.begin(); it != other.m_values.end(); ++it) {
+			m_values[it->first] = it->second;
+		}
+		for(auto itSM = other.m_modeSpecificValues.begin(); itSM != other.m_modeSpecificValues.end(); ++itSM) {
+			std::map<QString, QVariant>& msv = m_modeSpecificValues[itSM->first];
+			for(auto it = itSM->second.begin(); it != itSM->second.end(); ++it) {
+				msv[it->first] = it->second;
+			}
+		}
+	}
+	else {
+		for(auto it = other.m_values.begin(); it != other.m_values.end(); ++it) {
+			auto existsIt = m_values.find(it->first);
+			if(existsIt != m_values.end())
+				continue;
+			m_values[it->first] = it->second;
+		}
+		for(auto itSM = other.m_modeSpecificValues.begin(); itSM != other.m_modeSpecificValues.end(); ++itSM) {
+			std::map<QString, QVariant>& msv = m_modeSpecificValues[itSM->first];
+			for(auto it = itSM->second.begin(); it != itSM->second.end(); ++it) {
+				auto existsIt = msv.find(it->first);
+				if(existsIt != msv.end())
+					continue;
+				msv[it->first] = it->second;
+			}
+		}
+	}
+	return *this;
+}
+
 QVariant MaterialProperties::value(Material::ShaderMode targetMode, QString name, QVariant fallback) {
 	auto msValues = m_modeSpecificValues.find(targetMode);
 	if(msValues != m_modeSpecificValues.end()) {

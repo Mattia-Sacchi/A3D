@@ -19,6 +19,8 @@ public:
 		Normal3DAttribute       = 3,
 		Color3DAttribute        = 4,
 		Color4DAttribute        = 5,
+		BoneIDAttribute         = 6,
+		BoneWeightsAttribute    = 7,
 	};
 
 	explicit MeshCacheOGL(Mesh*);
@@ -33,6 +35,7 @@ private:
 	QOpenGLBuffer m_vbo;
 	QOpenGLBuffer m_ibo;
 	std::size_t m_elementCount;
+	GLenum m_iboFormat;
 };
 
 }

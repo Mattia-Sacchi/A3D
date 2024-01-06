@@ -46,31 +46,13 @@ void Renderer::CleanupRenderCache() {
 	cleanupQPointers(m_materialCaches);
 }
 
-struct OpaqueSorter {
-	OpaqueSorter(Camera const& c)
-		: m_camera(c) {}
+bool Renderer::OpaqueSorter(GroupBufferData const& a, GroupBufferData const& b) {
+	return a.m_distanceFromCamera < b.m_distanceFromCamera;
+}
 
-	bool operator()(std::pair<Entity*, QMatrix4x4> const& a, std::pair<Entity*, QMatrix4x4> const& b) const {
-		return QVector3D::dotProduct(a.first->position() - m_camera.position(), m_camera.forward())
-		       < QVector3D::dotProduct(b.first->position() - m_camera.position(), m_camera.forward());
-	}
-
-private:
-	Camera const& m_camera;
-};
-
-struct TranslucentSorter {
-	TranslucentSorter(Camera const& c)
-		: m_camera(c) {}
-
-	bool operator()(std::pair<Entity*, QMatrix4x4> const& a, std::pair<Entity*, QMatrix4x4> const& b) const {
-		return QVector3D::dotProduct(a.first->position() - m_camera.position(), m_camera.forward())
-		       > QVector3D::dotProduct(b.first->position() - m_camera.position(), m_camera.forward());
-	}
-
-private:
-	Camera const& m_camera;
-};
+bool Renderer::TranslucentSorter(GroupBufferData const& a, GroupBufferData const& b) {
+	return a.m_distanceFromCamera > b.m_distanceFromCamera;
+}
 
 void Renderer::PreLoadEntityTree(Entity* root) {
 	this->PreLoadEntity(root);
@@ -84,51 +66,67 @@ void Renderer::PreLoadEntityTree(Entity* root) {
 }
 
 void Renderer::DrawAll(Entity* root, Camera const& camera) {
-	m_opaqueEntityBuffer.clear();
-	m_translucentEntityBuffer.clear();
+	m_opaqueGroupBuffer.clear();
+	m_translucentGroupBuffer.clear();
 
-	BuildDrawLists(root, QMatrix4x4());
+	BuildDrawLists(camera, root, root->entityMatrix());
 
-	{
-		OpaqueSorter os(camera);
-		std::stable_sort(m_opaqueEntityBuffer.begin(), m_opaqueEntityBuffer.end(), os);
-	}
+	std::stable_sort(m_opaqueGroupBuffer.begin(), m_opaqueGroupBuffer.end(), Renderer::OpaqueSorter);
+	std::stable_sort(m_translucentGroupBuffer.begin(), m_translucentGroupBuffer.end(), Renderer::TranslucentSorter);
 
-	{
-		TranslucentSorter ts(camera);
-		std::stable_sort(m_translucentEntityBuffer.begin(), m_translucentEntityBuffer.end(), ts);
-	}
-
-	QMatrix4x4 const& projMatrix = camera.getProjection();
-	QMatrix4x4 const& viewMatrix = camera.getView();
+	DrawInfo drawInfo;
+	drawInfo.m_projMatrix = camera.getProjection();
+	drawInfo.m_viewMatrix = camera.getView();
 
 	this->BeginOpaque();
-	for(auto it = m_opaqueEntityBuffer.begin(); it != m_opaqueEntityBuffer.end(); ++it) {
-		this->Draw(it->first, it->second, projMatrix, viewMatrix);
+	for(auto it = m_opaqueGroupBuffer.begin(); it != m_opaqueGroupBuffer.end(); ++it) {
+		drawInfo.m_calculatedMaterialProperties = it->m_materialProperties;
+		drawInfo.m_calculatedMatrix             = it->m_transform;
+		this->Draw(it->m_group, drawInfo);
 	}
 	this->EndOpaque();
 
 	this->BeginTranslucent();
-	for(auto it = m_translucentEntityBuffer.begin(); it != m_translucentEntityBuffer.end(); ++it) {
-		this->Draw(it->first, it->second, projMatrix, viewMatrix);
+	for(auto it = m_translucentGroupBuffer.begin(); it != m_translucentGroupBuffer.end(); ++it) {
+		drawInfo.m_calculatedMaterialProperties = it->m_materialProperties;
+		drawInfo.m_calculatedMatrix             = it->m_transform;
+		this->Draw(it->m_group, drawInfo);
 	}
 	this->EndTranslucent();
 }
 
-void Renderer::BuildDrawLists(Entity* e, QMatrix4x4 cascadeMatrix) {
-	if(e->renderOptions() & Entity::Hidden)
+void Renderer::BuildDrawLists(Camera const& camera, Entity* e, QMatrix4x4 const& cascadeMatrix) {
+	if(!e || e->renderOptions() & Entity::Hidden)
 		return;
 
-	cascadeMatrix *= e->modelMatrix();
+	Model* m = e->model();
+	if(m && !(m->renderOptions() & Model::Hidden)) {
+		QMatrix4x4 baseMatrix                            = cascadeMatrix * m->modelMatrix();
+		std::map<QString, QPointer<Group>> const& groups = m->groups();
+		for(auto it = groups.begin(); it != groups.end(); ++it) {
+			Group* g = it->second;
+			if(!g || g->renderOptions() & Group::Hidden)
+				continue;
 
-	Mesh* mesh    = e->mesh();
-	Material* mat = e->material();
-	if(mesh && mat) {
-		if(mat->renderOptions() & Material::Translucent) {
-			m_translucentEntityBuffer.push_back(std::make_pair(e, cascadeMatrix));
-		}
-		else {
-			m_opaqueEntityBuffer.push_back(std::make_pair(e, cascadeMatrix));
+			Mesh* mesh    = g->mesh();
+			Material* mat = g->material();
+			if(mesh && mat) {
+				GroupBufferData* gbd = nullptr;
+				if(mat->renderOptions() & Material::Translucent) {
+					m_translucentGroupBuffer.emplace_back();
+					gbd = &m_translucentGroupBuffer.back();
+				}
+				else {
+					m_opaqueGroupBuffer.emplace_back();
+					gbd = &m_opaqueGroupBuffer.back();
+				}
+
+				gbd->m_group              = g;
+				gbd->m_transform          = baseMatrix * g->groupMatrix();
+				gbd->m_materialProperties = e->materialProperties();
+				gbd->m_materialProperties.append(g->materialProperties(), false);
+				gbd->m_distanceFromCamera = QVector3D::dotProduct((gbd->m_transform * g->position()) - camera.position(), camera.forward());
+			}
 		}
 	}
 
@@ -136,7 +134,7 @@ void Renderer::BuildDrawLists(Entity* e, QMatrix4x4 cascadeMatrix) {
 	for(auto it = subEntities.begin(); it != subEntities.end(); ++it) {
 		if(it->isNull())
 			continue;
-		BuildDrawLists(*it, cascadeMatrix);
+		BuildDrawLists(camera, *it, cascadeMatrix * (*it)->entityMatrix());
 	}
 }
 

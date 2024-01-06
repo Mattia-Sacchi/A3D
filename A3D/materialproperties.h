@@ -14,6 +14,8 @@ public:
 	MaterialProperties& operator=(MaterialProperties const&) = default;
 	MaterialProperties& operator=(MaterialProperties&&)      = default;
 
+	MaterialProperties& append(MaterialProperties const& other, bool overwrite = true);
+
 	QVariant value(Material::ShaderMode targetMode, QString name, QVariant fallback = QVariant());
 	void setValue(QString name, QVariant value);
 	void setValue(Material::ShaderMode targetMode, QString name, QVariant value);

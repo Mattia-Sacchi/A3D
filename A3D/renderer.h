@@ -13,17 +13,23 @@ protected:
 	Renderer();
 
 public:
+	struct DrawInfo {
+		MaterialProperties m_calculatedMaterialProperties;
+		QMatrix4x4 m_calculatedMatrix;
+		QMatrix4x4 m_projMatrix;
+		QMatrix4x4 m_viewMatrix;
+	};
+
 	virtual ~Renderer();
 
 	std::uintptr_t rendererID() const;
 
-	virtual void Draw(Entity*, QMatrix4x4 const& parent, QMatrix4x4 const& proj, QMatrix4x4 const& view) = 0;
-
-	virtual void PreLoadEntity(Entity*) = 0;
-	virtual void Delete(MeshCache*)     = 0;
-	virtual void Delete(MaterialCache*) = 0;
-	virtual void Delete(TextureCache*)  = 0;
-	virtual void DeleteAllResources()   = 0;
+	virtual void Draw(Group*, DrawInfo const&) = 0;
+	virtual void PreLoadEntity(Entity*)        = 0;
+	virtual void Delete(MeshCache*)            = 0;
+	virtual void Delete(MaterialCache*)        = 0;
+	virtual void Delete(TextureCache*)         = 0;
+	virtual void DeleteAllResources()          = 0;
 
 	void PreLoadEntityTree(Entity*);
 	void CleanupRenderCache();
@@ -42,15 +48,25 @@ protected:
 	void invalidateCache();
 
 private:
-	void BuildDrawLists(Entity* root, QMatrix4x4 cascadeMatrix);
+	void BuildDrawLists(Camera const& camera, Entity* root, QMatrix4x4 const& cascadeMatrix);
+
+	struct GroupBufferData {
+		Group* m_group;
+		QMatrix4x4 m_transform;
+		MaterialProperties m_materialProperties;
+		float m_distanceFromCamera;
+	};
+
+	static bool OpaqueSorter(GroupBufferData const& a, GroupBufferData const& b);
+	static bool TranslucentSorter(GroupBufferData const& a, GroupBufferData const& b);
 
 	std::uintptr_t m_rendererID;
 	std::vector<QPointer<MeshCache>> m_meshCaches;
 	std::vector<QPointer<MaterialCache>> m_materialCaches;
 	std::vector<QPointer<TextureCache>> m_textureCaches;
 
-	std::vector<std::pair<Entity*, QMatrix4x4>> m_opaqueEntityBuffer;
-	std::vector<std::pair<Entity*, QMatrix4x4>> m_translucentEntityBuffer;
+	std::vector<GroupBufferData> m_opaqueGroupBuffer;
+	std::vector<GroupBufferData> m_translucentGroupBuffer;
 
 public:
 	static Renderer* getRenderer(std::uintptr_t rendererID);

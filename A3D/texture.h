@@ -49,6 +49,8 @@ public:
 	explicit Texture(QImage image, ResourceManager* = nullptr);
 	~Texture();
 
+	Texture* clone() const;
+
 	RenderOptions renderOptions() const;
 	void setRenderOptions(RenderOptions);
 

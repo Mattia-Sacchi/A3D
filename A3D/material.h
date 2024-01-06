@@ -45,6 +45,8 @@ public:
 	explicit Material(ResourceManager* = nullptr);
 	~Material();
 
+	Material* clone() const;
+
 	RenderOptions renderOptions() const;
 	void setRenderOptions(RenderOptions);
 

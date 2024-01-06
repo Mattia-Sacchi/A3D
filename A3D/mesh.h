@@ -29,6 +29,8 @@ public:
 		Normal3D       = 0x0008,
 		Color3D        = 0x0010,
 		Color4D        = 0x0020,
+		BoneIDs        = 0x0040,
+		BoneWeights    = 0x0080,
 	};
 	Q_DECLARE_FLAGS(Contents, Content)
 
@@ -52,10 +54,16 @@ public:
 		QVector3D Normal3D;
 		QVector3D Color3D;
 		QVector4D Color4D;
+		std::uint8_t BoneIDs[4];
+		QVector4D BoneWeights;
+
+		bool Equals(Vertex const& o, Contents c) const;
 	};
 
 	explicit Mesh(ResourceManager* = nullptr);
 	~Mesh();
+
+	Mesh* clone() const;
 
 	RenderOptions renderOptions() const;
 	void setRenderOptions(RenderOptions);
@@ -66,10 +74,14 @@ public:
 	void setDrawMode(DrawMode mode);
 	DrawMode drawMode() const;
 
+	//void setBoneTransform(QString const& bone, QMatrix4x4 const& matrix);
+	//void boneTransform(QString const& bone, QMatrix4x4 const& matrix);
+	//std::vector<QMatrix4x4> const& boneTransforms();
+	void optimizeIndices();
+
 	std::vector<Vertex>& vertices();
 	std::vector<Vertex> const& vertices() const;
-
-	std::vector<float> const& packedVertices() const;
+	std::vector<std::uint8_t> const& packedData() const;
 
 	std::vector<std::uint32_t>& indices();
 	std::vector<std::uint32_t> const& indices() const;
@@ -100,7 +112,7 @@ public:
 		return std::make_pair(c, false);
 	}
 
-	std::size_t packedElementCount() const;
+	static std::size_t packedVertexSize(Contents);
 
 private:
 	DrawMode m_drawMode;
@@ -108,8 +120,11 @@ private:
 	std::vector<std::uint32_t> m_indices;
 	RenderOptions m_renderOptions;
 
+	//std::map<QString, std::size_t> m_bones;
+	//std::vector<QMatrix4x4> m_boneTransforms;
+
 	Contents m_contents;
-	mutable std::vector<float> m_packedVertices;
+	mutable std::vector<std::uint8_t> m_packedData;
 	std::map<std::uintptr_t, QPointer<MeshCache>> m_meshCache;
 };
 

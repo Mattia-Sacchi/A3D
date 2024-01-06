@@ -15,41 +15,42 @@ RendererOGL::~RendererOGL() {
 	log(LC_Debug, "Destructor: RendererOGL (end)");
 }
 
-void RendererOGL::Draw(Entity* e, QMatrix4x4 const& calcMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix) {
-	if(!e)
+void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
+	if(!g || g->renderOptions() & Group::Hidden)
 		return;
 
-	Mesh* mesh    = e->mesh();
-	Material* mat = e->material();
+	Mesh* mesh    = g->mesh();
+	Material* mat = g->material();
 	if(!mesh || !mat)
 		return;
 
 	MeshCacheOGL* meshCache    = buildMeshCache(mesh);
 	MaterialCacheOGL* matCache = buildMaterialCache(mat);
 
-	TextureCacheOGL* texCache[Entity::MaxTextures];
-	for(std::size_t i = 0; i < Entity::MaxTextures; ++i) {
-		Texture* tex = e->texture(i);
-		if(tex)
-			texCache[i] = buildTextureCache(tex);
-		else
-			texCache[i] = nullptr;
+	TextureCacheOGL* texCache[Group::MaxTextures];
+	for(std::size_t i = 0; i < Group::MaxTextures; ++i) {
+		Texture* tex = g->texture(i);
+		texCache[i]  = tex ? buildTextureCache(tex) : nullptr;
+
+		if(!texCache[i])
+			texCache[i] = buildTextureCache(Texture::standardTexture(Texture::MissingTexture));
 	}
 
-	Mesh::RenderOptions meshRenderOptions         = mesh->renderOptions();
-	Material::RenderOptions materialRenderOptions = mat->renderOptions();
+	Mesh::RenderOptions meshRenderOptions    = mesh->renderOptions();
+	Material::RenderOptions matRenderOptions = mat->renderOptions();
 
-	if(meshRenderOptions & Mesh::DisableCulling || materialRenderOptions & Material::Translucent)
+	if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent)
 		m_gl->glDisable(GL_CULL_FACE);
 
-	for(GLuint i = 0; i < Entity::MaxTextures; ++i) {
-		if(texCache[i])
-			texCache[i]->applyToSlot(m_gl, i);
+	for(GLuint i = 0; i < Group::MaxTextures; ++i) {
+		if(!texCache[i])
+			continue;
+		texCache[i]->applyToSlot(m_gl, i);
 	}
-	matCache->install(m_gl, e->materialProperties(), calcMatrix, viewMatrix, projMatrix);
+	matCache->install(m_gl, drawInfo.m_calculatedMaterialProperties, drawInfo.m_calculatedMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
 	meshCache->render(m_gl);
 
-	if(meshRenderOptions & Mesh::DisableCulling || materialRenderOptions & Material::Translucent)
+	if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent)
 		m_gl->glEnable(GL_CULL_FACE);
 }
 
@@ -142,18 +143,30 @@ void RendererOGL::DeleteAllResources() {
 void RendererOGL::PreLoadEntity(Entity* e) {
 	if(!e)
 		return;
-	Mesh* mesh    = e->mesh();
-	Material* mat = e->material();
 
-	if(mesh)
-		buildMeshCache(mesh);
+	Model* model = e->model();
+	if(!model || model->renderOptions() & Model::Hidden)
+		return;
 
-	if(mat)
-		buildMaterialCache(mat);
+	std::map<QString, QPointer<Group>> const& groups = model->groups();
+	for(auto it = groups.begin(); it != groups.end(); ++it) {
+		Group* g = it->second;
+		if(!g)
+			continue;
 
-	for(std::size_t i = 0; i < Entity::MaxTextures; ++i) {
-		if(Texture* tex = e->texture(i))
-			buildTextureCache(tex);
+		Mesh* mesh    = g->mesh();
+		Material* mat = g->material();
+
+		if(mesh)
+			buildMeshCache(mesh);
+
+		if(mat)
+			buildMaterialCache(mat);
+
+		for(std::size_t i = 0; i < Group::MaxTextures; ++i) {
+			if(Texture* tex = g->texture(i))
+				buildTextureCache(tex);
+		}
 	}
 }
 

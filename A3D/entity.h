@@ -6,24 +6,17 @@
 #include <QPointer>
 #include <QMatrix4x4>
 #include <vector>
-#include "A3D/mesh.h"
-#include "A3D/material.h"
-#include "A3D/texture.h"
-#include "A3D/materialproperties.h"
+#include "A3D/model.h"
 
 namespace A3D {
 
 class Entity : public QObject {
 	Q_OBJECT
 public:
-	enum {
-		MaxTextures = 8,
-	};
-
 	enum RenderOption {
 		NoOptions = 0x0,
 
-		// Hide this object and all connected children
+		// Hide this object and all children
 		Hidden = 0x1,
 	};
 	Q_DECLARE_FLAGS(RenderOptions, RenderOption)
@@ -49,6 +42,9 @@ public:
 		return p;
 	}
 
+	void setModel(Model*);
+	Model* model() const;
+
 	void setPosition(QVector3D const&);
 	QVector3D position() const;
 
@@ -58,17 +54,11 @@ public:
 	void setScale(QVector3D const& = QVector3D(1.f, 1.f, 1.f));
 	QVector3D scale() const;
 
-	QMatrix4x4 const& modelMatrix() const;
+	QMatrix4x4 const& entityMatrix() const;
 
-	Mesh* mesh() const;
-	Texture* texture(std::size_t slot = 0) const;
-	Material* material() const;
 	MaterialProperties& materialProperties();
 	MaterialProperties const& materialProperties() const;
 
-	void setMesh(Mesh*);
-	void setTexture(Texture*, std::size_t slot = 0);
-	void setMaterial(Material*);
 	void setMaterialProperties(MaterialProperties);
 
 private:
@@ -79,15 +69,14 @@ private:
 	std::vector<QPointer<Entity>> m_entities;
 	RenderOptions m_renderOptions;
 
-	QVector3D m_position;
-	QQuaternion m_rotation;
-	QVector3D m_scale;
 	mutable bool m_matrixDirty;
 	mutable QMatrix4x4 m_matrix;
 
-	Mesh* m_mesh;
-	Material* m_material;
-	Texture* m_textureSet[8];
+	QVector3D m_position;
+	QQuaternion m_rotation;
+	QVector3D m_scale;
+
+	QPointer<Model> m_model;
 	MaterialProperties m_materialProperties;
 };
 

@@ -13,6 +13,7 @@ SOURCES += \
     A3D/camera.cpp \
     A3D/common.cpp \
     A3D/entity.cpp \
+    A3D/group.cpp \
     A3D/material.cpp \
     A3D/materialcache.cpp \
     A3D/materialcacheogl.cpp \
@@ -20,10 +21,13 @@ SOURCES += \
     A3D/mesh.cpp \
     A3D/meshcache.cpp \
     A3D/meshcacheogl.cpp \
+    A3D/model.cpp \
     A3D/renderer.cpp \
     A3D/rendererogl.cpp \
     A3D/resource.cpp \
     A3D/resourcemanager.cpp \
+    A3D/resourcemanager_ms3d.cpp \
+    A3D/resourcemanager_obj.cpp \
     A3D/scene.cpp \
     A3D/texture.cpp \
     A3D/texturecache.cpp \
@@ -35,6 +39,7 @@ HEADERS += \
 	A3D/camera.h \
 	A3D/common.h \
 	A3D/entity.h \
+	A3D/group.h \
 	A3D/material.h \
 	A3D/materialcache.h \
 	A3D/materialcacheogl.h \
@@ -42,6 +47,7 @@ HEADERS += \
 	A3D/mesh.h \
 	A3D/meshcache.h \
 	A3D/meshcacheogl.h \
+	A3D/model.h \
 	A3D/renderer.h \
 	A3D/rendererogl.h \
 	A3D/resource.h \

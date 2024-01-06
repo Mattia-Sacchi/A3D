@@ -70,6 +70,17 @@ Mesh::~Mesh() {
 	log(LC_Debug, "Destructor: Mesh (end)");
 }
 
+Mesh* Mesh::clone() const {
+	Mesh* newMesh            = new Mesh(resourceManager());
+	newMesh->m_drawMode      = m_drawMode;
+	newMesh->m_vertices      = m_vertices;
+	newMesh->m_indices       = m_indices;
+	newMesh->m_renderOptions = m_renderOptions;
+	newMesh->m_contents      = m_contents;
+	newMesh->m_packedData    = m_packedData;
+	return newMesh;
+}
+
 Mesh::RenderOptions Mesh::renderOptions() const {
 	return m_renderOptions;
 }
@@ -85,51 +96,76 @@ void Mesh::setContents(Contents contents) {
 		return;
 
 	m_contents = contents;
-	m_packedVertices.clear();
+	m_packedData.clear();
 	invalidateCache();
 }
 
-std::size_t Mesh::packedElementCount() const {
-	std::size_t elementCount = 0;
-	if(m_contents & Position2D)
-		elementCount += 2;
-	if(m_contents & Position3D)
-		elementCount += 3;
-	if(m_contents & TextureCoord2D)
-		elementCount += 2;
-	if(m_contents & Normal3D)
-		elementCount += 3;
-	if(m_contents & Color3D)
-		elementCount += 3;
-	if(m_contents & Color4D)
-		elementCount += 4;
-
-	return elementCount;
+std::size_t Mesh::packedVertexSize(Contents contents) {
+	std::size_t vCount = 0;
+	if(contents & Position2D)
+		vCount += sizeof(Vertex().Position2D);
+	if(contents & Position3D)
+		vCount += sizeof(Vertex().Position3D);
+	if(contents & TextureCoord2D)
+		vCount += sizeof(Vertex().TextureCoord2D);
+	if(contents & Normal3D)
+		vCount += sizeof(Vertex().Normal3D);
+	if(contents & Color3D)
+		vCount += sizeof(Vertex().Color3D);
+	if(contents & Color4D)
+		vCount += sizeof(Vertex().Color4D);
+	if(contents & BoneIDs)
+		vCount += sizeof(Vertex().BoneIDs);
+	if(contents & BoneWeights)
+		vCount += sizeof(Vertex().BoneWeights);
+	return vCount;
 }
 
-std::vector<float> const& Mesh::packedVertices() const {
-	if(m_packedVertices.empty()) {
-		std::size_t const elementCount = packedElementCount();
+std::vector<std::uint8_t> const& Mesh::packedData() const {
+	if(m_packedData.empty()) {
+		std::size_t const vertexSize = packedVertexSize(m_contents);
+		m_packedData.resize(vertexSize * m_vertices.size());
 
-		m_packedVertices.reserve(elementCount * m_vertices.size());
-		for(auto it = m_vertices.begin(); it != m_vertices.end(); ++it) {
-			Vertex const& v = *it;
+		std::uint8_t* pDstBase = m_packedData.data();
+		for(auto it = m_vertices.begin(); it != m_vertices.end(); ++it, pDstBase += vertexSize) {
+			std::uint8_t* pDst = pDstBase;
+			Vertex const& v    = *it;
 
-			if(m_contents & Position2D)
-				pushToContainer(m_packedVertices, v.Position2D);
-			if(m_contents & Position3D)
-				pushToContainer(m_packedVertices, v.Position3D);
-			if(m_contents & TextureCoord2D)
-				pushToContainer(m_packedVertices, v.TextureCoord2D);
-			if(m_contents & Normal3D)
-				pushToContainer(m_packedVertices, v.Normal3D);
-			if(m_contents & Color3D)
-				pushToContainer(m_packedVertices, v.Color3D);
-			if(m_contents & Color4D)
-				pushToContainer(m_packedVertices, v.Color4D);
+			if(m_contents & Position2D) {
+				std::memcpy(pDst, &v.Position2D, sizeof(v.Position2D));
+				pDst += sizeof(v.Position2D);
+			}
+			if(m_contents & Position3D) {
+				std::memcpy(pDst, &v.Position3D, sizeof(v.Position3D));
+				pDst += sizeof(v.Position3D);
+			}
+			if(m_contents & TextureCoord2D) {
+				std::memcpy(pDst, &v.TextureCoord2D, sizeof(v.TextureCoord2D));
+				pDst += sizeof(v.TextureCoord2D);
+			}
+			if(m_contents & Normal3D) {
+				std::memcpy(pDst, &v.Normal3D, sizeof(v.Normal3D));
+				pDst += sizeof(v.Normal3D);
+			}
+			if(m_contents & Color3D) {
+				std::memcpy(pDst, &v.Color3D, sizeof(v.Color3D));
+				pDst += sizeof(v.Color3D);
+			}
+			if(m_contents & Color4D) {
+				std::memcpy(pDst, &v.Color4D, sizeof(v.Color4D));
+				pDst += sizeof(v.Color4D);
+			}
+			if(m_contents & BoneIDs) {
+				std::memcpy(pDst, v.BoneIDs, sizeof(v.BoneIDs));
+				pDst += sizeof(v.BoneIDs);
+			}
+			if(m_contents & BoneWeights) {
+				std::memcpy(pDst, &v.BoneWeights, sizeof(v.BoneWeights));
+				pDst += sizeof(v.BoneWeights);
+			}
 		}
 	}
-	return m_packedVertices;
+	return m_packedData;
 }
 
 void Mesh::setDrawMode(DrawMode drawMode) {
@@ -137,6 +173,56 @@ void Mesh::setDrawMode(DrawMode drawMode) {
 }
 Mesh::DrawMode Mesh::drawMode() const {
 	return m_drawMode;
+}
+
+bool Mesh::Vertex::Equals(Vertex const& o, Contents c) const {
+	if(c & Mesh::Position2D && Position2D != o.Position2D)
+		return false;
+	if(c & Mesh::Position3D && Position3D != o.Position3D)
+		return false;
+	if(c & Mesh::TextureCoord2D && TextureCoord2D != o.TextureCoord2D)
+		return false;
+	if(c & Mesh::Normal3D && Normal3D != o.Normal3D)
+		return false;
+	if(c & Mesh::Color3D && Color3D != o.Color3D)
+		return false;
+	if(c & Mesh::Color4D && Color4D != o.Color4D)
+		return false;
+	if(c & Mesh::BoneIDs && std::memcmp(BoneIDs, o.BoneIDs, sizeof(BoneIDs)) != 0)
+		return false;
+	if(c & Mesh::BoneWeights && BoneWeights != o.BoneWeights)
+		return false;
+	return true;
+}
+
+void Mesh::optimizeIndices() {
+	if(drawMode() != Mesh::IndexedTriangles && drawMode() != Mesh::IndexedTriangleStrips)
+		return;
+	std::vector<Mesh::Vertex> optimizedVertices;
+	std::vector<std::uint32_t> optimizedIndices;
+
+	optimizedVertices.reserve(m_indices.size() / 2);
+	optimizedIndices.reserve(m_indices.size());
+
+	for(auto it = m_indices.begin(); it != m_indices.end(); ++it) {
+		Mesh::Vertex* currentVertex = &m_vertices[*it];
+
+		optimizedIndices.push_back(static_cast<std::uint32_t>(optimizedVertices.size()));
+
+		for(std::uint32_t prevIndex = 0; prevIndex < optimizedVertices.size(); ++prevIndex) {
+			if(currentVertex->Equals(optimizedVertices[prevIndex], m_contents)) {
+				optimizedIndices.back() = prevIndex;
+				break;
+			}
+		}
+
+		if(optimizedIndices.back() == optimizedVertices.size())
+			optimizedVertices.push_back(*currentVertex);
+	}
+
+	m_vertices = std::move(optimizedVertices);
+	m_indices  = std::move(optimizedIndices);
+	invalidateCache();
 }
 
 std::vector<Mesh::Vertex>& Mesh::vertices() {
@@ -155,7 +241,7 @@ std::vector<std::uint32_t> const& Mesh::indices() const {
 
 void Mesh::invalidateCache(std::uintptr_t rendererID) {
 	if(rendererID == std::numeric_limits<std::uintptr_t>::max()) {
-		m_packedVertices.clear();
+		m_packedData.clear();
 		for(auto it = m_meshCache.begin(); it != m_meshCache.end();) {
 			if(it->second.isNull())
 				it = m_meshCache.erase(it);
