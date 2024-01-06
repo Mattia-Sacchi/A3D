@@ -1,15 +1,14 @@
-#include "scene.h"
+#include "A3D/scene.h"
 
 namespace A3D {
 
-Scene::Scene(QObject *parent)
-	: Entity{nullptr}
-{
+Scene::Scene(QObject* parent)
+	: Entity{ nullptr } {
 	QObject::setParent(parent);
-	dbgConstruct("Scene")
+	log(LC_Debug, "Constructor: Scene");
 }
 Scene::~Scene() {
-	dbgDestruct("Scene")
+	log(LC_Debug, "Destructor: Scene");
 }
 
 }

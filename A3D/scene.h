@@ -7,11 +7,10 @@
 
 namespace A3D {
 
-class Scene : public Entity
-{
+class Scene : public Entity {
 	Q_OBJECT
 public:
-	explicit Scene(QObject *parent = nullptr);
+	explicit Scene(QObject* parent = nullptr);
 	~Scene();
 };
 

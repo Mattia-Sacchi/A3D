@@ -1,21 +1,21 @@
-#include "entity.h"
+#include "A3D/entity.h"
 
 namespace A3D {
 
-Entity::Entity(Entity *parent)
-	: QObject{parent},
+Entity::Entity(Entity* parent)
+	: QObject{ parent },
 	  m_parent(parent),
 	  m_renderOptions(NoOptions),
 	  m_scale(1.f, 1.f, 1.f),
 	  m_matrixDirty(true),
 	  m_mesh(nullptr),
-	  m_material(nullptr)
-{
-	dbgConstruct("Entity")
+	  m_material(nullptr),
+	  m_textureSet{ nullptr } {
+	log(LC_Debug, "Constructor: Entity");
 }
 
 Entity::~Entity() {
-	dbgDestruct("Entity")
+	log(LC_Debug, "Destructor: Entity");
 }
 
 Entity::RenderOptions Entity::renderOptions() const {
@@ -26,7 +26,7 @@ void Entity::setRenderOptions(RenderOptions renderOptions) {
 }
 
 Entity* Entity::parentEntity() const {
-	return m_parent.get();
+	return m_parent;
 }
 
 std::vector<QPointer<Entity>> const& Entity::childrenEntities() const {
@@ -40,24 +40,28 @@ void Entity::addChildEntity(Entity* entity) {
 
 void Entity::setPosition(QVector3D const& pos) {
 	if(m_position == pos)
-	   return;
-	m_position = pos;
+		return;
+	m_position    = pos;
 	m_matrixDirty = true;
 }
-QVector3D Entity::position() const { return m_position; }
+QVector3D Entity::position() const {
+	return m_position;
+}
 
 void Entity::setRotation(QQuaternion const& rot) {
 	if(m_rotation == rot)
 		return;
-	m_rotation = rot;
+	m_rotation    = rot;
 	m_matrixDirty = true;
 }
-QQuaternion Entity::rotation() const { return m_rotation; }
+QQuaternion Entity::rotation() const {
+	return m_rotation;
+}
 
 void Entity::setScale(QVector3D const& scale) {
 	if(m_scale == scale)
 		return;
-	m_scale = scale;
+	m_scale       = scale;
 	m_matrixDirty = true;
 }
 QVector3D Entity::scale() const {
@@ -78,7 +82,11 @@ QMatrix4x4 const& Entity::modelMatrix() const {
 Mesh* Entity::mesh() const {
 	return m_mesh;
 }
-
+Texture* Entity::texture(std::size_t slot) const {
+	if(slot >= MaxTextures)
+		return nullptr;
+	return m_textureSet[slot];
+}
 Material* Entity::material() const {
 	return m_material;
 }
@@ -90,12 +98,26 @@ MaterialProperties const& Entity::materialProperties() const {
 }
 
 void Entity::setMesh(Mesh* mesh) {
+	if(mesh == m_mesh)
+		return;
 	if(m_mesh && m_mesh->parent() == this)
 		delete m_mesh;
 	m_mesh = mesh;
 }
 
+void Entity::setTexture(Texture* texture, std::size_t slot) {
+	if(slot >= MaxTextures)
+		return;
+	if(texture == m_textureSet[slot])
+		return;
+	if(m_textureSet[slot] && m_textureSet[slot]->parent() == this)
+		delete m_textureSet[slot];
+	m_textureSet[slot] = texture;
+}
+
 void Entity::setMaterial(Material* material) {
+	if(material == m_material)
+		return;
 	if(m_material && m_material->parent() == this)
 		delete m_material;
 	m_material = material;

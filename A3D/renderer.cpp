@@ -1,4 +1,4 @@
-#include "renderer.h"
+#include "A3D/renderer.h"
 
 namespace A3D {
 
@@ -6,11 +6,12 @@ static std::uintptr_t g_lastRendererID = 0;
 static std::map<std::uintptr_t, Renderer*> g_renderers;
 
 std::uintptr_t Renderer::createRendererID(Renderer* renderer) {
-	
+
 	do {
 		++g_lastRendererID;
-	} while(g_renderers.find(g_lastRendererID) != g_renderers.end());
-	
+	}
+	while(g_renderers.find(g_lastRendererID) != g_renderers.end());
+
 	g_renderers[g_lastRendererID] = renderer;
 	return g_lastRendererID;
 }
@@ -25,18 +26,15 @@ Renderer* Renderer::getRenderer(std::uintptr_t rendererID) {
 	return it->second;
 }
 
-
-
 Renderer::Renderer()
-	: m_rendererID(0)
-{
-	dbgConstruct("Renderer")
+	: m_rendererID(0) {
+	log(LC_Debug, "Constructor: Renderer");
 	m_rendererID = Renderer::createRendererID(this);
 }
 
 Renderer::~Renderer() {
 	removeRendererID(rendererID());
-	dbgDestruct("Renderer")
+	log(LC_Debug, "Destructor: Renderer");
 }
 
 std::uintptr_t Renderer::rendererID() const {
@@ -49,29 +47,27 @@ void Renderer::CleanupRenderCache() {
 }
 
 struct OpaqueSorter {
-	OpaqueSorter(Camera const& c) : m_camera(c) {}
-	
-	bool operator() (std::pair<Entity*, QMatrix4x4> const& a, std::pair<Entity*, QMatrix4x4> const& b) const
-	{
-		return
-			QVector3D::dotProduct(a.first->position() - m_camera.position(), m_camera.forward())
-			< QVector3D::dotProduct(b.first->position() - m_camera.position(), m_camera.forward());
+	OpaqueSorter(Camera const& c)
+		: m_camera(c) {}
+
+	bool operator()(std::pair<Entity*, QMatrix4x4> const& a, std::pair<Entity*, QMatrix4x4> const& b) const {
+		return QVector3D::dotProduct(a.first->position() - m_camera.position(), m_camera.forward())
+		       < QVector3D::dotProduct(b.first->position() - m_camera.position(), m_camera.forward());
 	}
-	
+
 private:
 	Camera const& m_camera;
 };
 
 struct TranslucentSorter {
-	TranslucentSorter(Camera const& c) : m_camera(c) {}
-	
-	bool operator() (std::pair<Entity*, QMatrix4x4> const& a, std::pair<Entity*, QMatrix4x4> const& b) const
-	{
-		return
-			QVector3D::dotProduct(a.first->position() - m_camera.position(), m_camera.forward())
-			> QVector3D::dotProduct(b.first->position() - m_camera.position(), m_camera.forward());
+	TranslucentSorter(Camera const& c)
+		: m_camera(c) {}
+
+	bool operator()(std::pair<Entity*, QMatrix4x4> const& a, std::pair<Entity*, QMatrix4x4> const& b) const {
+		return QVector3D::dotProduct(a.first->position() - m_camera.position(), m_camera.forward())
+		       > QVector3D::dotProduct(b.first->position() - m_camera.position(), m_camera.forward());
 	}
-	
+
 private:
 	Camera const& m_camera;
 };
@@ -79,28 +75,28 @@ private:
 void Renderer::DrawAll(Entity* root, Camera const& camera) {
 	m_opaqueEntityBuffer.clear();
 	m_translucentEntityBuffer.clear();
-	
+
 	BuildDrawLists(root, QMatrix4x4());
-	
+
 	{
-		OpaqueSorter os(camera);	
+		OpaqueSorter os(camera);
 		std::stable_sort(m_opaqueEntityBuffer.begin(), m_opaqueEntityBuffer.end(), os);
 	}
-	
+
 	{
 		TranslucentSorter ts(camera);
 		std::stable_sort(m_translucentEntityBuffer.begin(), m_translucentEntityBuffer.end(), ts);
 	}
-	
+
 	QMatrix4x4 const& projMatrix = camera.getProjection();
 	QMatrix4x4 const& viewMatrix = camera.getView();
-	
+
 	this->BeginOpaque();
 	for(auto it = m_opaqueEntityBuffer.begin(); it != m_opaqueEntityBuffer.end(); ++it) {
 		this->Draw(it->first, it->second, projMatrix, viewMatrix);
 	}
 	this->EndOpaque();
-	
+
 	this->BeginTranslucent();
 	for(auto it = m_translucentEntityBuffer.begin(); it != m_translucentEntityBuffer.end(); ++it) {
 		this->Draw(it->first, it->second, projMatrix, viewMatrix);
@@ -111,24 +107,25 @@ void Renderer::DrawAll(Entity* root, Camera const& camera) {
 void Renderer::BuildDrawLists(Entity* e, QMatrix4x4 cascadeMatrix) {
 	if(e->renderOptions() & Entity::Hidden)
 		return;
-	
+
 	cascadeMatrix *= e->modelMatrix();
-	
-	Mesh* mesh = e->mesh();
+
+	Mesh* mesh    = e->mesh();
 	Material* mat = e->material();
 	if(mesh && mat) {
 		if(mat->renderOptions() & Material::Translucent) {
 			m_translucentEntityBuffer.push_back(std::make_pair(e, cascadeMatrix));
-		} else {
+		}
+		else {
 			m_opaqueEntityBuffer.push_back(std::make_pair(e, cascadeMatrix));
 		}
 	}
-	
+
 	std::vector<QPointer<Entity>> const& subEntities = e->childrenEntities();
 	for(auto it = subEntities.begin(); it != subEntities.end(); ++it) {
 		if(it->isNull())
 			continue;
-		BuildDrawLists(it->get(), cascadeMatrix);
+		BuildDrawLists(*it, cascadeMatrix);
 	}
 }
 
@@ -142,25 +139,60 @@ void Renderer::runDeleteOnAllResources() {
 		QPointer<MeshCache>& mc = *it;
 		if(mc.isNull())
 			continue;
-		delete mc.get();
+		delete mc;
 	}
 	m_meshCaches.clear();
-	
+
 	for(auto it = m_materialCaches.begin(); it != m_materialCaches.end(); ++it) {
 		QPointer<MaterialCache>& mc = *it;
 		if(mc.isNull())
 			continue;
-		delete mc.get();
+		delete mc;
 	}
 	m_materialCaches.clear();
+
+	for(auto it = m_textureCaches.begin(); it != m_textureCaches.end(); ++it) {
+		QPointer<TextureCache>& tc = *it;
+		if(tc.isNull())
+			continue;
+		delete tc;
+	}
+	m_textureCaches.clear();
+}
+
+void Renderer::invalidateCache() {
+	for(auto it = m_meshCaches.begin(); it != m_meshCaches.end(); ++it) {
+		QPointer<MeshCache>& mc = *it;
+		if(mc.isNull())
+			continue;
+		mc->markDirty();
+	}
+
+	for(auto it = m_materialCaches.begin(); it != m_materialCaches.end(); ++it) {
+		QPointer<MaterialCache>& mc = *it;
+		if(mc.isNull())
+			continue;
+		mc->markDirty();
+	}
+
+	for(auto it = m_textureCaches.begin(); it != m_textureCaches.end(); ++it) {
+		QPointer<TextureCache>& tc = *it;
+		if(tc.isNull())
+			continue;
+		tc->markDirty();
+	}
 }
 
 void Renderer::addToMaterialCaches(QPointer<MaterialCache> material) {
-	m_materialCaches.push_back(material);
+	m_materialCaches.push_back(std::move(material));
 }
 
 void Renderer::addToMeshCaches(QPointer<MeshCache> mesh) {
-	m_meshCaches.push_back(mesh);
+	m_meshCaches.push_back(std::move(mesh));
+}
+
+void Renderer::addToTextureCaches(QPointer<TextureCache> texture) {
+	m_textureCaches.push_back(std::move(texture));
 }
 
 }

@@ -6,5 +6,8 @@
         <file>A3D/Basic3DMaterial.vert</file>
         <file>A3D/SampleTranslucentMaterial.frag</file>
         <file>A3D/SampleTranslucentMaterial.vert</file>
+        <file>A3D/TexturedMaterial.frag</file>
+        <file>A3D/TexturedMaterial.vert</file>
+        <file>A3D/Qt-Logo.webp</file>
     </qresource>
 </RCC>

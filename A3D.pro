@@ -1,6 +1,7 @@
-QT       += core gui openglwidgets
+QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 5): QT += openglwidgets
 
 CONFIG += c++17
 
@@ -10,6 +11,7 @@ CONFIG += c++17
 
 SOURCES += \
     A3D/camera.cpp \
+    A3D/common.cpp \
     A3D/entity.cpp \
     A3D/material.cpp \
     A3D/materialcache.cpp \
@@ -21,6 +23,9 @@ SOURCES += \
     A3D/renderer.cpp \
     A3D/rendererogl.cpp \
     A3D/scene.cpp \
+    A3D/texture.cpp \
+    A3D/texturecache.cpp \
+    A3D/texturecacheogl.cpp \
     A3D/view.cpp \
     main.cpp
 
@@ -38,6 +43,9 @@ HEADERS += \
 	A3D/renderer.h \
 	A3D/rendererogl.h \
 	A3D/scene.h \
+	A3D/texture.h \
+	A3D/texturecache.h \
+	A3D/texturecacheogl.h \
 	A3D/view.h
 
 # Default rules for deployment.

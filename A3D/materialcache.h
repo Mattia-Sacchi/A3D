@@ -8,20 +8,19 @@
 namespace A3D {
 
 class Material;
-class MaterialCache : public QObject
-{
+class MaterialCache : public QObject {
 	Q_OBJECT
 public:
-	explicit MaterialCache(Material *parent);
+	explicit MaterialCache(Material* parent);
 	~MaterialCache();
 	Material* material() const;
-	
+
 	void markDirty();
 	bool isDirty() const;
-	
+
 protected:
 	void markClean();
-	
+
 private:
 	QPointer<Material> m_material;
 	bool m_isDirty;

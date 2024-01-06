@@ -1,23 +1,22 @@
-#include "view.h"
-#include "scene.h"
+#include "A3D/view.h"
+#include "A3D/scene.h"
 #include <QDebug>
 #include <QTimer>
 #include <QKeyEvent>
 
 namespace A3D {
 
-View::View(QWidget *parent)
-	: QOpenGLWidget{parent},
+View::View(QWidget* parent)
+	: QOpenGLWidget{ parent },
 	  m_initDoneGL(false),
 	  m_renderer(nullptr),
 	  m_scene(nullptr),
-	  m_renderTimer(nullptr)
-{
-	dbgConstruct("View")
+	  m_renderTimer(nullptr) {
+	log(LC_Debug, "Constructor: View");
 	setMouseTracking(true);
 	setFocusPolicy(Qt::StrongFocus);
 	setAttribute(Qt::WA_AlwaysStackOnTop);
-	
+
 	QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
 	fmt.setSamples(4);
 	fmt.setDepthBufferSize(24);
@@ -28,11 +27,15 @@ View::View(QWidget *parent)
 	fmt.setSwapInterval(1);
 	fmt.setSwapBehavior(QSurfaceFormat::TripleBuffer);
 	setFormat(fmt);
-	
+
 	m_renderTimer = new QTimer(this);
-	connect(m_renderTimer, &QTimer::timeout, this, [this](){
+	connect(m_renderTimer, &QTimer::timeout, this, [this]() {
 		this->update();
 	});
+}
+
+View::~View() {
+	log(LC_Debug, "Destructor: View");
 }
 
 void View::setRenderTimerEnabled(bool enabled) {
@@ -47,10 +50,6 @@ void View::setRenderTimerEnabled(bool enabled) {
 			m_renderTimer->setInterval(16);
 		m_renderTimer->start();
 	}
-}
-
-View::~View() {
-	dbgDestruct("View")
 }
 
 Camera& View::camera() {
@@ -76,23 +75,23 @@ QSize View::sizeHint() const {
 void View::initializeGL() {
 	if(m_initDoneGL)
 		return;
-	
+
 	if(!initializeOpenGLFunctions()) {
 		qDebug() << "initializeOpenGLFunctions failed (OpenGL 3.3 Core required).";
 		return;
 	}
-	
-	m_renderer = std::make_unique<RendererOGL>(context(), this);
+
+	m_renderer   = std::make_unique<RendererOGL>(context(), this);
 	m_initDoneGL = true;
 }
 
 void View::resizeGL(int w, int h) {
 	if(!m_initDoneGL)
 		return;
-	
+
 	// Update the Camera
 	if(m_camera.projectionMode() == Camera::PM_PERSPECTIVE) {
-		float fWidth = static_cast<float>(w);
+		float fWidth  = static_cast<float>(w);
 		float fHeight = static_cast<float>(h);
 		if(fWidth <= 1.f)
 			fWidth = 1.f;
@@ -109,18 +108,18 @@ void View::sceneChanged() {
 void View::paintGL() {
 	if(!m_initDoneGL)
 		return;
-	
+
 	glDisable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
-	
+
 	static float fVal = 0.f;
 	fVal += 1.f / 60.f;
 	if(fVal > 1.f)
 		fVal = 0.f;
 	glClearColor(1.f, 0.f, 0.f, 0.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+
 	// Don't get fooled by the X/Y names....
 	// x is the pitch (vertical angle)
 	// y is the yaw (horizontal angle)
@@ -135,18 +134,18 @@ void View::paintGL() {
 		orientation.setY(orientation.y() - fRotSpeed);
 	if(m_keyPressed[Qt::Key_D])
 		orientation.setY(orientation.y() + fRotSpeed);
-	
+
 	camera().offsetOrientation(orientation);
-	
+
 	// Coordinate Convention is RHS/CCW:
 	// X = -Left / +Right
 	// Y = +Up / -Down
 	// Z = -Further / +Closer
-	
+
 	QVector3D const forward = camera().forward();
-	QVector3D const right = camera().right();
-	QVector3D const up = camera().up();
-	
+	QVector3D const right   = camera().right();
+	QVector3D const up      = camera().up();
+
 	float const fMovSpeed = 0.05f;
 	QVector3D movement;
 	if(m_keyPressed[Qt::Key_Up] && m_keyPressed[Qt::Key_Shift])
@@ -161,15 +160,15 @@ void View::paintGL() {
 		movement -= right * fMovSpeed;
 	if(m_keyPressed[Qt::Key_Right])
 		movement += right * fMovSpeed;
-	
+
 	camera().setPosition(camera().position() + movement);
-	
+
 	if(m_keyPressed[Qt::Key_H])
 		camera().setOrientationTarget(QVector3D(0.f, 0.f, 0.f));
-	
+
 	m_renderer->DrawAll(m_scene, camera());
 	m_renderer->CleanupRenderCache();
-	
+
 	emit frameRendered();
 }
 

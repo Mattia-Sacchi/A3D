@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "A3D/camera.h"
 
 namespace A3D {
 
@@ -8,11 +8,11 @@ inline void normalizeAngleVector(QVector3D& angle) {
 		angle.setX(fMaxVerticalAngle);
 	else if(angle.x() < -fMaxVerticalAngle)
 		angle.setX(-fMaxVerticalAngle);
-	
+
 	angle.setY(fmodf(angle.y(), 360.f));
 	if(angle.y() < 0.f)
 		angle.setY(angle.y() + 360.f);
-	
+
 	angle.setZ(fmodf(angle.z(), 360.f));
 	if(angle.z() < 0.f)
 		angle.setZ(angle.z() + 360.f);
@@ -20,19 +20,17 @@ inline void normalizeAngleVector(QVector3D& angle) {
 
 Camera::Camera()
 	: m_viewMatrixIsDirty(true),
-		m_projMatrixIsDirty(true),
-		m_projectionMode(PM_PERSPECTIVE),
-		m_nearPlane(0.1f),
-		m_farPlane(1000.f),
-		m_perspVerticalFOV(45.f),
-		m_perspAspectRatio(16.f/9.f)
-{
-	dbgConstruct("Camera")
+	  m_projMatrixIsDirty(true),
+	  m_projectionMode(PM_PERSPECTIVE),
+	  m_nearPlane(0.1f),
+	  m_farPlane(1000.f),
+	  m_perspVerticalFOV(45.f),
+	  m_perspAspectRatio(16.f / 9.f) {
+	log(LC_Debug, "Constructor: Camera");
 }
 
-Camera::~Camera()
-{
-	dbgDestruct("Camera")
+Camera::~Camera() {
+	log(LC_Debug, "Destructor: Camera");
 }
 
 QVector3D const& Camera::position() const {
@@ -41,7 +39,7 @@ QVector3D const& Camera::position() const {
 void Camera::setPosition(QVector3D const& pos) {
 	if(m_position == pos)
 		return;
-	m_position = pos;
+	m_position          = pos;
 	m_viewMatrixIsDirty = true;
 }
 QMatrix4x4 Camera::orientation() const {
@@ -58,21 +56,17 @@ void Camera::setOrientationTarget(QVector3D const& target) {
 	if(target == m_position)
 		return;
 	QVector3D const direction = (target - m_position);
-	float const length = direction.length();
-	
+	float const length        = direction.length();
+
 	float const pitch = qAsin(-direction.y() / length);
-	float const yaw = qAtan2(direction.x(), -direction.z());
-	
-	QVector3D newAngle(
-		qRadiansToDegrees(pitch),
-		qRadiansToDegrees(yaw),
-		0.f
-	);
+	float const yaw   = qAtan2(direction.x(), -direction.z());
+
+	QVector3D newAngle(qRadiansToDegrees(pitch), qRadiansToDegrees(yaw), 0.f);
 	normalizeAngleVector(newAngle);
-	
+
 	if(newAngle == m_angle)
 		return;
-	m_angle = newAngle;
+	m_angle             = newAngle;
 	m_viewMatrixIsDirty = true;
 }
 void Camera::offsetOrientation(QVector3D const& orientation) {
@@ -80,7 +74,7 @@ void Camera::offsetOrientation(QVector3D const& orientation) {
 	normalizeAngleVector(newAngle);
 	if(newAngle == m_angle)
 		return;
-	m_angle = newAngle;
+	m_angle             = newAngle;
 	m_viewMatrixIsDirty = true;
 }
 
@@ -99,7 +93,7 @@ QVector3D Camera::up() const {
 QMatrix4x4 const& Camera::getView() const {
 	if(m_viewMatrixIsDirty) {
 		m_viewMatrixIsDirty = false;
-		m_viewMatrix = orientation();
+		m_viewMatrix        = orientation();
 		m_viewMatrix.translate(-m_position);
 	}
 	return m_viewMatrix;
@@ -115,7 +109,7 @@ float Camera::nearPlane() const {
 void Camera::setNearPlane(float nearPlane) {
 	if(m_nearPlane == nearPlane)
 		return;
-	m_nearPlane = nearPlane;
+	m_nearPlane         = nearPlane;
 	m_projMatrixIsDirty = true;
 }
 
@@ -125,27 +119,24 @@ float Camera::farPlane() const {
 void Camera::setFarPlane(float farPlane) {
 	if(m_farPlane == farPlane)
 		return;
-	m_farPlane = farPlane;
+	m_farPlane          = farPlane;
 	m_projMatrixIsDirty = true;
 }
 
 void Camera::setOrthogonal(QRectF const& rect) {
-	if(m_projectionMode == PM_ORTHOGONAL
-		&& m_orthoView == rect)
+	if(m_projectionMode == PM_ORTHOGONAL && m_orthoView == rect)
 		return;
-	m_projectionMode = PM_ORTHOGONAL;
-	m_orthoView = rect;
+	m_projectionMode    = PM_ORTHOGONAL;
+	m_orthoView         = rect;
 	m_projMatrixIsDirty = true;
 }
 void Camera::setPerspective(float verticalFOV, float aspectRatio) {
-	if(m_projectionMode == PM_PERSPECTIVE
-		&& m_perspVerticalFOV == verticalFOV
-		&& m_perspAspectRatio == aspectRatio)
+	if(m_projectionMode == PM_PERSPECTIVE && m_perspVerticalFOV == verticalFOV && m_perspAspectRatio == aspectRatio)
 		return;
-	
-	m_projectionMode = PM_PERSPECTIVE;
-	m_perspVerticalFOV = verticalFOV;
-	m_perspAspectRatio = aspectRatio;
+
+	m_projectionMode    = PM_PERSPECTIVE;
+	m_perspVerticalFOV  = verticalFOV;
+	m_perspAspectRatio  = aspectRatio;
 	m_projMatrixIsDirty = true;
 }
 
@@ -153,7 +144,7 @@ QMatrix4x4 const& Camera::getProjection() const {
 	if(m_projMatrixIsDirty) {
 		m_projMatrixIsDirty = false;
 		m_projMatrix.setToIdentity();
-		
+
 		switch(m_projectionMode) {
 		case PM_PERSPECTIVE:
 			m_projMatrix.perspective(m_perspVerticalFOV, m_perspAspectRatio, m_nearPlane, m_farPlane);
@@ -165,6 +156,5 @@ QMatrix4x4 const& Camera::getProjection() const {
 	}
 	return m_projMatrix;
 }
-
 
 }

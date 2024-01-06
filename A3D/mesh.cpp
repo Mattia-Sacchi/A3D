@@ -1,31 +1,31 @@
-#include "mesh.h"
-#include "renderer.h"
+#include "A3D/mesh.h"
+#include "A3D/renderer.h"
 #include <QDebug>
 
 namespace A3D {
 
 Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 	static std::map<StandardMesh, Mesh> standardMeshes;
-	
+
 	auto it = standardMeshes.find(stdMesh);
 	if(it != standardMeshes.end())
 		return &it->second;
-	
+
 	Mesh& newMesh = standardMeshes[stdMesh];
 	switch(stdMesh) {
 	case Triangle2DMesh:
 		newMesh.setDrawMode(Triangles);
-		
+
 		newMesh.vertices().resize(3);
-		newMesh.vertices()[0].Position3D = QVector3D( 0.0f,  0.5f, 0.f);
+		newMesh.vertices()[0].Position3D = QVector3D(0.0f, 0.5f, 0.f);
 		newMesh.vertices()[1].Position3D = QVector3D(-0.5f, -0.5f, 0.f);
-		newMesh.vertices()[2].Position3D = QVector3D( 0.5f, -0.5f, 0.f);
-		
+		newMesh.vertices()[2].Position3D = QVector3D(0.5f, -0.5f, 0.f);
+
 		newMesh.setContents(Position3D);
 		break;
 	case CubeIndexedMesh:
 		newMesh.setDrawMode(IndexedTriangles);
-		
+
 		newMesh.vertices().resize(8);
 		newMesh.vertices()[0].Position3D = QVector3D(-0.5f, -0.5f, +0.5f);
 		newMesh.vertices()[1].Position3D = QVector3D(+0.5f, -0.5f, +0.5f);
@@ -35,53 +35,39 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 		newMesh.vertices()[5].Position3D = QVector3D(+0.5f, -0.5f, -0.5f);
 		newMesh.vertices()[6].Position3D = QVector3D(+0.5f, +0.5f, -0.5f);
 		newMesh.vertices()[7].Position3D = QVector3D(-0.5f, +0.5f, -0.5f);
-		
+
 		newMesh.setContents(Position3D);
-		
-		for (std::uint32_t i : {
-			 0, 1, 2,
-			 2, 3, 0,
-			 1, 5, 6,
-			 6, 2, 1,
-			 7, 6, 5,
-			 5, 4, 7,
-			 4, 0, 3,
-			 3, 7, 4,
-			 4, 5, 1,
-			 1, 0, 4,
-			 3, 2, 6,
-			 6, 7, 3
-		})
+
+		for(std::uint32_t i: { 0, 1, 2, 2, 3, 0, 1, 5, 6, 6, 2, 1, 7, 6, 5, 5, 4, 7, 4, 0, 3, 3, 7, 4, 4, 5, 1, 1, 0, 4, 3, 2, 6, 6, 7, 3 })
 			newMesh.indices().push_back(i);
 		break;
 	};
-	newMesh.invalidateMeshCache();
+	newMesh.invalidateCache();
 	return &newMesh;
 }
 
-Mesh::Mesh(QObject *parent)
-	: QObject{parent},
+Mesh::Mesh(QObject* parent)
+	: QObject{ parent },
 	  m_drawMode(Triangles),
-	  m_renderOptions(NoOptions)
-{
-	dbgConstruct("Mesh")
+	  m_renderOptions(NoOptions) {
+	log(LC_Debug, "Constructor: Mesh");
 }
 
 Mesh::~Mesh() {
-	dbgDestruct("Mesh started")
+	log(LC_Debug, "Destructor: Mesh (begin)");
 	for(auto it = m_meshCache.begin(); it != m_meshCache.end(); ++it) {
 		if(it->second.isNull())
 			continue;
-		
+
 		Renderer* r = Renderer::getRenderer(it->first);
 		if(!r) {
 			qDebug() << "Mesh::~Mesh: Potential memory leak? Renderer not available.";
 			continue;
 		}
-		
+
 		r->Delete(it->second);
 	}
-	dbgDestruct("Mesh finished")
+	log(LC_Debug, "Destructor: Mesh (end)");
 }
 
 Mesh::RenderOptions Mesh::renderOptions() const {
@@ -97,10 +83,10 @@ Mesh::Contents Mesh::contents() const {
 void Mesh::setContents(Contents contents) {
 	if(m_contents == contents)
 		return;
-	
+
 	m_contents = contents;
 	m_packedVertices.clear();
-	invalidateMeshCache();
+	invalidateCache();
 }
 
 std::size_t Mesh::packedElementCount() const {
@@ -117,18 +103,18 @@ std::size_t Mesh::packedElementCount() const {
 		elementCount += 3;
 	if(m_contents & Color4D)
 		elementCount += 4;
-	
+
 	return elementCount;
 }
 
 std::vector<float> const& Mesh::packedVertices() const {
 	if(m_packedVertices.empty()) {
 		std::size_t const elementCount = packedElementCount();
-		
+
 		m_packedVertices.reserve(elementCount * m_vertices.size());
 		for(auto it = m_vertices.begin(); it != m_vertices.end(); ++it) {
 			Vertex const& v = *it;
-			
+
 			if(m_contents & Position2D)
 				pushToContainer(m_packedVertices, v.Position2D);
 			if(m_contents & Position3D)
@@ -167,7 +153,7 @@ std::vector<std::uint32_t> const& Mesh::indices() const {
 	return m_indices;
 }
 
-void Mesh::invalidateMeshCache(std::uintptr_t rendererID) {
+void Mesh::invalidateCache(std::uintptr_t rendererID) {
 	if(rendererID == std::numeric_limits<std::uintptr_t>::max()) {
 		m_packedVertices.clear();
 		for(auto it = m_meshCache.begin(); it != m_meshCache.end();) {
@@ -178,7 +164,8 @@ void Mesh::invalidateMeshCache(std::uintptr_t rendererID) {
 				++it;
 			}
 		}
-	} else {
+	}
+	else {
 		auto it = m_meshCache.find(rendererID);
 		if(it == m_meshCache.end())
 			return;

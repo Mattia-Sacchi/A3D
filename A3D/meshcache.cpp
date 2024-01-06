@@ -1,21 +1,20 @@
-#include "meshcache.h"
-#include "mesh.h"
+#include "A3D/meshcache.h"
+#include "A3D/mesh.h"
 
 namespace A3D {
 
-MeshCache::MeshCache(Mesh *parent)
-	: QObject{parent},
+MeshCache::MeshCache(Mesh* parent)
+	: QObject{ parent },
 	  m_mesh(parent),
-	  m_isDirty(true)
-{
-	dbgConstruct("MeshCache")
+	  m_isDirty(true) {
+	log(LC_Debug, "Constructor: MeshCache");
 }
 MeshCache::~MeshCache() {
-	dbgDestruct("MeshCache")
+	log(LC_Debug, "Destructor: MeshCache");
 }
 
 Mesh* MeshCache::mesh() const {
-	return m_mesh.get();
+	return m_mesh;
 }
 
 void MeshCache::markDirty() {

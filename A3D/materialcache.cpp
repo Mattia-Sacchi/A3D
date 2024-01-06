@@ -1,21 +1,20 @@
-#include "materialcache.h"
-#include "material.h"
+#include "A3D/materialcache.h"
+#include "A3D/material.h"
 
 namespace A3D {
 
-MaterialCache::MaterialCache(Material *parent)
-	: QObject{parent},
+MaterialCache::MaterialCache(Material* parent)
+	: QObject{ parent },
 	  m_material(parent),
-	  m_isDirty(true)
-{
-	dbgConstruct("MaterialCache")
+	  m_isDirty(true) {
+	log(LC_Debug, "Constructor: MaterialCache");
 }
 MaterialCache::~MaterialCache() {
-	dbgDestruct("MaterialCache")
+	log(LC_Debug, "Destructor: MaterialCache");
 }
 
 Material* MaterialCache::material() const {
-	return m_material.get();
+	return m_material;
 }
 
 void MaterialCache::markDirty() {
