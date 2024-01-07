@@ -100,6 +100,7 @@ void MaterialCacheOGL::install(CoreGLFunctions*, MaterialProperties const& mater
 	applyUniform("mMatrix", model);
 	applyUniform("vMatrix", view);
 	applyUniform("pMatrix", proj);
+	applyUniform("nMatrix", model.inverted().transposed());
 }
 
 void MaterialCacheOGL::update(CoreGLFunctions*) {

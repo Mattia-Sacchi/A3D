@@ -48,8 +48,11 @@ private:
 		std::unique_ptr<QIODevice> stream;
 		QString name;
 		QString uri;
+		QString basePath;
 	};
-	OpenFileResult openFile(QString name, QString const& path);
+	OpenFileResult openFile(QString name, QString const& path) const;
+	OpenFileResult openFile(OpenFileResult const& parent, QString const& relativePath) const;
+	QString locateFile(OpenFileResult const& parent, QString const& relativePath) const;
 
 	Model* loadModel_OBJ(OpenFileResult);
 

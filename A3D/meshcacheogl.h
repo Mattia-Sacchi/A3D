@@ -21,6 +21,7 @@ public:
 		Color4DAttribute        = 5,
 		BoneIDAttribute         = 6,
 		BoneWeightsAttribute    = 7,
+		SmoothingGroupAttribute = 8,
 	};
 
 	explicit MeshCacheOGL(Mesh*);

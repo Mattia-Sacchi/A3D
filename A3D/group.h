@@ -25,6 +25,13 @@ public:
 		MaxTextures = 8,
 	};
 
+	enum StandardTextureSlots {
+		Diffuse,
+		Ambient,
+		Specular,
+		Emissive,
+	};
+
 	explicit Group(Model* model);
 	~Group();
 

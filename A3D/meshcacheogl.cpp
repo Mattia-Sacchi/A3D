@@ -157,6 +157,12 @@ void MeshCacheOGL::update(CoreGLFunctions* gl) {
 		dataOffset += sizeof(Mesh::Vertex().BoneWeights);
 	}
 
+	if(contents & Mesh::SmoothingGroup) {
+		gl->glVertexAttribIPointer(SmoothingGroupAttribute, 1, GL_UNSIGNED_BYTE, stride, dataOffset);
+		gl->glEnableVertexAttribArray(SmoothingGroupAttribute);
+		dataOffset += sizeof(Mesh::Vertex().SmoothingGroup);
+	}
+
 	m_vao.release();
 	m_vbo.release();
 	if(isIndexed)
