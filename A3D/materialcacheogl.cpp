@@ -1,6 +1,6 @@
 #include "A3D/materialcacheogl.h"
+#include "A3D/materialpropertiescacheogl.h"
 #include "A3D/material.h"
-#include "A3D/group.h"
 #include <QColor>
 #include <QTransform>
 
@@ -83,7 +83,7 @@ void MaterialCacheOGL::applyUniforms(std::map<QString, QVariant> const& uniforms
 	}
 }
 
-void MaterialCacheOGL::install(CoreGLFunctions*, MaterialProperties const& materialProperties, QMatrix4x4 const& model, QMatrix4x4 const& view, QMatrix4x4 const& proj) {
+void MaterialCacheOGL::install(CoreGLFunctions*, MaterialPropertiesCacheOGL* materialPropertiesCache, QMatrix4x4 const& model, QMatrix4x4 const& view, QMatrix4x4 const& proj) {
 	if(!m_program)
 		return;
 
@@ -93,17 +93,23 @@ void MaterialCacheOGL::install(CoreGLFunctions*, MaterialProperties const& mater
 
 	m_program->bind();
 
-	applyUniforms(materialProperties.values());
-	applyUniforms(materialProperties.modeSpecificValues(Material::GLSL));
+	if(materialPropertiesCache) {
+		if(MaterialProperties* materialProperties = materialPropertiesCache->materialProperties())
+			applyUniforms(materialProperties->rawValues());
+	}
 
-	applyUniform("mvpMatrix", (proj * view * model));
-	applyUniform("mMatrix", model);
-	applyUniform("vMatrix", view);
 	applyUniform("pMatrix", proj);
-	applyUniform("nMatrix", model.inverted().transposed());
+	applyUniform("vMatrix", view);
+	applyUniform("mMatrix", model);
+	applyUniform("mvMatrix", (view * model));
+	applyUniform("mvpMatrix", (proj * view * model));
+
+	applyUniform("mNormalMatrix", model.inverted().transposed());
+	applyUniform("mvNormalMatrix", (view * model).inverted().transposed());
+	applyUniform("mvpNormalMatrix", (proj * view * model).inverted().transposed());
 }
 
-void MaterialCacheOGL::update(CoreGLFunctions*) {
+void MaterialCacheOGL::update(CoreGLFunctions* gl) {
 	Material* m = material();
 	if(!m) {
 		m_program.reset();
@@ -130,9 +136,26 @@ void MaterialCacheOGL::update(CoreGLFunctions*) {
 
 	m_uniformCachedInfo.clear();
 
-	for(GLuint i = 0; i < Group::MaxTextures; ++i) {
+	for(GLuint i = 0; i < MaterialProperties::MaxTextures; ++i) {
 		applyUniform(QString("TextureSlot") + QString::number(i), GLuint(i));
 	}
+
+	applyUniform("DiffuseTexture", GLuint(MaterialProperties::DiffuseTextureSlot));
+	applyUniform("AmbientTexture", GLuint(MaterialProperties::AmbientTextureSlot));
+	applyUniform("SpecularTexture", GLuint(MaterialProperties::SpecularTextureSlot));
+	applyUniform("EmissiveTexture", GLuint(MaterialProperties::EmissiveTextureSlot));
+	applyUniform("BumpMapTexture", GLuint(MaterialProperties::BumpMapTextureSlot));
+
+	// UBO Processing
+	/*
+	GLuint uboPhongInformations = gl->glGetUniformBlockIndex(m_program->programId(), "ShaderData");
+	if(uboPhongInformations != GL_INVALID_INDEX) {
+		m_hasPhong = true;
+		m_uboPhong.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+		std::memset(&m_phongData, 0, sizeof(m_phongData));
+		m_uboPhong.allocate(&m_phongData, sizeof(m_phongData));
+		// ... bind ...
+	}*/
 
 	markClean();
 }

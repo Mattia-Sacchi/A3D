@@ -28,7 +28,7 @@ public:
 	~MeshCacheOGL();
 
 	void update(CoreGLFunctions*);
-	void render(CoreGLFunctions*);
+	void render(CoreGLFunctions*, QMatrix4x4 const& modelMatrix, QMatrix4x4 const& viewMatrix, QMatrix4x4 const& projMatrix);
 
 private:
 	Mesh::DrawMode m_drawMode;
@@ -37,6 +37,20 @@ private:
 	QOpenGLBuffer m_ibo;
 	std::size_t m_elementCount;
 	GLenum m_iboFormat;
+
+	struct MeshUBO_Data {
+		QMatrix4x4 pMatrix;
+		QMatrix4x4 vMatrix;
+		QMatrix4x4 mMatrix;
+
+		QMatrix4x4 mvMatrix;
+		QMatrix4x4 mvpMatrix;
+
+		QMatrix4x4 mNormalMatrix;
+		QMatrix4x4 mvNormalMatrix;
+		QMatrix4x4 mvpNormalMatrix;
+	} m_meshUBO_data;
+	QOpenGLBuffer m_meshUBO;
 };
 
 }

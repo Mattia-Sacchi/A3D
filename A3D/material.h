@@ -30,6 +30,9 @@ public:
 		SampleTranslucentMaterial,
 		TexturedMaterial,
 		TexturedTranslucentMaterial,
+
+		PhongShadedMaterial,
+		PhongShadedTranslucentMaterial,
 	};
 	static Material* standardMaterial(StandardMaterial);
 

@@ -11,12 +11,6 @@ class Mesh;
 class Material;
 class Model;
 
-struct MeshLoadingResult {
-	std::map<QString, QPointer<Mesh>> meshes;
-	std::map<QString, QPointer<Material>> materials;
-	std::map<QString, QPointer<Texture>> textures;
-};
-
 class ResourceManager : public QObject {
 	Q_OBJECT
 public:
@@ -28,8 +22,8 @@ public:
 
 	Model* getLoadedModel(QString const& name) const;
 	Mesh* getLoadedMesh(QString const& name) const;
-	Material* getLoadedMaterial(QString const& name) const;
-	Texture* getLoadedTexture(QString const& name) const;
+	Material* getLoadedMaterial(QString const& name, bool withFallback = true) const;
+	Texture* getLoadedTexture(QString const& name, bool withFallback = true) const;
 
 	Model* registerModel(QString name, Model* model);
 	Mesh* registerMesh(QString name, Mesh* resource);

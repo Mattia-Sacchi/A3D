@@ -12,6 +12,10 @@ namespace A3D {
 
 class Entity : public QObject {
 	Q_OBJECT
+
+protected:
+	explicit Entity(Entity* parent);
+
 public:
 	enum RenderOption {
 		NoOptions = 0x0,
@@ -21,7 +25,6 @@ public:
 	};
 	Q_DECLARE_FLAGS(RenderOptions, RenderOption)
 
-	explicit Entity(Entity* parent);
 	~Entity();
 
 	RenderOptions renderOptions() const;
@@ -56,11 +59,6 @@ public:
 
 	QMatrix4x4 const& entityMatrix() const;
 
-	MaterialProperties& materialProperties();
-	MaterialProperties const& materialProperties() const;
-
-	void setMaterialProperties(MaterialProperties);
-
 private:
 	// Adds a child Entity
 	void addChildEntity(Entity*);
@@ -77,7 +75,6 @@ private:
 	QVector3D m_scale;
 
 	QPointer<Model> m_model;
-	MaterialProperties m_materialProperties;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Entity::RenderOptions)

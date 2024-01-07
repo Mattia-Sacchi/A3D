@@ -21,17 +21,6 @@ public:
 	};
 	Q_DECLARE_FLAGS(RenderOptions, RenderOption)
 
-	enum {
-		MaxTextures = 8,
-	};
-
-	enum StandardTextureSlots {
-		Diffuse,
-		Ambient,
-		Specular,
-		Emissive,
-	};
-
 	explicit Group(Model* model);
 	~Group();
 
@@ -54,15 +43,12 @@ public:
 	QMatrix4x4 const& groupMatrix() const;
 
 	Mesh* mesh() const;
-	Texture* texture(std::size_t slot = 0) const;
 	Material* material() const;
-	MaterialProperties& materialProperties();
-	MaterialProperties const& materialProperties() const;
+	MaterialProperties* materialProperties() const;
 
 	void setMesh(Mesh*);
-	void setTexture(Texture*, std::size_t slot = 0);
 	void setMaterial(Material*);
-	void setMaterialProperties(MaterialProperties);
+	void setMaterialProperties(MaterialProperties*);
 
 private:
 	RenderOptions m_renderOptions;
@@ -77,8 +63,7 @@ private:
 
 	QPointer<Mesh> m_mesh;
 	QPointer<Material> m_material;
-	QPointer<Texture> m_textures[MaxTextures];
-	MaterialProperties m_materialProperties;
+	QPointer<MaterialProperties> m_materialProperties;
 };
 
 }

@@ -23,21 +23,21 @@ Model* ResourceManager::getLoadedModel(QString const& name) const {
 Mesh* ResourceManager::getLoadedMesh(QString const& name) const {
 	auto it = m_meshes.find(name);
 	if(it == m_meshes.end() || !it->second)
-		return Mesh::standardMesh(Mesh::CubeIndexedMesh);
+		return nullptr;
 	return it->second;
 }
 
-Material* ResourceManager::getLoadedMaterial(QString const& name) const {
+Material* ResourceManager::getLoadedMaterial(QString const& name, bool withFallback) const {
 	auto it = m_materials.find(name);
 	if(it == m_materials.end() || !it->second)
-		return Material::standardMaterial(Material::Basic3DMaterial);
+		return withFallback ? Material::standardMaterial(Material::Basic3DMaterial) : nullptr;
 	return it->second;
 }
 
-Texture* ResourceManager::getLoadedTexture(QString const& name) const {
+Texture* ResourceManager::getLoadedTexture(QString const& name, bool withFallback) const {
 	auto it = m_textures.find(name);
 	if(it == m_textures.end() || !it->second)
-		return Texture::standardTexture(Texture::MissingTexture);
+		return withFallback ? Texture::standardTexture(Texture::MissingTexture) : nullptr;
 	return it->second;
 }
 

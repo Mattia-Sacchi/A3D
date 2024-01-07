@@ -21,10 +21,10 @@ Group* Group::clone(Model* m, bool deepClone) const {
 	newGroup->m_matrixDirty = m_matrixDirty;
 	if(!m_matrixDirty)
 		newGroup->m_matrix = m_matrix;
-	newGroup->m_position           = m_position;
-	newGroup->m_rotation           = m_rotation;
-	newGroup->m_scale              = m_scale;
-	newGroup->m_materialProperties = m_materialProperties;
+
+	newGroup->m_position = m_position;
+	newGroup->m_rotation = m_rotation;
+	newGroup->m_scale    = m_scale;
 
 	if(deepClone) {
 		// ...
@@ -32,17 +32,13 @@ Group* Group::clone(Model* m, bool deepClone) const {
 			newGroup->m_mesh = m_mesh->clone();
 		if(m_material)
 			newGroup->m_material = m_material->clone();
-		for(std::size_t i = 0; i < MaxTextures; ++i) {
-			if(m_textures[i])
-				newGroup->m_textures[i] = m_textures[i]->clone();
-		}
+		if(m_materialProperties)
+			newGroup->m_materialProperties = m_materialProperties->clone();
 	}
 	else {
-		newGroup->m_mesh     = m_mesh;
-		newGroup->m_material = m_material;
-		for(std::size_t i = 0; i < MaxTextures; ++i) {
-			newGroup->m_textures[i] = m_textures[i];
-		}
+		newGroup->m_mesh               = m_mesh;
+		newGroup->m_material           = m_material;
+		newGroup->m_materialProperties = m_materialProperties;
 	}
 
 	return newGroup;
@@ -103,18 +99,10 @@ QMatrix4x4 const& Group::groupMatrix() const {
 Mesh* Group::mesh() const {
 	return m_mesh;
 }
-Texture* Group::texture(std::size_t slot) const {
-	if(slot >= MaxTextures)
-		return nullptr;
-	return m_textures[slot];
-}
 Material* Group::material() const {
 	return m_material;
 }
-MaterialProperties& Group::materialProperties() {
-	return m_materialProperties;
-}
-MaterialProperties const& Group::materialProperties() const {
+MaterialProperties* Group::materialProperties() const {
 	return m_materialProperties;
 }
 
@@ -126,16 +114,6 @@ void Group::setMesh(Mesh* mesh) {
 	m_mesh = mesh;
 }
 
-void Group::setTexture(Texture* texture, std::size_t slot) {
-	if(slot >= MaxTextures)
-		return;
-	if(texture == m_textures[slot])
-		return;
-	if(m_textures[slot] && m_textures[slot]->parent() == this)
-		delete m_textures[slot];
-	m_textures[slot] = texture;
-}
-
 void Group::setMaterial(Material* material) {
 	if(material == m_material)
 		return;
@@ -144,8 +122,12 @@ void Group::setMaterial(Material* material) {
 	m_material = material;
 }
 
-void Group::setMaterialProperties(MaterialProperties properties) {
-	m_materialProperties = std::move(properties);
+void Group::setMaterialProperties(MaterialProperties* materialProperties) {
+	if(materialProperties == m_materialProperties)
+		return;
+	if(m_materialProperties && m_materialProperties->parent() == this)
+		delete m_materialProperties;
+	m_materialProperties = materialProperties;
 }
 
 }

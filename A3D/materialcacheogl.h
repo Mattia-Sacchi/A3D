@@ -4,11 +4,12 @@
 #include "A3D/common.h"
 #include "A3D/materialcache.h"
 #include "A3D/materialproperties.h"
-#include "A3D/texturecacheogl.h"
 #include <QOpenGLShaderProgram>
+#include <QOpenGLBuffer>
 
 namespace A3D {
 
+class MaterialPropertiesCacheOGL;
 class MaterialCacheOGL : public MaterialCache {
 	Q_OBJECT
 public:
@@ -16,7 +17,7 @@ public:
 	~MaterialCacheOGL();
 
 	void update(CoreGLFunctions*);
-	void install(CoreGLFunctions*, MaterialProperties const&, QMatrix4x4 const& model, QMatrix4x4 const& view, QMatrix4x4 const& proj);
+	void install(CoreGLFunctions*, MaterialPropertiesCacheOGL*, QMatrix4x4 const& model, QMatrix4x4 const& view, QMatrix4x4 const& proj);
 
 private:
 	int searchUniform(QString const& name);
@@ -33,6 +34,21 @@ private:
 	};
 
 	std::map<QString, UniformCachedInfo> m_uniformCachedInfo;
+
+	struct UBOShaderData {
+		QVector4D diffuse;
+		QVector4D ambient;
+		QVector4D specular;
+		QVector4D emissive;
+		float opacity;
+		float specularExponent;
+		float paddingA;
+		float paddingB;
+	};
+
+	MaterialProperties::HighLevelProperties m_lastUboReferenceData;
+	QOpenGLBuffer m_uboBuffer;
+	UBOShaderData m_uboData;
 };
 
 }

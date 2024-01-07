@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	A3D::View* v = new A3D::View;
-	v->camera().setPosition(QVector3D(0.f, 4.f, 10.f));
+	v->camera().setPosition(QVector3D(0.f, 8.f, 12.f));
 	v->setScene(s);
 	v->setRenderTimerEnabled(true);
 

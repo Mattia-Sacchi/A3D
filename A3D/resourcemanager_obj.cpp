@@ -80,7 +80,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 				QString currentGroupName;
 				lineStream.skipWhiteSpace();
 				lineStream.readLineInto(&currentGroupName);
-				auto iter    = groups.insert_or_assign(currentGroupName, GroupInfo{ 0, Mesh::Position3D | Mesh::TextureCoord2D | Mesh::Normal3D });
+				auto iter    = groups.insert_or_assign(currentGroupName, GroupInfo{ 0, Mesh::Position3D | Mesh::TextureCoord2D | Mesh::Normal3D | Mesh::SmoothingGroup });
 				currentGroup = iter.first;
 				continue;
 			}
@@ -230,6 +230,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 		QString ambientMap;
 		QString specularMap;
 		QString emissiveMap;
+		QString bumpMap;
 	};
 
 	std::map<QString, MaterialInformations> materials;
@@ -328,7 +329,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 		else
 			realIndex -= 1;
 
-		if(realIndex < 0 || realIndex >= in.size())
+		if(realIndex < 0 || realIndex >= static_cast<std::int32_t>(in.size()))
 			return QVector3D();
 		return in[realIndex];
 	};
@@ -337,7 +338,10 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 		std::int32_t realIndex = ix;
 		if(realIndex < 0)
 			realIndex = static_cast<std::int32_t>(in.size()) - realIndex;
-		if(realIndex < 0 || realIndex >= in.size())
+		else
+			realIndex -= 1;
+
+		if(realIndex < 0 || realIndex >= static_cast<std::int32_t>(in.size()))
 			return QVector2D();
 		return in[realIndex];
 	};
@@ -349,21 +353,24 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 		newGroup->setProperty("obj_Material", gi.material);
 		newGroup->setMaterial(Material::standardMaterial(Material::Basic3DMaterial));
 
+		MaterialProperties* matProp                      = new MaterialProperties(this);
+		MaterialProperties::HighLevelProperties& hlProps = matProp->highLevelProperties();
+		newGroup->setMaterialProperties(matProp);
+
 		auto foundMaterial = materials.find(gi.material);
 		if(foundMaterial != materials.end()) {
-			newGroup->setMaterial(Material::standardMaterial(Material::PBRMaterial));
 
 			MaterialInformations const& mat = foundMaterial->second;
-			MaterialProperties& properties  = newGroup->materialProperties();
-			properties.setValue("Opacity", mat.opacity);
-			properties.setValue("SpecularExponent", mat.specularExponent);
-			properties.setValue("SpecularColor", mat.specular);
-			properties.setValue("EmissiveColor", mat.emissive);
-			properties.setValue("AmbientColor", mat.ambient);
-			properties.setValue("DiffuseColor", mat.diffuse);
+
+			hlProps.diffuseColor     = QVector4D(mat.diffuse, 1.f);
+			hlProps.ambientColor     = QVector4D(mat.ambient, 1.f);
+			hlProps.emissiveColor    = QVector4D(mat.emissive, 1.f);
+			hlProps.specularColor    = QVector4D(mat.specular, 1.f);
+			hlProps.opacity          = mat.opacity;
+			hlProps.specularExponent = mat.specularExponent;
 
 			if(!mat.diffuseMap.isEmpty()) {
-				Texture* t = getLoadedTexture(mat.diffuseMap);
+				Texture* t = getLoadedTexture(mat.diffuseMap, false);
 				if(!t) {
 					QImage i(mat.diffuseMap);
 					if(!i.isNull())
@@ -371,11 +378,11 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 				}
 
 				if(t)
-					newGroup->setTexture(t, Group::Diffuse);
+					matProp->setTexture(t, MaterialProperties::DiffuseTextureSlot);
 			}
 
 			if(!mat.ambientMap.isEmpty()) {
-				Texture* t = getLoadedTexture(mat.ambientMap);
+				Texture* t = getLoadedTexture(mat.ambientMap, false);
 				if(!t) {
 					QImage i(mat.ambientMap);
 					if(!i.isNull())
@@ -383,11 +390,11 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 				}
 
 				if(t)
-					newGroup->setTexture(t, Group::Ambient);
+					matProp->setTexture(t, MaterialProperties::AmbientTextureSlot);
 			}
 
 			if(!mat.specularMap.isEmpty()) {
-				Texture* t = getLoadedTexture(mat.specularMap);
+				Texture* t = getLoadedTexture(mat.specularMap, false);
 				if(!t) {
 					QImage i(mat.specularMap);
 					if(!i.isNull())
@@ -395,11 +402,11 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 				}
 
 				if(t)
-					newGroup->setTexture(t, Group::Specular);
+					matProp->setTexture(t, MaterialProperties::SpecularTextureSlot);
 			}
 
 			if(!mat.emissiveMap.isEmpty()) {
-				Texture* t = getLoadedTexture(mat.emissiveMap);
+				Texture* t = getLoadedTexture(mat.emissiveMap, false);
 				if(!t) {
 					QImage i(mat.emissiveMap);
 					if(!i.isNull())
@@ -407,9 +414,10 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 				}
 
 				if(t)
-					newGroup->setTexture(t, Group::Emissive);
+					matProp->setTexture(t, MaterialProperties::EmissiveTextureSlot);
 			}
-			// newGroup->setTexture();
+
+			newGroup->setMaterial(Material::standardMaterial(Material::PhongShadedMaterial));
 		}
 
 		Mesh* mesh = new Mesh(this);
@@ -437,6 +445,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 					vertex.Normal3D = getVertex3D(vn, face.indices_vn[vertexIndex]);
 				if(gi.contents & Mesh::TextureCoord2D)
 					vertex.TextureCoord2D = getVertex2D(vt, face.indices_vt[vertexIndex]);
+				vertex.SmoothingGroup = face.smoothingGroup;
 			}
 		}
 

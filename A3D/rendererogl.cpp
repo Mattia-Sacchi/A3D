@@ -19,38 +19,26 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 	if(!g || g->renderOptions() & Group::Hidden)
 		return;
 
-	Mesh* mesh    = g->mesh();
-	Material* mat = g->material();
-	if(!mesh || !mat)
+	Mesh* mesh                  = g->mesh();
+	Material* mat               = g->material();
+	MaterialProperties* matProp = g->materialProperties();
+	if(!mesh || !mat || !matProp)
 		return;
 
-	MeshCacheOGL* meshCache    = buildMeshCache(mesh);
-	MaterialCacheOGL* matCache = buildMaterialCache(mat);
-
-	TextureCacheOGL* texCache[Group::MaxTextures];
-	for(std::size_t i = 0; i < Group::MaxTextures; ++i) {
-		Texture* tex = g->texture(i);
-		texCache[i]  = tex ? buildTextureCache(tex) : nullptr;
-
-		if(!texCache[i])
-			texCache[i] = buildTextureCache(Texture::standardTexture(Texture::MissingTexture));
-	}
+	MeshCacheOGL* meshCache                  = buildMeshCache(mesh);
+	MaterialCacheOGL* matCache               = buildMaterialCache(mat);
+	MaterialPropertiesCacheOGL* matPropCache = buildMaterialPropertiesCache(matProp);
 
 	Mesh::RenderOptions meshRenderOptions    = mesh->renderOptions();
 	Material::RenderOptions matRenderOptions = mat->renderOptions();
 
-	if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent)
+	if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent || matProp->isTranslucent())
 		m_gl->glDisable(GL_CULL_FACE);
 
-	for(GLuint i = 0; i < Group::MaxTextures; ++i) {
-		if(!texCache[i])
-			continue;
-		texCache[i]->applyToSlot(m_gl, i);
-	}
-	matCache->install(m_gl, drawInfo.m_calculatedMaterialProperties, drawInfo.m_calculatedMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
-	meshCache->render(m_gl);
+	matCache->install(m_gl, matPropCache);
+	meshCache->render(m_gl, drawInfo.m_calculatedMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
 
-	if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent)
+	if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent || matProp->isTranslucent())
 		m_gl->glEnable(GL_CULL_FACE);
 }
 
@@ -116,6 +104,18 @@ void RendererOGL::Delete(MaterialCache* matCache) {
 	delete matCache;
 }
 
+void RendererOGL::Delete(MaterialPropertiesCache* matPropCache) {
+	if(m_context.isNull()) {
+		log(LC_Debug, "Couldn't delete MaterialPropertiesCache: OpenGL context is unavailable. A memory leak might have happened.");
+		return;
+	}
+
+	ContextSwitcher switcher(m_context);
+	Q_UNUSED(switcher);
+
+	delete matPropCache;
+}
+
 void RendererOGL::Delete(TextureCache* texCache) {
 	if(m_context.isNull()) {
 		log(LC_Debug, "Couldn't delete TextureCache: OpenGL context is unavailable. A memory leak might have happened.");
@@ -154,8 +154,9 @@ void RendererOGL::PreLoadEntity(Entity* e) {
 		if(!g)
 			continue;
 
-		Mesh* mesh    = g->mesh();
-		Material* mat = g->material();
+		Mesh* mesh                  = g->mesh();
+		Material* mat               = g->material();
+		MaterialProperties* matProp = g->materialProperties();
 
 		if(mesh)
 			buildMeshCache(mesh);
@@ -163,10 +164,8 @@ void RendererOGL::PreLoadEntity(Entity* e) {
 		if(mat)
 			buildMaterialCache(mat);
 
-		for(std::size_t i = 0; i < Group::MaxTextures; ++i) {
-			if(Texture* tex = g->texture(i))
-				buildTextureCache(tex);
-		}
+		if(matProp)
+			buildMaterialPropertiesCache(matProp);
 	}
 }
 
@@ -190,6 +189,17 @@ MaterialCacheOGL* RendererOGL::buildMaterialCache(Material* material) {
 
 	if(mc.second)
 		addToMaterialCaches(mc.first);
+
+	return mc.first;
+}
+MaterialPropertiesCacheOGL* RendererOGL::buildMaterialPropertiesCache(MaterialProperties* materialProperties) {
+	std::pair<MaterialPropertiesCacheOGL*, bool> mc = materialProperties->getOrEmplaceMaterialPropertiesCache<MaterialPropertiesCacheOGL>(rendererID());
+
+	if(mc.first->isDirty())
+		mc.first->update(m_gl);
+
+	if(mc.second)
+		addToMaterialPropertiesCaches(mc.first);
 
 	return mc.first;
 }

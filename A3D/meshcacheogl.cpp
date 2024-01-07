@@ -16,11 +16,26 @@ MeshCacheOGL::~MeshCacheOGL() {
 	log(LC_Debug, "Destructor: MeshCacheOGL");
 }
 
-void MeshCacheOGL::render(CoreGLFunctions* gl) {
+void MeshCacheOGL::render(CoreGLFunctions* gl, QMatrix4x4 const& modelMatrix, QMatrix4x4 const& viewMatrix, QMatrix4x4 const& projMatrix) {
 	if(!m_elementCount)
 		return;
 
 	m_vao.bind();
+
+	if(modelMatrix != m_meshUBO_data.mMatrix || viewMatrix != m_meshUBO_data.vMatrix || projMatrix != m_meshUBO_data.pMatrix) {
+		m_meshUBO_data.mMatrix         = modelMatrix;
+		m_meshUBO_data.vMatrix         = viewMatrix;
+		m_meshUBO_data.pMatrix         = projMatrix;
+		m_meshUBO_data.mvMatrix        = (viewMatrix * modelMatrix);
+		m_meshUBO_data.mvpMatrix       = (projMatrix * viewMatrix * modelMatrix);
+		m_meshUBO_data.mNormalMatrix   = modelMatrix.inverted().transposed();
+		m_meshUBO_data.mvNormalMatrix  = (viewMatrix * modelMatrix).inverted().transposed();
+		m_meshUBO_data.mvpNormalMatrix = (projMatrix * viewMatrix * modelMatrix).inverted().transposed();
+
+		m_meshUBO.write(0, &m_meshUBO_data, sizeof(m_meshUBO_data));
+	}
+
+	m_meshUBO.bind();
 
 	switch(m_drawMode) {
 	case Mesh::Triangles:

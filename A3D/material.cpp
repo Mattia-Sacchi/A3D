@@ -1,6 +1,5 @@
 #include "A3D/material.h"
 #include "A3D/renderer.h"
-#include <QDebug>
 #include <QFile>
 #include <utility>
 
@@ -36,6 +35,10 @@ Material* Material::standardMaterial(StandardMaterial stdMat) {
 	case TexturedMaterial:
 		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/TexturedMaterial.vert");
 		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/TexturedMaterial.frag");
+		break;
+	case PhongShadedMaterial:
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/PhongShadedMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/PhongShadedMaterial.frag");
 		break;
 	}
 	newMat.invalidateCache();
