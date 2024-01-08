@@ -27,17 +27,17 @@ Mesh* ResourceManager::getLoadedMesh(QString const& name) const {
 	return it->second;
 }
 
-Material* ResourceManager::getLoadedMaterial(QString const& name, bool withFallback) const {
+Material* ResourceManager::getLoadedMaterial(QString const& name) const {
 	auto it = m_materials.find(name);
 	if(it == m_materials.end() || !it->second)
-		return withFallback ? Material::standardMaterial(Material::Basic3DMaterial) : nullptr;
+		return nullptr;
 	return it->second;
 }
 
-Texture* ResourceManager::getLoadedTexture(QString const& name, bool withFallback) const {
+Texture* ResourceManager::getLoadedTexture(QString const& name) const {
 	auto it = m_textures.find(name);
 	if(it == m_textures.end() || !it->second)
-		return withFallback ? Texture::standardTexture(Texture::MissingTexture) : nullptr;
+		return nullptr;
 	return it->second;
 }
 

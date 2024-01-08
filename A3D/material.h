@@ -25,14 +25,8 @@ public:
 	Q_DECLARE_FLAGS(RenderOptions, RenderOption)
 
 	enum StandardMaterial {
-		Basic2DMaterial,
-		Basic3DMaterial,
-		SampleTranslucentMaterial,
-		TexturedMaterial,
-		TexturedTranslucentMaterial,
-
-		PhongShadedMaterial,
-		PhongShadedTranslucentMaterial,
+		SampleMaterial,
+		PhongShadedMaterial
 	};
 	static Material* standardMaterial(StandardMaterial);
 
