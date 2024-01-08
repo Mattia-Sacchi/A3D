@@ -351,7 +351,6 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 		GroupInfo const& gi = it->second;
 
 		newGroup->setProperty("obj_Material", gi.material);
-		newGroup->setMaterial(Material::standardMaterial(Material::Basic3DMaterial));
 
 		MaterialProperties* matProp                      = new MaterialProperties(this);
 		MaterialProperties::HighLevelProperties& hlProps = matProp->highLevelProperties();
@@ -371,7 +370,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 			hlProps.specularExponent = mat.specularExponent;
 
 			if(!mat.diffuseMap.isEmpty()) {
-				Texture* t = getLoadedTexture(mat.diffuseMap, false);
+				Texture* t = getLoadedTexture(mat.diffuseMap);
 				if(!t) {
 					QImage i(mat.diffuseMap);
 					if(!i.isNull())
@@ -383,7 +382,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 			}
 
 			if(!mat.ambientMap.isEmpty()) {
-				Texture* t = getLoadedTexture(mat.ambientMap, false);
+				Texture* t = getLoadedTexture(mat.ambientMap);
 				if(!t) {
 					QImage i(mat.ambientMap);
 					if(!i.isNull())
@@ -395,7 +394,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 			}
 
 			if(!mat.specularMap.isEmpty()) {
-				Texture* t = getLoadedTexture(mat.specularMap, false);
+				Texture* t = getLoadedTexture(mat.specularMap);
 				if(!t) {
 					QImage i(mat.specularMap);
 					if(!i.isNull())
@@ -407,7 +406,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 			}
 
 			if(!mat.emissiveMap.isEmpty()) {
-				Texture* t = getLoadedTexture(mat.emissiveMap, false);
+				Texture* t = getLoadedTexture(mat.emissiveMap);
 				if(!t) {
 					QImage i(mat.emissiveMap);
 					if(!i.isNull())
