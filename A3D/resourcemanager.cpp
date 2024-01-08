@@ -156,8 +156,17 @@ Model* ResourceManager::loadModel(QString name, QString const& path, InputFormat
 	if(!ofr.stream)
 		return nullptr;
 
+	if(fmt == IF_AutoDetect) {
+		int lastDot = path.lastIndexOf('.');
+		if(lastDot < 0)
+			return nullptr;
+		QString extension = path.mid(lastDot+1).toLower();
+
+		if(extension == "obj")
+			fmt = IF_OBJ;
+	}
+
 	switch(fmt) {
-	default:
 	case IF_OBJ:
 		return loadModel_OBJ(std::move(ofr));
 	}

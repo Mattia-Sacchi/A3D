@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
 	A3D::Model* sampleModel = nullptr;
 	{
 		s->resourceManager().registerTexture("Qt-Logo", new A3D::Texture(QImage(":/A3D/Qt-Logo.webp"), &s->resourceManager()));
-		sampleModel = s->resourceManager().loadModel("Sample_OBJ", ":/A3D/teapot.obj", A3D::ResourceManager::IF_OBJ);
+		sampleModel = s->resourceManager().loadModel("Sample_OBJ", ":/A3D/teapot.obj");
 	}
 
 	A3D::Entity* e = s;
