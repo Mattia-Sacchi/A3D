@@ -34,12 +34,7 @@ void MaterialPropertiesCacheOGL::update(CoreGLFunctions* gl) {
 		return;
 
 	MaterialProperties::HighLevelProperties& hlProps = p->highLevelProperties();
-	m_materialUBO_data.diffuse                       = hlProps.diffuseColor;
-	m_materialUBO_data.ambient                       = hlProps.ambientColor;
-	m_materialUBO_data.specular                      = hlProps.specularColor;
-	m_materialUBO_data.emissive                      = hlProps.emissiveColor;
 	m_materialUBO_data.opacity                       = hlProps.opacity;
-	m_materialUBO_data.specularExponent              = hlProps.specularExponent;
 
 	if(!m_materialUBO) {
 		gl->glGenBuffers(1, &m_materialUBO);

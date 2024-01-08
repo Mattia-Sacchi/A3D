@@ -67,7 +67,7 @@ void Renderer::PreLoadEntityTree(Entity* root) {
 	}
 }
 
-void Renderer::DrawAll(Entity* root, Camera const& camera) {
+void Renderer::DrawAll(Scene* root, Camera const& camera) {
 	m_opaqueGroupBuffer.clear();
 	m_translucentGroupBuffer.clear();
 
@@ -77,19 +77,20 @@ void Renderer::DrawAll(Entity* root, Camera const& camera) {
 	std::stable_sort(m_translucentGroupBuffer.begin(), m_translucentGroupBuffer.end(), Renderer::TranslucentSorter);
 
 	DrawInfo drawInfo;
+	drawInfo.m_scene      = root;
 	drawInfo.m_projMatrix = camera.getProjection();
 	drawInfo.m_viewMatrix = camera.getView();
 
 	this->BeginOpaque();
 	for(auto it = m_opaqueGroupBuffer.begin(); it != m_opaqueGroupBuffer.end(); ++it) {
-		drawInfo.m_calculatedMatrix = it->m_transform;
+		drawInfo.m_modelMatrix = it->m_transform;
 		this->Draw(it->m_group, drawInfo);
 	}
 	this->EndOpaque();
 
 	this->BeginTranslucent();
 	for(auto it = m_translucentGroupBuffer.begin(); it != m_translucentGroupBuffer.end(); ++it) {
-		drawInfo.m_calculatedMatrix = it->m_transform;
+		drawInfo.m_modelMatrix = it->m_transform;
 		this->Draw(it->m_group, drawInfo);
 	}
 	this->EndTranslucent();

@@ -2,9 +2,9 @@
     <qresource prefix="/">
         <file>A3D/SampleMaterial.frag</file>
         <file>A3D/SampleMaterial.vert</file>
-        <file>A3D/Qt-Logo.webp</file>
         <file>A3D/PhongShadedMaterial.frag</file>
         <file>A3D/PhongShadedMaterial.vert</file>
-        <file>A3D/teapot.obj</file>
+        <file>A3D/PBRMaterial.vert</file>
+        <file>A3D/PBRMaterial.frag</file>
     </qresource>
 </RCC>

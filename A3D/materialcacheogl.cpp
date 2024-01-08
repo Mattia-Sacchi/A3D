@@ -133,19 +133,29 @@ void MaterialCacheOGL::update(CoreGLFunctions* gl) {
 	}
 
 	m_uniformCachedInfo.clear();
+	m_program->bind();
 
 	for(GLuint i = 0; i < MaterialProperties::MaxTextures; ++i) {
 		applyUniform(QString("TextureSlot") + QString::number(i), GLuint(i));
 	}
 
-	applyUniform("DiffuseTexture", GLuint(MaterialProperties::DiffuseTextureSlot));
+	// PBR mode
+	applyUniform("AlbedoTexture", GLuint(MaterialProperties::AlbedoTextureSlot));
+	applyUniform("NormalTexture", GLuint(MaterialProperties::NormalTextureSlot));
+	applyUniform("MetallicTexture", GLuint(MaterialProperties::MetallicTextureSlot));
+	applyUniform("RoughnessTexture", GLuint(MaterialProperties::RoughnessTextureSlot));
+	applyUniform("AOTexture", GLuint(MaterialProperties::AOTextureSlot));
+
+	// Phong mode
+	applyUniform("DiffuseTexture", GLuint(MaterialProperties::AlbedoTextureSlot));
 	applyUniform("AmbientTexture", GLuint(MaterialProperties::AmbientTextureSlot));
 	applyUniform("SpecularTexture", GLuint(MaterialProperties::SpecularTextureSlot));
-	applyUniform("EmissiveTexture", GLuint(MaterialProperties::EmissiveTextureSlot));
-	applyUniform("BumpMapTexture", GLuint(MaterialProperties::BumpMapTextureSlot));
+	applyUniform("EmissiveTexture", GLuint(MaterialProperties::MetallicTextureSlot));
+	applyUniform("BumpMapTexture", GLuint(MaterialProperties::NormalTextureSlot));
 
 	m_meshUBO_index    = gl->glGetUniformBlockIndex(m_program->programId(), "MeshUBO_Data");
 	m_matpropUBO_index = gl->glGetUniformBlockIndex(m_program->programId(), "MaterialUBO_Data");
+	m_program->release();
 
 	markClean();
 }

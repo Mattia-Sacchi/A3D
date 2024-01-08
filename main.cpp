@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
 
 		if(sampleModel) {
 			e->setModel(sampleModel);
+			// g->materialProperties()->setTexture(s->resourceManager().getLoadedTexture("Qt-Logo"), A3D::MaterialProperties::AmbientTextureSlot);
 			//e->setPosition(QVector3D(0.f, 1.1f, 0.f));
 			//e->setScale(QVector3D(0.5f, 0.5f, 0.5f));
 			//e->setRotation(QQuaternion::fromAxisAndAngle(0.f, 1.f, 0.f, 15.f));
@@ -33,8 +34,10 @@ int main(int argc, char* argv[]) {
 			A3D::Group* g = m->getOrAddGroup("Default");
 
 			g->setMesh(A3D::Mesh::standardMesh(A3D::Mesh::CubeIndexedMesh));
-			g->setMaterial(A3D::Material::standardMaterial(A3D::Material::SampleMaterial));
+			// g->setMaterial(A3D::Material::standardMaterial(A3D::Material::SampleMaterial));
+			g->setMaterial(A3D::Material::standardMaterial(A3D::Material::PhongShadedMaterial));
 			g->setMaterialProperties(new A3D::MaterialProperties(&s->resourceManager()));
+			g->materialProperties()->setTexture(s->resourceManager().getLoadedTexture("Qt-Logo"), A3D::MaterialProperties::AmbientTextureSlot);
 
 			m->setPosition(QVector3D(0.f, 1.1f * i, 0.f));
 			m->setScale(QVector3D(0.5f * i, 0.5f * i, 0.5f * i));
