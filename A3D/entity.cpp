@@ -83,14 +83,4 @@ QMatrix4x4 const& Entity::entityMatrix() const {
 	return m_matrix;
 }
 
-MaterialProperties& Entity::materialProperties() {
-	return m_materialProperties;
-}
-MaterialProperties const& Entity::materialProperties() const {
-	return m_materialProperties;
-}
-void Entity::setMaterialProperties(MaterialProperties properties) {
-	m_materialProperties = std::move(properties);
-}
-
 }

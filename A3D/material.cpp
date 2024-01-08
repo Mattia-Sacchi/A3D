@@ -1,6 +1,5 @@
 #include "A3D/material.h"
 #include "A3D/renderer.h"
-#include <QDebug>
 #include <QFile>
 #include <utility>
 
@@ -15,27 +14,13 @@ Material* Material::standardMaterial(StandardMaterial stdMat) {
 
 	Material& newMat = standardMaterials[stdMat];
 	switch(stdMat) {
-	case Basic2DMaterial:
-		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/Basic2DMaterial.vert");
-		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/Basic2DMaterial.frag");
+	case SampleMaterial:
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/SampleMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/SampleMaterial.frag");
 		break;
-	case Basic3DMaterial:
-		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/Basic3DMaterial.vert");
-		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/Basic3DMaterial.frag");
-		break;
-	case SampleTranslucentMaterial:
-		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/SampleTranslucentMaterial.vert");
-		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/SampleTranslucentMaterial.frag");
-		newMat.setRenderOptions(newMat.renderOptions() | Translucent);
-		break;
-	case TexturedTranslucentMaterial:
-		newMat.setRenderOptions(Translucent);
-		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/TexturedMaterial.vert");
-		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/TexturedMaterial.frag");
-		break;
-	case TexturedMaterial:
-		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/TexturedMaterial.vert");
-		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/TexturedMaterial.frag");
+	case PhongShadedMaterial:
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/PhongShadedMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/PhongShadedMaterial.frag");
 		break;
 	}
 	newMat.invalidateCache();

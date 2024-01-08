@@ -26,7 +26,11 @@ void log(LogChannel channel, QStringView text) {
 		qCritical().noquote() << timestamp() << "[C] " << text;
 		break;
 	case LC_Fatal:
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+		qCritical().noquote() << timestamp() << "[C] " << text;
+#else
 		qFatal().noquote() << timestamp() << "[F] " << text;
+#endif
 		break;
 	}
 }

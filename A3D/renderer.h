@@ -14,7 +14,6 @@ protected:
 
 public:
 	struct DrawInfo {
-		MaterialProperties m_calculatedMaterialProperties;
 		QMatrix4x4 m_calculatedMatrix;
 		QMatrix4x4 m_projMatrix;
 		QMatrix4x4 m_viewMatrix;
@@ -24,12 +23,13 @@ public:
 
 	std::uintptr_t rendererID() const;
 
-	virtual void Draw(Group*, DrawInfo const&) = 0;
-	virtual void PreLoadEntity(Entity*)        = 0;
-	virtual void Delete(MeshCache*)            = 0;
-	virtual void Delete(MaterialCache*)        = 0;
-	virtual void Delete(TextureCache*)         = 0;
-	virtual void DeleteAllResources()          = 0;
+	virtual void Draw(Group*, DrawInfo const&)    = 0;
+	virtual void PreLoadEntity(Entity*)           = 0;
+	virtual void Delete(MeshCache*)               = 0;
+	virtual void Delete(MaterialCache*)           = 0;
+	virtual void Delete(MaterialPropertiesCache*) = 0;
+	virtual void Delete(TextureCache*)            = 0;
+	virtual void DeleteAllResources()             = 0;
 
 	void PreLoadEntityTree(Entity*);
 	void CleanupRenderCache();
@@ -43,6 +43,7 @@ protected:
 
 	void addToMeshCaches(QPointer<MeshCache>);
 	void addToMaterialCaches(QPointer<MaterialCache>);
+	void addToMaterialPropertiesCaches(QPointer<MaterialPropertiesCache>);
 	void addToTextureCaches(QPointer<TextureCache>);
 	void runDeleteOnAllResources();
 	void invalidateCache();
@@ -53,7 +54,6 @@ private:
 	struct GroupBufferData {
 		Group* m_group;
 		QMatrix4x4 m_transform;
-		MaterialProperties m_materialProperties;
 		float m_distanceFromCamera;
 	};
 
@@ -63,6 +63,7 @@ private:
 	std::uintptr_t m_rendererID;
 	std::vector<QPointer<MeshCache>> m_meshCaches;
 	std::vector<QPointer<MaterialCache>> m_materialCaches;
+	std::vector<QPointer<MaterialPropertiesCache>> m_materialPropertiesCaches;
 	std::vector<QPointer<TextureCache>> m_textureCaches;
 
 	std::vector<GroupBufferData> m_opaqueGroupBuffer;

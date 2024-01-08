@@ -18,6 +18,8 @@ SOURCES += \
     A3D/materialcache.cpp \
     A3D/materialcacheogl.cpp \
     A3D/materialproperties.cpp \
+    A3D/materialpropertiescache.cpp \
+    A3D/materialpropertiescacheogl.cpp \
     A3D/mesh.cpp \
     A3D/meshcache.cpp \
     A3D/meshcacheogl.cpp \
@@ -44,6 +46,8 @@ HEADERS += \
 	A3D/materialcache.h \
 	A3D/materialcacheogl.h \
 	A3D/materialproperties.h \
+	A3D/materialpropertiescache.h \
+	A3D/materialpropertiescacheogl.h \
 	A3D/mesh.h \
 	A3D/meshcache.h \
 	A3D/meshcacheogl.h \

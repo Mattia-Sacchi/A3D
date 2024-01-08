@@ -1,13 +1,16 @@
 #include "A3D/materialcacheogl.h"
+#include "A3D/materialpropertiescacheogl.h"
 #include "A3D/material.h"
-#include "A3D/group.h"
+#include "A3D/rendererogl.h"
 #include <QColor>
 #include <QTransform>
 
 namespace A3D {
 
 MaterialCacheOGL::MaterialCacheOGL(Material* parent)
-	: MaterialCache{ parent } {
+	: MaterialCache{ parent },
+	  m_meshUBO_index(GL_INVALID_INDEX),
+	  m_matpropUBO_index(GL_INVALID_INDEX) {
 	log(LC_Debug, "Constructor: MaterialCacheOGL");
 }
 
@@ -83,7 +86,7 @@ void MaterialCacheOGL::applyUniforms(std::map<QString, QVariant> const& uniforms
 	}
 }
 
-void MaterialCacheOGL::install(CoreGLFunctions*, MaterialProperties const& materialProperties, QMatrix4x4 const& model, QMatrix4x4 const& view, QMatrix4x4 const& proj) {
+void MaterialCacheOGL::install(CoreGLFunctions* gl) {
 	if(!m_program)
 		return;
 
@@ -93,16 +96,14 @@ void MaterialCacheOGL::install(CoreGLFunctions*, MaterialProperties const& mater
 
 	m_program->bind();
 
-	applyUniforms(materialProperties.values());
-	applyUniforms(materialProperties.modeSpecificValues(Material::GLSL));
+	if(m_meshUBO_index != GL_INVALID_INDEX)
+		gl->glUniformBlockBinding(m_program->programId(), m_meshUBO_index, RendererOGL::UBO_MeshBinding);
 
-	applyUniform("mvpMatrix", (proj * view * model));
-	applyUniform("mMatrix", model);
-	applyUniform("vMatrix", view);
-	applyUniform("pMatrix", proj);
+	if(m_matpropUBO_index != GL_INVALID_INDEX)
+		gl->glUniformBlockBinding(m_program->programId(), m_matpropUBO_index, RendererOGL::UBO_MaterialPropertiesBinding);
 }
 
-void MaterialCacheOGL::update(CoreGLFunctions*) {
+void MaterialCacheOGL::update(CoreGLFunctions* gl) {
 	Material* m = material();
 	if(!m) {
 		m_program.reset();
@@ -125,13 +126,26 @@ void MaterialCacheOGL::update(CoreGLFunctions*) {
 		m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vxShader);
 	if(!fxShader.isEmpty())
 		m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fxShader);
-	m_program->link();
+	if(!m_program->link()) {
+		log(LC_Warning, "Couldn't link QOpenGLShader: " + m_program->log());
+		m_program.reset();
+		return;
+	}
 
 	m_uniformCachedInfo.clear();
 
-	for(GLuint i = 0; i < Group::MaxTextures; ++i) {
+	for(GLuint i = 0; i < MaterialProperties::MaxTextures; ++i) {
 		applyUniform(QString("TextureSlot") + QString::number(i), GLuint(i));
 	}
+
+	applyUniform("DiffuseTexture", GLuint(MaterialProperties::DiffuseTextureSlot));
+	applyUniform("AmbientTexture", GLuint(MaterialProperties::AmbientTextureSlot));
+	applyUniform("SpecularTexture", GLuint(MaterialProperties::SpecularTextureSlot));
+	applyUniform("EmissiveTexture", GLuint(MaterialProperties::EmissiveTextureSlot));
+	applyUniform("BumpMapTexture", GLuint(MaterialProperties::BumpMapTextureSlot));
+
+	m_meshUBO_index    = gl->glGetUniformBlockIndex(m_program->programId(), "MeshUBO_Data");
+	m_matpropUBO_index = gl->glGetUniformBlockIndex(m_program->programId(), "MaterialUBO_Data");
 
 	markClean();
 }

@@ -10,7 +10,6 @@
 #include <QtMath>
 #include <QString>
 #include <QStringView>
-#include <QLatin1StringView>
 #include <QVariant>
 #include <QObject>
 

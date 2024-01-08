@@ -6,6 +6,7 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QDir>
 
 namespace A3D {
 
@@ -22,21 +23,21 @@ Model* ResourceManager::getLoadedModel(QString const& name) const {
 Mesh* ResourceManager::getLoadedMesh(QString const& name) const {
 	auto it = m_meshes.find(name);
 	if(it == m_meshes.end() || !it->second)
-		return Mesh::standardMesh(Mesh::CubeIndexedMesh);
+		return nullptr;
 	return it->second;
 }
 
 Material* ResourceManager::getLoadedMaterial(QString const& name) const {
 	auto it = m_materials.find(name);
 	if(it == m_materials.end() || !it->second)
-		return Material::standardMaterial(Material::Basic3DMaterial);
+		return nullptr;
 	return it->second;
 }
 
 Texture* ResourceManager::getLoadedTexture(QString const& name) const {
 	auto it = m_textures.find(name);
 	if(it == m_textures.end() || !it->second)
-		return Texture::standardTexture(Texture::MissingTexture);
+		return nullptr;
 	return it->second;
 }
 
@@ -104,7 +105,15 @@ QStringList ResourceManager::registeredTextures() const {
 	return sl;
 }
 
-ResourceManager::OpenFileResult ResourceManager::openFile(QString name, QString const& path) {
+QString ResourceManager::locateFile(OpenFileResult const& parent, QString const& relativePath) const {
+	if(relativePath.isEmpty())
+		return QString();
+
+	QString rv = parent.basePath + QDir::separator() + relativePath;
+	return QFileInfo::exists(rv) ? rv : QString();
+}
+
+ResourceManager::OpenFileResult ResourceManager::openFile(QString name, QString const& path) const {
 	OpenFileResult r;
 	r.name = std::move(name);
 
@@ -114,8 +123,30 @@ ResourceManager::OpenFileResult ResourceManager::openFile(QString name, QString 
 		return r;
 	}
 
+	QFileInfo fi(*f);
 	r.stream.reset(f);
-	r.uri = QFileInfo(*f).absoluteFilePath();
+	r.uri      = fi.absoluteFilePath();
+	r.basePath = fi.absolutePath();
+
+	return r;
+}
+
+ResourceManager::OpenFileResult ResourceManager::openFile(OpenFileResult const& parent, QString const& relativePath) const {
+	OpenFileResult r;
+	r.name = locateFile(parent, relativePath);
+	if(r.name.isEmpty())
+		return r;
+
+	QFile* f = new QFile(parent.basePath + QDir::separator() + relativePath);
+	if(!f->open(QFile::ReadOnly)) {
+		delete f;
+		return r;
+	}
+
+	QFileInfo fi(*f);
+	r.stream.reset(f);
+	r.uri      = fi.absoluteFilePath();
+	r.basePath = fi.absolutePath();
 
 	return r;
 }

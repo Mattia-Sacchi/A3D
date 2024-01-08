@@ -21,13 +21,14 @@ public:
 		Color4DAttribute        = 5,
 		BoneIDAttribute         = 6,
 		BoneWeightsAttribute    = 7,
+		SmoothingGroupAttribute = 8,
 	};
 
 	explicit MeshCacheOGL(Mesh*);
 	~MeshCacheOGL();
 
 	void update(CoreGLFunctions*);
-	void render(CoreGLFunctions*);
+	void render(CoreGLFunctions*, QMatrix4x4 const& modelMatrix, QMatrix4x4 const& viewMatrix, QMatrix4x4 const& projMatrix);
 
 private:
 	Mesh::DrawMode m_drawMode;
@@ -36,6 +37,32 @@ private:
 	QOpenGLBuffer m_ibo;
 	std::size_t m_elementCount;
 	GLenum m_iboFormat;
+
+	struct RawMatrix4x4 {
+		inline RawMatrix4x4()
+			: RawMatrix4x4(QMatrix4x4()) {}
+		inline RawMatrix4x4(QMatrix4x4 const& m) { *this = m; }
+		inline RawMatrix4x4& operator=(QMatrix4x4 const& m) {
+			std::memcpy(data, m.data(), sizeof(data));
+			return *this;
+		}
+		inline bool operator==(QMatrix4x4 const& o) const { return std::memcmp(data, o.data(), sizeof(data)) == 0; }
+		inline bool operator!=(QMatrix4x4 const& o) const { return !(*this == o); }
+		float data[16];
+	};
+	struct MeshUBO_Data {
+		RawMatrix4x4 pMatrix;
+		RawMatrix4x4 vMatrix;
+		RawMatrix4x4 mMatrix;
+
+		RawMatrix4x4 mvMatrix;
+		RawMatrix4x4 mvpMatrix;
+
+		RawMatrix4x4 mNormalMatrix;
+		RawMatrix4x4 mvNormalMatrix;
+		RawMatrix4x4 mvpNormalMatrix;
+	} m_meshUBO_data;
+	GLuint m_meshUBO;
 };
 
 }
