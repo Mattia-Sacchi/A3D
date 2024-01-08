@@ -5,6 +5,7 @@
 #include "A3D/renderer.h"
 #include "A3D/meshcacheogl.h"
 #include "A3D/materialcacheogl.h"
+#include "A3D/materialpropertiescacheogl.h"
 #include "A3D/texturecacheogl.h"
 #include <queue>
 
@@ -12,6 +13,11 @@ namespace A3D {
 
 class RendererOGL final : public Renderer {
 public:
+	enum UBOBindings {
+		UBO_MeshBinding               = 0,
+		UBO_MaterialPropertiesBinding = 1,
+	};
+
 	RendererOGL(QOpenGLContext*, CoreGLFunctions*);
 	~RendererOGL();
 
@@ -19,6 +25,7 @@ public:
 	virtual void PreLoadEntity(Entity*) override;
 	virtual void Delete(MeshCache*) override;
 	virtual void Delete(MaterialCache*) override;
+	virtual void Delete(MaterialPropertiesCache*) override;
 	virtual void Delete(TextureCache*) override;
 	virtual void DeleteAllResources() override;
 
@@ -34,6 +41,7 @@ private:
 
 	MeshCacheOGL* buildMeshCache(Mesh*);
 	MaterialCacheOGL* buildMaterialCache(Material*);
+	MaterialPropertiesCacheOGL* buildMaterialPropertiesCache(MaterialProperties*);
 	TextureCacheOGL* buildTextureCache(Texture*);
 
 	QPointer<QOpenGLContext> m_context;

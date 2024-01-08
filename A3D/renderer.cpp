@@ -44,6 +44,8 @@ std::uintptr_t Renderer::rendererID() const {
 void Renderer::CleanupRenderCache() {
 	cleanupQPointers(m_meshCaches);
 	cleanupQPointers(m_materialCaches);
+	cleanupQPointers(m_materialCaches);
+	cleanupQPointers(m_textureCaches);
 }
 
 bool Renderer::OpaqueSorter(GroupBufferData const& a, GroupBufferData const& b) {
@@ -80,16 +82,14 @@ void Renderer::DrawAll(Entity* root, Camera const& camera) {
 
 	this->BeginOpaque();
 	for(auto it = m_opaqueGroupBuffer.begin(); it != m_opaqueGroupBuffer.end(); ++it) {
-		drawInfo.m_calculatedMaterialProperties = it->m_materialProperties;
-		drawInfo.m_calculatedMatrix             = it->m_transform;
+		drawInfo.m_calculatedMatrix = it->m_transform;
 		this->Draw(it->m_group, drawInfo);
 	}
 	this->EndOpaque();
 
 	this->BeginTranslucent();
 	for(auto it = m_translucentGroupBuffer.begin(); it != m_translucentGroupBuffer.end(); ++it) {
-		drawInfo.m_calculatedMaterialProperties = it->m_materialProperties;
-		drawInfo.m_calculatedMatrix             = it->m_transform;
+		drawInfo.m_calculatedMatrix = it->m_transform;
 		this->Draw(it->m_group, drawInfo);
 	}
 	this->EndTranslucent();
@@ -108,11 +108,13 @@ void Renderer::BuildDrawLists(Camera const& camera, Entity* e, QMatrix4x4 const&
 			if(!g || g->renderOptions() & Group::Hidden)
 				continue;
 
-			Mesh* mesh    = g->mesh();
-			Material* mat = g->material();
-			if(mesh && mat) {
+			Mesh* mesh                  = g->mesh();
+			Material* mat               = g->material();
+			MaterialProperties* matProp = g->materialProperties();
+
+			if(mesh && mat && matProp) {
 				GroupBufferData* gbd = nullptr;
-				if(mat->renderOptions() & Material::Translucent) {
+				if(mat->renderOptions() & Material::Translucent || matProp->isTranslucent()) {
 					m_translucentGroupBuffer.emplace_back();
 					gbd = &m_translucentGroupBuffer.back();
 				}
@@ -123,8 +125,6 @@ void Renderer::BuildDrawLists(Camera const& camera, Entity* e, QMatrix4x4 const&
 
 				gbd->m_group              = g;
 				gbd->m_transform          = baseMatrix * g->groupMatrix();
-				gbd->m_materialProperties = e->materialProperties();
-				gbd->m_materialProperties.append(g->materialProperties(), false);
 				gbd->m_distanceFromCamera = QVector3D::dotProduct((gbd->m_transform * g->position()) - camera.position(), camera.forward());
 			}
 		}
@@ -160,6 +160,14 @@ void Renderer::runDeleteOnAllResources() {
 	}
 	m_materialCaches.clear();
 
+	for(auto it = m_materialPropertiesCaches.begin(); it != m_materialPropertiesCaches.end(); ++it) {
+		QPointer<MaterialPropertiesCache>& mc = *it;
+		if(mc.isNull())
+			continue;
+		delete mc;
+	}
+	m_materialPropertiesCaches.clear();
+
 	for(auto it = m_textureCaches.begin(); it != m_textureCaches.end(); ++it) {
 		QPointer<TextureCache>& tc = *it;
 		if(tc.isNull())
@@ -184,6 +192,13 @@ void Renderer::invalidateCache() {
 		mc->markDirty();
 	}
 
+	for(auto it = m_materialPropertiesCaches.begin(); it != m_materialPropertiesCaches.end(); ++it) {
+		QPointer<MaterialPropertiesCache>& mc = *it;
+		if(mc.isNull())
+			continue;
+		mc->markDirty();
+	}
+
 	for(auto it = m_textureCaches.begin(); it != m_textureCaches.end(); ++it) {
 		QPointer<TextureCache>& tc = *it;
 		if(tc.isNull())
@@ -194,6 +209,10 @@ void Renderer::invalidateCache() {
 
 void Renderer::addToMaterialCaches(QPointer<MaterialCache> material) {
 	m_materialCaches.push_back(std::move(material));
+}
+
+void Renderer::addToMaterialPropertiesCaches(QPointer<MaterialPropertiesCache> materialProperties) {
+	m_materialPropertiesCaches.push_back(std::move(materialProperties));
 }
 
 void Renderer::addToMeshCaches(QPointer<MeshCache> mesh) {

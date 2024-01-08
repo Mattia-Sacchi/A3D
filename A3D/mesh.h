@@ -31,6 +31,7 @@ public:
 		Color4D        = 0x0020,
 		BoneIDs        = 0x0040,
 		BoneWeights    = 0x0080,
+		SmoothingGroup = 0x0100,
 	};
 	Q_DECLARE_FLAGS(Contents, Content)
 
@@ -56,6 +57,7 @@ public:
 		QVector4D Color4D;
 		std::uint8_t BoneIDs[4];
 		QVector4D BoneWeights;
+		std::uint8_t SmoothingGroup;
 
 		bool Equals(Vertex const& o, Contents c) const;
 	};

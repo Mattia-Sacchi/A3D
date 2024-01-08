@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
 	A3D::Model* sampleModel = nullptr;
 	{
 		s->resourceManager().registerTexture("Qt-Logo", new A3D::Texture(QImage(":/A3D/Qt-Logo.webp"), &s->resourceManager()));
-		sampleModel = s->resourceManager().loadModel("Sample_OBJ", "C:\\Users\\grass\\Desktop\\sample.obj", A3D::ResourceManager::IF_OBJ);
+		sampleModel = s->resourceManager().loadModel("Sample_OBJ", ":/A3D/teapot.obj", A3D::ResourceManager::IF_OBJ);
 	}
 
 	A3D::Entity* e = s;
@@ -33,7 +33,8 @@ int main(int argc, char* argv[]) {
 			A3D::Group* g = m->getOrAddGroup("Default");
 
 			g->setMesh(A3D::Mesh::standardMesh(A3D::Mesh::CubeIndexedMesh));
-			g->setMaterial(A3D::Material::standardMaterial(A3D::Material::Basic3DMaterial));
+			g->setMaterial(A3D::Material::standardMaterial(A3D::Material::SampleMaterial));
+			g->setMaterialProperties(new A3D::MaterialProperties(&s->resourceManager()));
 
 			m->setPosition(QVector3D(0.f, 1.1f * i, 0.f));
 			m->setScale(QVector3D(0.5f * i, 0.5f * i, 0.5f * i));
@@ -45,7 +46,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	A3D::View* v = new A3D::View;
-	v->camera().setPosition(QVector3D(0.f, 4.f, 10.f));
+	v->camera().setPosition(QVector3D(0.f, 8.f, 12.f));
 	v->setScene(s);
 	v->setRenderTimerEnabled(true);
 

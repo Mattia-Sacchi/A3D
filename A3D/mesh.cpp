@@ -118,6 +118,8 @@ std::size_t Mesh::packedVertexSize(Contents contents) {
 		vCount += sizeof(Vertex().BoneIDs);
 	if(contents & BoneWeights)
 		vCount += sizeof(Vertex().BoneWeights);
+	if(contents & SmoothingGroup)
+		vCount += sizeof(Vertex().SmoothingGroup);
 	return vCount;
 }
 
@@ -163,6 +165,10 @@ std::vector<std::uint8_t> const& Mesh::packedData() const {
 				std::memcpy(pDst, &v.BoneWeights, sizeof(v.BoneWeights));
 				pDst += sizeof(v.BoneWeights);
 			}
+			if(m_contents & SmoothingGroup) {
+				std::memcpy(pDst, &v.SmoothingGroup, sizeof(v.SmoothingGroup));
+				pDst += sizeof(v.SmoothingGroup);
+			}
 		}
 	}
 	return m_packedData;
@@ -191,6 +197,8 @@ bool Mesh::Vertex::Equals(Vertex const& o, Contents c) const {
 	if(c & Mesh::BoneIDs && std::memcmp(BoneIDs, o.BoneIDs, sizeof(BoneIDs)) != 0)
 		return false;
 	if(c & Mesh::BoneWeights && BoneWeights != o.BoneWeights)
+		return false;
+	if(c & Mesh::SmoothingGroup && SmoothingGroup != o.SmoothingGroup)
 		return false;
 	return true;
 }

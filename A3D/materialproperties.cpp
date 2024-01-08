@@ -1,83 +1,98 @@
 #include "A3D/materialproperties.h"
+#include "A3D/renderer.h"
 
 namespace A3D {
 
-MaterialProperties::MaterialProperties() {}
-
-MaterialProperties& MaterialProperties::append(MaterialProperties const& other, bool overwrite) {
-	if(overwrite) {
-		for(auto it = other.m_values.begin(); it != other.m_values.end(); ++it) {
-			m_values[it->first] = it->second;
-		}
-		for(auto itSM = other.m_modeSpecificValues.begin(); itSM != other.m_modeSpecificValues.end(); ++itSM) {
-			std::map<QString, QVariant>& msv = m_modeSpecificValues[itSM->first];
-			for(auto it = itSM->second.begin(); it != itSM->second.end(); ++it) {
-				msv[it->first] = it->second;
-			}
-		}
-	}
-	else {
-		for(auto it = other.m_values.begin(); it != other.m_values.end(); ++it) {
-			auto existsIt = m_values.find(it->first);
-			if(existsIt != m_values.end())
-				continue;
-			m_values[it->first] = it->second;
-		}
-		for(auto itSM = other.m_modeSpecificValues.begin(); itSM != other.m_modeSpecificValues.end(); ++itSM) {
-			std::map<QString, QVariant>& msv = m_modeSpecificValues[itSM->first];
-			for(auto it = itSM->second.begin(); it != itSM->second.end(); ++it) {
-				auto existsIt = msv.find(it->first);
-				if(existsIt != msv.end())
-					continue;
-				msv[it->first] = it->second;
-			}
-		}
-	}
-	return *this;
+MaterialProperties::MaterialProperties(ResourceManager* resourceManager)
+	: Resource{ resourceManager },
+	  m_alwaysTranslucent(false) {
+	log(LC_Debug, "Constructor: MaterialProperties");
+	m_hlValues.opacity          = 1.f;
+	m_hlValues.specularExponent = 32.f;
 }
 
-QVariant MaterialProperties::value(Material::ShaderMode targetMode, QString name, QVariant fallback) {
-	auto msValues = m_modeSpecificValues.find(targetMode);
-	if(msValues != m_modeSpecificValues.end()) {
-		std::map<QString, QVariant> const& mValues = msValues->second;
-		auto val                                   = mValues.find(name);
-		if(val != mValues.end())
-			return val->second;
-	}
+MaterialProperties::~MaterialProperties() {
+	log(LC_Debug, "Destructor: MaterialProperties (start)");
+	for(auto it = m_materialPropertiesCache.begin(); it != m_materialPropertiesCache.end(); ++it) {
+		if(it->second.isNull())
+			continue;
 
-	auto val = m_values.find(name);
-	if(val != m_values.end())
+		Renderer* r = Renderer::getRenderer(it->first);
+		if(!r) {
+			log(LC_Info, "MaterialProperties::~MaterialProperties: Potential memory leak? Renderer not available.");
+			continue;
+		}
+
+		r->Delete(it->second);
+	}
+	log(LC_Debug, "Destructor: MaterialProperties (end)");
+}
+
+MaterialProperties* MaterialProperties::clone() const {
+	MaterialProperties* newMatProp  = new MaterialProperties(resourceManager());
+	newMatProp->m_alwaysTranslucent = m_alwaysTranslucent;
+	newMatProp->m_hlValues          = m_hlValues;
+	newMatProp->m_rawValues         = m_rawValues;
+	for(std::size_t i = 0; i < MaxTextures; ++i)
+		newMatProp->m_textures[i] = m_textures[i];
+	return newMatProp;
+}
+
+Texture* MaterialProperties::texture(TextureSlot slot) const {
+	if(slot >= MaxTextures)
+		return nullptr;
+	return m_textures[slot];
+}
+
+void MaterialProperties::setTexture(Texture* texture, TextureSlot slot) {
+	if(slot >= MaxTextures)
+		return;
+	if(texture == m_textures[slot])
+		return;
+	if(m_textures[slot] && m_textures[slot]->parent() == this)
+		delete m_textures[slot];
+	m_textures[slot] = texture;
+}
+
+MaterialProperties::HighLevelProperties& MaterialProperties::highLevelProperties() {
+	return m_hlValues;
+}
+MaterialProperties::HighLevelProperties const& MaterialProperties::highLevelProperties() const {
+	return m_hlValues;
+}
+
+QVariant MaterialProperties::rawValue(QString name, QVariant fallback) {
+	auto val = m_rawValues.find(name);
+	if(val != m_rawValues.end())
 		return val->second;
 
 	return fallback;
 }
 
-void MaterialProperties::setValue(QString name, QVariant value) {
-	m_values[std::move(name)] = std::move(value);
+void MaterialProperties::setRawValue(QString name, QVariant value) {
+	m_rawValues[std::move(name)] = std::move(value);
 }
 
-void MaterialProperties::setValue(Material::ShaderMode targetMode, QString name, QVariant value) {
-	m_modeSpecificValues[std::move(targetMode)][std::move(name)] = std::move(value);
+std::map<QString, QVariant> const& MaterialProperties::rawValues() const {
+	return m_rawValues;
+}
+std::map<QString, QVariant>& MaterialProperties::rawValues() {
+	return m_rawValues;
 }
 
-std::map<QString, QVariant> const& MaterialProperties::values() const {
-	return m_values;
+void MaterialProperties::setAlwaysTranslucent(bool always) {
+	m_alwaysTranslucent = always;
 }
-std::map<QString, QVariant>& MaterialProperties::values() {
-	return m_values;
-}
+bool MaterialProperties::isTranslucent() const {
+	if(m_alwaysTranslucent || m_hlValues.opacity < 1.f)
+		return true;
 
-std::map<QString, QVariant> const& MaterialProperties::modeSpecificValues(Material::ShaderMode targetMode) const {
-	static std::map<QString, QVariant> const emptyReference;
-	auto it = m_modeSpecificValues.find(targetMode);
-	if(it == m_modeSpecificValues.end())
-		return emptyReference;
+	for(std::size_t i = 0; i < MaxTextures; ++i) {
+		if(m_textures[i] && m_textures[i]->image().hasAlphaChannel())
+			return true;
+	}
 
-	return it->second;
-}
-
-std::map<QString, QVariant>& MaterialProperties::modeSpecificValues(Material::ShaderMode targetMode) {
-	return m_modeSpecificValues[targetMode];
+	return false;
 }
 
 }

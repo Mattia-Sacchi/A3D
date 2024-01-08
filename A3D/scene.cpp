@@ -19,4 +19,11 @@ ResourceManager const& Scene::resourceManager() const {
 	return m_resourceManager;
 }
 
+void Scene::setAmbientLight(QVector3D const& ambientLight) {
+	m_ambientLight = ambientLight;
+}
+QVector3D Scene::ambientLight() const {
+	return m_ambientLight;
+}
+
 }

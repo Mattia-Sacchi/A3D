@@ -17,8 +17,12 @@ public:
 	ResourceManager& resourceManager();
 	ResourceManager const& resourceManager() const;
 
+	void setAmbientLight(QVector3D const&);
+	QVector3D ambientLight() const;
+
 private:
 	ResourceManager m_resourceManager;
+	QVector3D m_ambientLight;
 };
 
 }

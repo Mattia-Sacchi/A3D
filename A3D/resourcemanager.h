@@ -11,12 +11,6 @@ class Mesh;
 class Material;
 class Model;
 
-struct MeshLoadingResult {
-	std::map<QString, QPointer<Mesh>> meshes;
-	std::map<QString, QPointer<Material>> materials;
-	std::map<QString, QPointer<Texture>> textures;
-};
-
 class ResourceManager : public QObject {
 	Q_OBJECT
 public:
@@ -48,8 +42,11 @@ private:
 		std::unique_ptr<QIODevice> stream;
 		QString name;
 		QString uri;
+		QString basePath;
 	};
-	OpenFileResult openFile(QString name, QString const& path);
+	OpenFileResult openFile(QString name, QString const& path) const;
+	OpenFileResult openFile(OpenFileResult const& parent, QString const& relativePath) const;
+	QString locateFile(OpenFileResult const& parent, QString const& relativePath) const;
 
 	Model* loadModel_OBJ(OpenFileResult);
 
