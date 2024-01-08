@@ -35,7 +35,15 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 	if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent || matProp->isTranslucent())
 		m_gl->glDisable(GL_CULL_FACE);
 
-	matCache->install(m_gl, matPropCache);
+	matCache->install(m_gl);
+	matPropCache->install(m_gl, matCache);
+	for(std::size_t i = 0; i < MaterialProperties::MaxTextures; ++i) {
+		Texture* t = matProp->texture(static_cast<MaterialProperties::TextureSlot>(i));
+		if(t) {
+			TextureCacheOGL* tCache = buildTextureCache(t);
+			tCache->applyToSlot(m_gl, static_cast<GLuint>(i));
+		}
+	}
 	meshCache->render(m_gl, drawInfo.m_calculatedMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
 
 	if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent || matProp->isTranslucent())
@@ -166,6 +174,12 @@ void RendererOGL::PreLoadEntity(Entity* e) {
 
 		if(matProp)
 			buildMaterialPropertiesCache(matProp);
+
+		for(std::size_t i = 0; i < MaterialProperties::MaxTextures; ++i) {
+			Texture* t = matProp->texture(static_cast<MaterialProperties::TextureSlot>(i));
+			if(t)
+				buildTextureCache(t);
+		}
 	}
 }
 

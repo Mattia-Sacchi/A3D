@@ -17,12 +17,13 @@ public:
 	~MaterialCacheOGL();
 
 	void update(CoreGLFunctions*);
-	void install(CoreGLFunctions*, MaterialPropertiesCacheOGL*, QMatrix4x4 const& model, QMatrix4x4 const& view, QMatrix4x4 const& proj);
+	void install(CoreGLFunctions*);
 
-private:
 	int searchUniform(QString const& name);
 	void applyUniform(QString const& name, QVariant const& value);
 	void applyUniforms(std::map<QString, QVariant> const& uniforms);
+
+private:
 	std::unique_ptr<QOpenGLShaderProgram> m_program;
 
 	struct UniformCachedInfo {
@@ -35,20 +36,8 @@ private:
 
 	std::map<QString, UniformCachedInfo> m_uniformCachedInfo;
 
-	struct UBOShaderData {
-		QVector4D diffuse;
-		QVector4D ambient;
-		QVector4D specular;
-		QVector4D emissive;
-		float opacity;
-		float specularExponent;
-		float paddingA;
-		float paddingB;
-	};
-
-	MaterialProperties::HighLevelProperties m_lastUboReferenceData;
-	QOpenGLBuffer m_uboBuffer;
-	UBOShaderData m_uboData;
+	GLuint m_meshUBO_index;
+	GLuint m_matpropUBO_index;
 };
 
 }

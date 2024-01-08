@@ -38,19 +38,31 @@ private:
 	std::size_t m_elementCount;
 	GLenum m_iboFormat;
 
+	struct RawMatrix4x4 {
+		inline RawMatrix4x4()
+			: RawMatrix4x4(QMatrix4x4()) {}
+		inline RawMatrix4x4(QMatrix4x4 const& m) { *this = m; }
+		inline RawMatrix4x4& operator=(QMatrix4x4 const& m) {
+			std::memcpy(data, m.data(), sizeof(data));
+			return *this;
+		}
+		inline bool operator==(QMatrix4x4 const& o) const { return std::memcmp(data, o.data(), sizeof(data)) == 0; }
+		inline bool operator!=(QMatrix4x4 const& o) const { return !(*this == o); }
+		float data[16];
+	};
 	struct MeshUBO_Data {
-		QMatrix4x4 pMatrix;
-		QMatrix4x4 vMatrix;
-		QMatrix4x4 mMatrix;
+		RawMatrix4x4 pMatrix;
+		RawMatrix4x4 vMatrix;
+		RawMatrix4x4 mMatrix;
 
-		QMatrix4x4 mvMatrix;
-		QMatrix4x4 mvpMatrix;
+		RawMatrix4x4 mvMatrix;
+		RawMatrix4x4 mvpMatrix;
 
-		QMatrix4x4 mNormalMatrix;
-		QMatrix4x4 mvNormalMatrix;
-		QMatrix4x4 mvpNormalMatrix;
+		RawMatrix4x4 mNormalMatrix;
+		RawMatrix4x4 mvNormalMatrix;
+		RawMatrix4x4 mvpNormalMatrix;
 	} m_meshUBO_data;
-	QOpenGLBuffer m_meshUBO;
+	GLuint m_meshUBO;
 };
 
 }

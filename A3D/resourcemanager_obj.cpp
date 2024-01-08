@@ -356,6 +356,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 		MaterialProperties* matProp                      = new MaterialProperties(this);
 		MaterialProperties::HighLevelProperties& hlProps = matProp->highLevelProperties();
 		newGroup->setMaterialProperties(matProp);
+		newGroup->setMaterial(Material::standardMaterial(Material::PhongShadedMaterial));
 
 		auto foundMaterial = materials.find(gi.material);
 		if(foundMaterial != materials.end()) {
@@ -416,8 +417,6 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 				if(t)
 					matProp->setTexture(t, MaterialProperties::EmissiveTextureSlot);
 			}
-
-			newGroup->setMaterial(Material::standardMaterial(Material::PhongShadedMaterial));
 		}
 
 		Mesh* mesh = new Mesh(this);

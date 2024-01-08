@@ -1,13 +1,16 @@
 #include "A3D/materialcacheogl.h"
 #include "A3D/materialpropertiescacheogl.h"
 #include "A3D/material.h"
+#include "A3D/rendererogl.h"
 #include <QColor>
 #include <QTransform>
 
 namespace A3D {
 
 MaterialCacheOGL::MaterialCacheOGL(Material* parent)
-	: MaterialCache{ parent } {
+	: MaterialCache{ parent },
+	  m_meshUBO_index(GL_INVALID_INDEX),
+	  m_matpropUBO_index(GL_INVALID_INDEX) {
 	log(LC_Debug, "Constructor: MaterialCacheOGL");
 }
 
@@ -83,7 +86,7 @@ void MaterialCacheOGL::applyUniforms(std::map<QString, QVariant> const& uniforms
 	}
 }
 
-void MaterialCacheOGL::install(CoreGLFunctions*, MaterialPropertiesCacheOGL* materialPropertiesCache, QMatrix4x4 const& model, QMatrix4x4 const& view, QMatrix4x4 const& proj) {
+void MaterialCacheOGL::install(CoreGLFunctions* gl) {
 	if(!m_program)
 		return;
 
@@ -93,20 +96,11 @@ void MaterialCacheOGL::install(CoreGLFunctions*, MaterialPropertiesCacheOGL* mat
 
 	m_program->bind();
 
-	if(materialPropertiesCache) {
-		if(MaterialProperties* materialProperties = materialPropertiesCache->materialProperties())
-			applyUniforms(materialProperties->rawValues());
-	}
+	if(m_meshUBO_index != GL_INVALID_INDEX)
+		gl->glUniformBlockBinding(m_program->programId(), m_meshUBO_index, RendererOGL::UBO_MeshBinding);
 
-	applyUniform("pMatrix", proj);
-	applyUniform("vMatrix", view);
-	applyUniform("mMatrix", model);
-	applyUniform("mvMatrix", (view * model));
-	applyUniform("mvpMatrix", (proj * view * model));
-
-	applyUniform("mNormalMatrix", model.inverted().transposed());
-	applyUniform("mvNormalMatrix", (view * model).inverted().transposed());
-	applyUniform("mvpNormalMatrix", (proj * view * model).inverted().transposed());
+	if(m_matpropUBO_index != GL_INVALID_INDEX)
+		gl->glUniformBlockBinding(m_program->programId(), m_matpropUBO_index, RendererOGL::UBO_MaterialPropertiesBinding);
 }
 
 void MaterialCacheOGL::update(CoreGLFunctions* gl) {
@@ -132,7 +126,11 @@ void MaterialCacheOGL::update(CoreGLFunctions* gl) {
 		m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vxShader);
 	if(!fxShader.isEmpty())
 		m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fxShader);
-	m_program->link();
+	if(!m_program->link()) {
+		log(LC_Warning, "Couldn't link QOpenGLShader: " + m_program->log());
+		m_program.reset();
+		return;
+	}
 
 	m_uniformCachedInfo.clear();
 
@@ -146,16 +144,8 @@ void MaterialCacheOGL::update(CoreGLFunctions* gl) {
 	applyUniform("EmissiveTexture", GLuint(MaterialProperties::EmissiveTextureSlot));
 	applyUniform("BumpMapTexture", GLuint(MaterialProperties::BumpMapTextureSlot));
 
-	// UBO Processing
-	/*
-	GLuint uboPhongInformations = gl->glGetUniformBlockIndex(m_program->programId(), "ShaderData");
-	if(uboPhongInformations != GL_INVALID_INDEX) {
-		m_hasPhong = true;
-		m_uboPhong.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-		std::memset(&m_phongData, 0, sizeof(m_phongData));
-		m_uboPhong.allocate(&m_phongData, sizeof(m_phongData));
-		// ... bind ...
-	}*/
+	m_meshUBO_index    = gl->glGetUniformBlockIndex(m_program->programId(), "MeshUBO_Data");
+	m_matpropUBO_index = gl->glGetUniformBlockIndex(m_program->programId(), "MaterialUBO_Data");
 
 	markClean();
 }

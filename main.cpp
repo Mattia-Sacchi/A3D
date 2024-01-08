@@ -34,6 +34,7 @@ int main(int argc, char* argv[]) {
 
 			g->setMesh(A3D::Mesh::standardMesh(A3D::Mesh::CubeIndexedMesh));
 			g->setMaterial(A3D::Material::standardMaterial(A3D::Material::Basic3DMaterial));
+			g->setMaterialProperties(new A3D::MaterialProperties(&s->resourceManager()));
 
 			m->setPosition(QVector3D(0.f, 1.1f * i, 0.f));
 			m->setScale(QVector3D(0.5f * i, 0.5f * i, 0.5f * i));

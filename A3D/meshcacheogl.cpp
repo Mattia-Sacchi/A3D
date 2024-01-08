@@ -1,4 +1,6 @@
 #include "A3D/meshcacheogl.h"
+#include "A3D/rendererogl.h"
+#include <QOpenGLFunctions>
 
 namespace A3D {
 
@@ -8,21 +10,25 @@ MeshCacheOGL::MeshCacheOGL(Mesh* parent)
 	  m_vbo(QOpenGLBuffer::VertexBuffer),
 	  m_ibo(QOpenGLBuffer::IndexBuffer),
 	  m_elementCount(0),
-	  m_iboFormat(GL_UNSIGNED_INT) {
+	  m_iboFormat(GL_UNSIGNED_INT),
+	  m_meshUBO(0) {
 	log(LC_Debug, "Constructor: MeshCacheOGL");
 }
 
 MeshCacheOGL::~MeshCacheOGL() {
 	log(LC_Debug, "Destructor: MeshCacheOGL");
+
+	if(m_meshUBO != 0)
+		QOpenGLContext::currentContext()->functions()->glDeleteBuffers(1, &m_meshUBO);
 }
 
 void MeshCacheOGL::render(CoreGLFunctions* gl, QMatrix4x4 const& modelMatrix, QMatrix4x4 const& viewMatrix, QMatrix4x4 const& projMatrix) {
-	if(!m_elementCount)
+	if(!m_elementCount || !m_meshUBO)
 		return;
 
 	m_vao.bind();
 
-	if(modelMatrix != m_meshUBO_data.mMatrix || viewMatrix != m_meshUBO_data.vMatrix || projMatrix != m_meshUBO_data.pMatrix) {
+	if(m_meshUBO_data.mMatrix != modelMatrix || m_meshUBO_data.vMatrix != viewMatrix || m_meshUBO_data.pMatrix != projMatrix) {
 		m_meshUBO_data.mMatrix         = modelMatrix;
 		m_meshUBO_data.vMatrix         = viewMatrix;
 		m_meshUBO_data.pMatrix         = projMatrix;
@@ -32,10 +38,12 @@ void MeshCacheOGL::render(CoreGLFunctions* gl, QMatrix4x4 const& modelMatrix, QM
 		m_meshUBO_data.mvNormalMatrix  = (viewMatrix * modelMatrix).inverted().transposed();
 		m_meshUBO_data.mvpNormalMatrix = (projMatrix * viewMatrix * modelMatrix).inverted().transposed();
 
-		m_meshUBO.write(0, &m_meshUBO_data, sizeof(m_meshUBO_data));
+		gl->glBindBuffer(GL_UNIFORM_BUFFER, m_meshUBO);
+		gl->glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(MeshUBO_Data), &m_meshUBO_data);
+		gl->glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
-	m_meshUBO.bind();
+	gl->glBindBufferBase(GL_UNIFORM_BUFFER, RendererOGL::UBO_MeshBinding, m_meshUBO);
 
 	switch(m_drawMode) {
 	case Mesh::Triangles:
@@ -182,6 +190,16 @@ void MeshCacheOGL::update(CoreGLFunctions* gl) {
 	m_vbo.release();
 	if(isIndexed)
 		m_ibo.release();
+
+	if(!m_meshUBO) {
+		gl->glGenBuffers(1, &m_meshUBO);
+
+		if(m_meshUBO) {
+			gl->glBindBuffer(GL_UNIFORM_BUFFER, m_meshUBO);
+			gl->glBufferData(GL_UNIFORM_BUFFER, sizeof(MeshUBO_Data), nullptr, GL_DYNAMIC_DRAW);
+			gl->glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		}
+	}
 
 	markClean();
 }
