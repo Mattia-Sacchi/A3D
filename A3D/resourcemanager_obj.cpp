@@ -362,12 +362,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 
 			MaterialInformations const& mat = foundMaterial->second;
 
-			hlProps.diffuseColor     = QVector4D(mat.diffuse, 1.f);
-			hlProps.ambientColor     = QVector4D(mat.ambient, 1.f);
-			hlProps.emissiveColor    = QVector4D(mat.emissive, 1.f);
-			hlProps.specularColor    = QVector4D(mat.specular, 1.f);
-			hlProps.opacity          = mat.opacity;
-			hlProps.specularExponent = mat.specularExponent;
+			hlProps.opacity = mat.opacity;
 
 			if(!mat.diffuseMap.isEmpty()) {
 				Texture* t = getLoadedTexture(mat.diffuseMap);
@@ -378,7 +373,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 				}
 
 				if(t)
-					matProp->setTexture(t, MaterialProperties::DiffuseTextureSlot);
+					matProp->setTexture(t, MaterialProperties::AlbedoTextureSlot);
 			}
 
 			if(!mat.ambientMap.isEmpty()) {
@@ -414,7 +409,19 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 				}
 
 				if(t)
-					matProp->setTexture(t, MaterialProperties::EmissiveTextureSlot);
+					matProp->setTexture(t, MaterialProperties::MetallicTextureSlot);
+			}
+
+			if(!mat.bumpMap.isEmpty()) {
+				Texture* t = getLoadedTexture(mat.emissiveMap);
+				if(!t) {
+					QImage i(mat.emissiveMap);
+					if(!i.isNull())
+						t = registerTexture(mat.emissiveMap, new Texture(i, this));
+				}
+
+				if(t)
+					matProp->setTexture(t, MaterialProperties::NormalTextureSlot);
 			}
 		}
 
