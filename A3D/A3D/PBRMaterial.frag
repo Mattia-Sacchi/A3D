@@ -85,6 +85,35 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 }
 
 void main() {
+	vec3 albedo = pow(texture(AlbedoTexture, fsIn.TexCoord).rgb, vec3(2.2));
+	float metallic = texture(MetallicTexture, fsIn.TexCoord).r;
+	float roughness = texture(RoughnessTexture, fsIn.TexCoord).r;
+	float ao = texture(AOTexture, fsIn.TexCoord).r;
+	
+	vec3 N = getNormalFromMap();
+	vec3 V = normalize(cameraPos - fsIn.WorldPos);
+	
+	vec3 F0 = mix(vec3(0.04), albedo, metallic);
+	vec3 Lo = vec3(0.0);
+	for(int i = 0; i < MAX_LIGHTS; ++i)
+	{
+		vec3 L = normalize(lightsPos[i] - fsIn.WorldPos);
+		vec3 H = normalize(V + L);
+		float distance = length(lightsPos[i] - fsIn.WorldPos);
+		float attenuation = 1.0 / (distance * distance);
+		vec3 radiance = lightsColor[i] * attenuation;
+		
+		float NDF = DistributionGGX(N, H, roughness);
+		float G = GeometrySmith(N, V, L, roughness);
+		vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+		
+		vec3 numerator = NDF * G * F;
+		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+		vec3 specular = numerator / denominator;
+		
+		vec3 kS = F;
+	}
+	
 	vec4 diffuseMatColor = vec4(0, 0, 1, 1);
 	vec4 ambientMatColor = vec4(0, 1, 0, 1);
 	vec4 specularMatColor = vec4(1, 0, 0, 1);
