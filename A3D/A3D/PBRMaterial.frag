@@ -1,22 +1,15 @@
 #version 330 core
 
-#ifndef MAX_LIGHTS
-#define MAX_LIGHTS 4
-#endif
-
+in vec3 WorldPos;
+in vec2 TexCoord;
+in vec3 Normal;
 out vec4 fragColor;
-
-in VS_OUT {
-	vec3 WorldPos;
-	vec2 TexCoord;
-	vec3 Normal;
-} fsIn;
 
 layout (std140) uniform SceneUBO_Data {
 	vec4 cameraPos;
 	
-	vec4 lightsPos[MAX_LIGHTS];
-	vec4 lightsColor[MAX_LIGHTS];
+	vec4 lightsPos[4];
+	vec4 lightsColor[4];
 };
 
 uniform sampler2D AlbedoTexture;
@@ -29,14 +22,14 @@ const float PI = 3.14159265359;
 
 vec3 getNormalFromMap()
 {
-	vec3 tangentNormal = texture(NormalTexture, fsIn.TexCoord).xyz * 2.0 - 1.0;
+	vec3 tangentNormal = texture(NormalTexture, TexCoord).xyz * 2.0 - 1.0;
 	
-	vec3 Q1 = dFdx(fsIn.WorldPos);
-	vec3 Q2 = dFdy(fsIn.WorldPos);
-	vec3 st1 = dFdx(fsIn.TexCoord);
-	vec3 st2 = dFdx(fsIn.TexCoord);
+	vec3 Q1 = dFdx(WorldPos);
+	vec3 Q2 = dFdy(WorldPos);
+	vec2 st1 = dFdx(TexCoord);
+	vec2 st2 = dFdx(TexCoord);
 	
-	vec3 N = normalize(fsIn.Normal);
+	vec3 N = normalize(Normal);
 	vec3 T = normalize(Q1*st2.t - Q2*st1.t);
 	vec3 B = -normalize(cross(N, T));
 	mat3 TBN = mat3(T, B, N);
@@ -85,23 +78,29 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 }
 
 void main() {
-	vec3 albedo = pow(texture(AlbedoTexture, fsIn.TexCoord).rgb, vec3(2.2));
-	float metallic = texture(MetallicTexture, fsIn.TexCoord).r;
-	float roughness = texture(RoughnessTexture, fsIn.TexCoord).r;
-	float ao = texture(AOTexture, fsIn.TexCoord).r;
+	vec4 albedoRGBA = texture(AlbedoTexture, TexCoord);
+	vec3 albedo = pow(albedoRGBA.rgb, vec3(2.2));
+	float metallic = texture(MetallicTexture, TexCoord).r;
+	float roughness = texture(RoughnessTexture, TexCoord).r;
+	float ao = texture(AOTexture, TexCoord).r;
 	
 	vec3 N = getNormalFromMap();
-	vec3 V = normalize(cameraPos - fsIn.WorldPos);
+	vec3 V = normalize(cameraPos.xyz - WorldPos.xyz);
 	
 	vec3 F0 = mix(vec3(0.04), albedo, metallic);
 	vec3 Lo = vec3(0.0);
-	for(int i = 0; i < MAX_LIGHTS; ++i)
+
+	vec3 sumDebug = vec3(0.0);
+	for(int i = 0; i < 4; ++i)
 	{
-		vec3 L = normalize(lightsPos[i] - fsIn.WorldPos);
+		vec3 lightPos = lightsPos[i].xyz;
+		vec3 lightColor = (lightsColor[i].rgb) * (1 + lightsColor[i].w + lightsPos[i].w);
+
+		vec3 L = normalize(lightPos - WorldPos.xyz);
 		vec3 H = normalize(V + L);
-		float distance = length(lightsPos[i] - fsIn.WorldPos);
+		float distance = length(lightPos - WorldPos.xyz);
 		float attenuation = 1.0 / (distance * distance);
-		vec3 radiance = lightsColor[i] * attenuation;
+		vec3 radiance = lightColor * attenuation;
 		
 		float NDF = DistributionGGX(N, H, roughness);
 		float G = GeometrySmith(N, V, L, roughness);
@@ -112,43 +111,20 @@ void main() {
 		vec3 specular = numerator / denominator;
 		
 		vec3 kS = F;
+		vec3 kD = vec3(1.0) - kS;
+		kD *= 1.0 - metallic;
+
+		float NdotL = max(dot(N, L), 0.0);
+		Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+		//sumDebug += NdotL;
 	}
-	
-	vec4 diffuseMatColor = vec4(0, 0, 1, 1);
-	vec4 ambientMatColor = vec4(0, 1, 0, 1);
-	vec4 specularMatColor = vec4(1, 0, 0, 1);
-	
-	vec3 lightPos = vec3(0, 30, 0);
-	vec3 eyePos = vec3(0, 0, 0);
-	float specularExponent = 32.0;
-	
-	float diffuseStrength = 0;
-	float ambientStrength = 0.05;
-	float specularStrength = 0;
-	
-	// Calculate lighting strengths
-	{
-		vec3 lightDir = normalize(lightPos - fsIn.Pos);
-		vec3 normal = normalize(fsIn.Normal);
-		
-		// Diffuse
-		diffuseStrength = max(dot(lightDir, normal), 0.0);
-		
-		// Specular
-		vec3 viewDir = normalize(eyePos - fsIn.Pos);
-		vec3 reflectDir = reflect(-lightDir, normal);
-		vec3 halfwayDir = normalize(lightDir + viewDir);
-		
-		specularStrength = pow(max(dot(normal, halfwayDir), 0.0), specularExponent);
-	}
-	
-	vec4 diffuseColor = texture(DiffuseTexture, fsIn.TexCoord) * diffuseMatColor;
-	vec4 ambientColor = texture(AmbientTexture, fsIn.TexCoord) * ambientMatColor;
-	vec4 specularColor = texture(SpecularTexture, fsIn.TexCoord) * specularMatColor;
-	
-	fragColor = vec4(
-		(diffuseColor.rgb * diffuseStrength)
-		+ (ambientColor.rgb * ambientStrength)
-		+ (specularColor.rgb * specularStrength)
-	, 1.0);
+	//sumDebug = vec3(Lo);
+
+	vec3 ambient = vec3(0.1) * albedo * ao;
+	vec3 color = ambient + Lo;
+
+	color = color / (color + vec3(1.0));
+	color = pow(color, vec3(1.0 / 2.2));
+	fragColor = vec4(color, albedoRGBA.a);
+	//fragColor = vec4(sumDebug, 1.0);
 }

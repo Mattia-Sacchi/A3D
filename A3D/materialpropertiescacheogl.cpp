@@ -12,8 +12,10 @@ MaterialPropertiesCacheOGL::MaterialPropertiesCacheOGL(MaterialProperties* paren
 MaterialPropertiesCacheOGL::~MaterialPropertiesCacheOGL() {
 	log(LC_Debug, "Destructor: MaterialPropertiesCacheOGL");
 
-	if(m_materialUBO != 0)
+	if(m_materialUBO) {
 		QOpenGLContext::currentContext()->functions()->glDeleteBuffers(1, &m_materialUBO);
+		m_materialUBO = 0;
+	}
 }
 
 void MaterialPropertiesCacheOGL::install(CoreGLFunctions* gl, MaterialCacheOGL* materialCache) {

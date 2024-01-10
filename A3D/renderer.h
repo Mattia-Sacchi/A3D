@@ -37,6 +37,9 @@ public:
 	void DrawAll(Scene* root, Camera const& camera);
 
 protected:
+	virtual void BeginDrawing(Camera const&);
+	virtual void EndDrawing();
+
 	virtual void BeginOpaque();
 	virtual void EndOpaque();
 	virtual void BeginTranslucent();

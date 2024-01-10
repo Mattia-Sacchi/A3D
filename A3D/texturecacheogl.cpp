@@ -57,6 +57,8 @@ void TextureCacheOGL::update(CoreGLFunctions*) {
 	m_texture->setLevelofDetailBias(t->lodBias());
 
 	m_texture->setData(t->image(), (t->renderOptions() & Texture::GenerateMipMaps) ? QOpenGLTexture::GenerateMipMaps : QOpenGLTexture::DontGenerateMipMaps);
+
+	markClean();
 }
 
 void TextureCacheOGL::applyToSlot(CoreGLFunctions* gl, GLuint slot) {
