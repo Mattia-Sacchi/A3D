@@ -10,7 +10,8 @@ namespace A3D {
 MaterialCacheOGL::MaterialCacheOGL(Material* parent)
 	: MaterialCache{ parent },
 	  m_meshUBO_index(GL_INVALID_INDEX),
-	  m_matpropUBO_index(GL_INVALID_INDEX) {
+	  m_matpropUBO_index(GL_INVALID_INDEX),
+	  m_sceneUBO_index(GL_INVALID_INDEX) {
 	log(LC_Debug, "Constructor: MaterialCacheOGL");
 }
 
@@ -101,6 +102,9 @@ void MaterialCacheOGL::install(CoreGLFunctions* gl) {
 
 	if(m_matpropUBO_index != GL_INVALID_INDEX)
 		gl->glUniformBlockBinding(m_program->programId(), m_matpropUBO_index, RendererOGL::UBO_MaterialPropertiesBinding);
+
+	if(m_sceneUBO_index != GL_INVALID_INDEX)
+		gl->glUniformBlockBinding(m_program->programId(), m_sceneUBO_index, RendererOGL::UBO_SceneBinding);
 }
 
 void MaterialCacheOGL::update(CoreGLFunctions* gl) {
@@ -155,6 +159,7 @@ void MaterialCacheOGL::update(CoreGLFunctions* gl) {
 
 	m_meshUBO_index    = gl->glGetUniformBlockIndex(m_program->programId(), "MeshUBO_Data");
 	m_matpropUBO_index = gl->glGetUniformBlockIndex(m_program->programId(), "MaterialUBO_Data");
+	m_sceneUBO_index = gl->glGetUniformBlockIndex(m_program->programId(), "SceneUBO_Data");
 	m_program->release();
 
 	markClean();

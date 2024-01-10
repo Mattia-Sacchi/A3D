@@ -129,7 +129,7 @@ void View::paintGL() {
 	// x is the pitch (vertical angle)
 	// y is the yaw (horizontal angle)
 	// z is the roll (tilt/peek angle)
-	float const fRotSpeed = 1.f;
+	float const fRotSpeed = 0.6f;
 	QVector3D orientation;
 	if(m_keyPressed[Qt::Key_W])
 		orientation.setX(orientation.x() - fRotSpeed);
@@ -151,7 +151,7 @@ void View::paintGL() {
 	QVector3D const right   = camera().right();
 	QVector3D const up      = camera().up();
 
-	float const fMovSpeed = 0.05f;
+	float const fMovSpeed = 0.2f;
 	QVector3D movement;
 	if(m_keyPressed[Qt::Key_Up] && m_keyPressed[Qt::Key_Shift])
 		movement += up * fMovSpeed;

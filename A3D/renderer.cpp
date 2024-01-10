@@ -81,6 +81,8 @@ void Renderer::DrawAll(Scene* root, Camera const& camera) {
 	drawInfo.m_projMatrix = camera.getProjection();
 	drawInfo.m_viewMatrix = camera.getView();
 
+	this->BeginDrawing(camera);
+
 	this->BeginOpaque();
 	for(auto it = m_opaqueGroupBuffer.begin(); it != m_opaqueGroupBuffer.end(); ++it) {
 		drawInfo.m_modelMatrix = it->m_transform;
@@ -94,6 +96,8 @@ void Renderer::DrawAll(Scene* root, Camera const& camera) {
 		this->Draw(it->m_group, drawInfo);
 	}
 	this->EndTranslucent();
+
+	this->EndDrawing();
 }
 
 void Renderer::BuildDrawLists(Camera const& camera, Entity* e, QMatrix4x4 const& cascadeMatrix) {
@@ -139,6 +143,8 @@ void Renderer::BuildDrawLists(Camera const& camera, Entity* e, QMatrix4x4 const&
 	}
 }
 
+void Renderer::BeginDrawing(Camera const&) {}
+void Renderer::EndDrawing() {}
 void Renderer::BeginOpaque() {}
 void Renderer::EndOpaque() {}
 void Renderer::BeginTranslucent() {}

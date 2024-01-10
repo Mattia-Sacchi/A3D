@@ -17,16 +17,14 @@ layout (std140) uniform MeshUBO_Data {
 	mat4 mvpNormalMatrix;
 };
 
-out VS_OUT {
-	vec3 WorldPos;
-	vec2 TexCoord;
-	vec3 Normal;
-} vsOut;
+out vec3 WorldPos;
+out vec2 TexCoord;
+out vec3 Normal;
 
 void main() {
-	vsOut.WorldPos = vec3(mMatrix * vec4(inVertex, 1.0));
-	vsOut.TexCoord = inTexCoord;
-	vsOut.Normal = mNormalMatrix * inNormal;
+	WorldPos = vec3(mMatrix * vec4(inVertex, 1.0));
+	TexCoord = inTexCoord;
+	Normal = mat3(mNormalMatrix) * inNormal;
 	
-	gl_Position = projection * view * vec4(vsOut.WorldPos, 1.0);
+	gl_Position = mvpMatrix * vec4(inVertex, 1.0);
 }

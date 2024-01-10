@@ -16,6 +16,7 @@ public:
 	enum UBOBindings {
 		UBO_MeshBinding               = 0,
 		UBO_MaterialPropertiesBinding = 1,
+		UBO_SceneBinding              = 2,
 	};
 
 	RendererOGL(QOpenGLContext*, CoreGLFunctions*);
@@ -30,6 +31,9 @@ public:
 	virtual void DeleteAllResources() override;
 
 protected:
+	virtual void BeginDrawing(Camera const&) override;
+	virtual void EndDrawing() override;
+
 	virtual void BeginOpaque() override;
 	virtual void EndOpaque() override;
 	virtual void BeginTranslucent() override;
@@ -47,6 +51,15 @@ private:
 	QPointer<QOpenGLContext> m_context;
 	CoreGLFunctions* m_gl;
 	std::vector<Entity*> m_translucentEntityBuffer;
+
+	struct SceneUBO_Data {
+		QVector4D m_cameraPos;
+
+		QVector4D m_lightPos[4];
+		QVector4D m_lightColor[4];
+	};
+	SceneUBO_Data m_sceneData;
+	GLuint m_sceneUBO;
 };
 
 }

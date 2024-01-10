@@ -6,5 +6,7 @@
         <file>A3D/PhongShadedMaterial.vert</file>
         <file>A3D/PBRMaterial.vert</file>
         <file>A3D/PBRMaterial.frag</file>
+        <file>A3D/teapot.obj</file>
+        <file>A3D/sphere.obj</file>
     </qresource>
 </RCC>

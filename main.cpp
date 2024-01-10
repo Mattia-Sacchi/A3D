@@ -8,57 +8,81 @@ int main(int argc, char* argv[]) {
 	QApplication a(argc, argv);
 	QMainWindow w;
 
-	A3D::Scene* s = new A3D::Scene;
+	A3D::Scene* s = new A3D::Scene(&w);
 
 	A3D::Model* sampleModel = nullptr;
+	A3D::MaterialProperties* pbrGold = nullptr;
+
 	{
-		s->resourceManager().registerTexture("Qt-Logo", new A3D::Texture(QImage(":/A3D/Qt-Logo.webp"), &s->resourceManager()));
-		sampleModel = s->resourceManager().loadModel("Sample_OBJ", ":/A3D/teapot.obj");
+		s->resourceManager().registerTexture("Foil_AO", new A3D::Texture(QImage("C:\\Users\\mauro.grassia\\Desktop\\FoilPBR\\Foil_AO.png")));
+		s->resourceManager().registerTexture("Foil_Color", new A3D::Texture(QImage("C:\\Users\\mauro.grassia\\Desktop\\FoilPBR\\Foil_Color.png")));
+		s->resourceManager().registerTexture("Foil_Displacement", new A3D::Texture(QImage("C:\\Users\\mauro.grassia\\Desktop\\FoilPBR\\Foil_Displacement.png")));
+		s->resourceManager().registerTexture("Foil_Metalness", new A3D::Texture(QImage("C:\\Users\\mauro.grassia\\Desktop\\FoilPBR\\Foil_Metalness.png")));
+		s->resourceManager().registerTexture("Foil_Normal", new A3D::Texture(QImage("C:\\Users\\mauro.grassia\\Desktop\\FoilPBR\\Foil_NormalGL.png")));
+		s->resourceManager().registerTexture("Foil_Roughness", new A3D::Texture(QImage("C:\\Users\\mauro.grassia\\Desktop\\FoilPBR\\Foil_Roughness.png")));
+
+		pbrGold = new A3D::MaterialProperties(&s->resourceManager());
+		pbrGold->setTexture(s->resourceManager().getLoadedTexture("Foil_AO"), A3D::MaterialProperties::AOTextureSlot);
+		pbrGold->setTexture(s->resourceManager().getLoadedTexture("Foil_Color"), A3D::MaterialProperties::AlbedoTextureSlot);
+		pbrGold->setTexture(s->resourceManager().getLoadedTexture("Foil_Metalness"), A3D::MaterialProperties::MetallicTextureSlot);
+		pbrGold->setTexture(s->resourceManager().getLoadedTexture("Foil_Normal"), A3D::MaterialProperties::NormalTextureSlot);
+		pbrGold->setTexture(s->resourceManager().getLoadedTexture("Foil_Roughness"), A3D::MaterialProperties::RoughnessTextureSlot);
+
+		sampleModel = s->resourceManager().loadModel("Sample_OBJ", ":/A3D/sphere.obj");
 	}
 
-	A3D::Entity* e = s;
-	for(int i = 1; i <= 5; ++i) {
-		e = e->emplaceChildEntity<A3D::Entity>();
+	A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
+	{
+		A3D::Model* m = sampleModel->clone(true);
+		e->setModel(m);
 
-		if(sampleModel) {
-			e->setModel(sampleModel);
-			// g->materialProperties()->setTexture(s->resourceManager().getLoadedTexture("Qt-Logo"), A3D::MaterialProperties::AmbientTextureSlot);
-			//e->setPosition(QVector3D(0.f, 1.1f, 0.f));
-			//e->setScale(QVector3D(0.5f, 0.5f, 0.5f));
-			//e->setRotation(QQuaternion::fromAxisAndAngle(0.f, 1.f, 0.f, 15.f));
-			break;
+		for(auto it = m->groups().begin(); it != m->groups().end(); ++it) {
+			A3D::Group* g = it->second;
+			g->setMaterial(A3D::Material::standardMaterial(A3D::Material::PBRMaterial));
+			g->setMaterialProperties(pbrGold);
 		}
-		else {
-			A3D::Model* m = new A3D::Model(s);
+	}
+
+
+	{
+		QVector3D const fakeLights[4] = {
+			{1,7,0},
+			{-6,10,3},
+			{3,-7,0},
+			{6,-2,-5}
+		};
+		QVector3D const fakeLightColors[4] = {
+			{1,1,1},
+			{1,1,1},
+			{1,1,1},
+			{1,0,0}
+		};
+
+		for(int i = 0; i < 4; ++i) {
+			A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
+			A3D::Model* m = sampleModel->clone(true);
 			e->setModel(m);
-			A3D::Group* g = m->getOrAddGroup("Default");
+			e->setScale(QVector3D(0.2f,0.2f,0.2f));
+			e->setPosition(fakeLights[i]);
 
-			g->setMesh(A3D::Mesh::standardMesh(A3D::Mesh::CubeIndexedMesh));
-			// g->setMaterial(A3D::Material::standardMaterial(A3D::Material::SampleMaterial));
-			g->setMaterial(A3D::Material::standardMaterial(A3D::Material::PhongShadedMaterial));
-			g->setMaterialProperties(new A3D::MaterialProperties(&s->resourceManager()));
-			g->materialProperties()->setTexture(s->resourceManager().getLoadedTexture("Qt-Logo"), A3D::MaterialProperties::AmbientTextureSlot);
-
-			m->setPosition(QVector3D(0.f, 1.1f * i, 0.f));
-			m->setScale(QVector3D(0.5f * i, 0.5f * i, 0.5f * i));
-			m->setRotation(QQuaternion::fromAxisAndAngle(0.f, 1.f, 0.f, 15.f * i));
-
-			if(i == 3)
-				g->setRotation(QQuaternion::fromAxisAndAngle(1.f, 0.f, 0.f, 45.f));
+			for(auto it = m->groups().begin(); it != m->groups().end(); ++it) {
+				A3D::Group* g = it->second;
+				g->setMaterial(A3D::Material::standardMaterial(A3D::Material::SampleMaterial));
+				g->setMaterialProperties(new A3D::MaterialProperties(&s->resourceManager()));
+				g->materialProperties()->setRawValue("Color", fakeLightColors[i]);
+			}
 		}
 	}
 
-	A3D::View* v = new A3D::View;
-	v->camera().setPosition(QVector3D(0.f, 8.f, 12.f));
+
+	A3D::View* v = new A3D::View(&w);
+	v->camera().setPosition(QVector3D(10.f, 0.f, 2.f));
+	v->camera().setOrientationTarget(QVector3D(0.f, 0.f, 0.f));
 	v->setScene(s);
 	v->setRenderTimerEnabled(true);
 
 	w.setCentralWidget(v);
 	w.show();
 	int rv = a.exec();
-
-	v->setScene(nullptr);
-	delete s;
-	delete v;
 	return rv;
 }

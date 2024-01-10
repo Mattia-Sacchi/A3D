@@ -87,7 +87,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 
 			auto requireGroup = [&]() {
 				if(currentGroup == groups.end()) {
-					auto iter    = groups.insert_or_assign("[default]", GroupInfo{ 0 });
+					auto iter    = groups.insert_or_assign("[default]", GroupInfo{ 0, Mesh::Position3D | Mesh::TextureCoord2D | Mesh::Normal3D | Mesh::SmoothingGroup });
 					currentGroup = iter.first;
 				}
 			};
