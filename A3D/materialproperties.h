@@ -13,21 +13,19 @@ class MaterialProperties : public Resource {
 	Q_OBJECT
 public:
 	struct HighLevelProperties {
-		QVector4D diffuseColor;
-		QVector4D ambientColor;
-		QVector4D specularColor;
-		QVector4D emissiveColor;
-
+		inline HighLevelProperties()
+			: opacity(1.f) {}
 		float opacity;
-		float specularExponent;
 	};
 
 	enum TextureSlot {
-		DiffuseTextureSlot,
+		AlbedoTextureSlot,
+		NormalTextureSlot,
+		MetallicTextureSlot,
+		RoughnessTextureSlot,
+		AOTextureSlot,
 		AmbientTextureSlot,
 		SpecularTextureSlot,
-		EmissiveTextureSlot,
-		BumpMapTextureSlot,
 
 		MaxTextures = 8
 	};

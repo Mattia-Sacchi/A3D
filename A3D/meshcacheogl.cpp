@@ -18,8 +18,10 @@ MeshCacheOGL::MeshCacheOGL(Mesh* parent)
 MeshCacheOGL::~MeshCacheOGL() {
 	log(LC_Debug, "Destructor: MeshCacheOGL");
 
-	if(m_meshUBO != 0)
+	if(m_meshUBO) {
 		QOpenGLContext::currentContext()->functions()->glDeleteBuffers(1, &m_meshUBO);
+		m_meshUBO = 0;
+	}
 }
 
 void MeshCacheOGL::render(CoreGLFunctions* gl, QMatrix4x4 const& modelMatrix, QMatrix4x4 const& viewMatrix, QMatrix4x4 const& projMatrix) {

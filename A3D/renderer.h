@@ -14,7 +14,8 @@ protected:
 
 public:
 	struct DrawInfo {
-		QMatrix4x4 m_calculatedMatrix;
+		Scene* m_scene;
+		QMatrix4x4 m_modelMatrix;
 		QMatrix4x4 m_projMatrix;
 		QMatrix4x4 m_viewMatrix;
 	};
@@ -33,9 +34,12 @@ public:
 
 	void PreLoadEntityTree(Entity*);
 	void CleanupRenderCache();
-	void DrawAll(Entity* root, Camera const& camera);
+	void DrawAll(Scene* root, Camera const& camera);
 
 protected:
+	virtual void BeginDrawing(Camera const&);
+	virtual void EndDrawing();
+
 	virtual void BeginOpaque();
 	virtual void EndOpaque();
 	virtual void BeginTranslucent();

@@ -1,23 +1,53 @@
 #version 330 core
 
-in vec2 texCoord;
 out vec4 fragColor;
 
-uniform sampler2D TextureSlot0;
+in VS_OUT {
+	vec3 Pos;
+	vec2 TexCoord;
+	vec3 Normal;
+} fsIn;
 
-/*
-layout (std140) uniform ShaderData {
-	vec4 diffuse;
-	vec4 ambient;
-	vec4 specular;
-	vec4 emissive;
-	float opacity;
-	float specularExponent;
-	float paddingA;
-	float paddingB;
-};*/
+uniform sampler2D DiffuseTexture;
+uniform sampler2D AmbientTexture;
+uniform sampler2D SpecularTexture;
 
 void main() {
-	vec4 texDiffuseColor = texture(TextureSlot0, texCoord);
-	fragColor = texDiffuseColor;
+	vec4 diffuseMatColor = vec4(0, 0, 1, 1);
+	vec4 ambientMatColor = vec4(0, 1, 0, 1);
+	vec4 specularMatColor = vec4(1, 0, 0, 1);
+	
+	vec3 lightPos = vec3(0, 30, 0);
+	vec3 eyePos = vec3(0, 0, 0);
+	float specularExponent = 32.0;
+	
+	float diffuseStrength = 0;
+	float ambientStrength = 0.05;
+	float specularStrength = 0;
+	
+	// Calculate lighting strengths
+	{
+		vec3 lightDir = normalize(lightPos - fsIn.Pos);
+		vec3 normal = normalize(fsIn.Normal);
+		
+		// Diffuse
+		diffuseStrength = max(dot(lightDir, normal), 0.0);
+		
+		// Specular
+		vec3 viewDir = normalize(eyePos - fsIn.Pos);
+		vec3 reflectDir = reflect(-lightDir, normal);
+		vec3 halfwayDir = normalize(lightDir + viewDir);
+		
+		specularStrength = pow(max(dot(normal, halfwayDir), 0.0), specularExponent);
+	}
+	
+	vec4 diffuseColor = texture(DiffuseTexture, fsIn.TexCoord) * diffuseMatColor;
+	vec4 ambientColor = texture(AmbientTexture, fsIn.TexCoord) * ambientMatColor;
+	vec4 specularColor = texture(SpecularTexture, fsIn.TexCoord) * specularMatColor;
+	
+	fragColor = vec4(
+		(diffuseColor.rgb * diffuseStrength)
+		+ (ambientColor.rgb * ambientStrength)
+		+ (specularColor.rgb * specularStrength)
+	, 1.0);
 }

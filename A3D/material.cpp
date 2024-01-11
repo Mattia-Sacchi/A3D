@@ -22,6 +22,10 @@ Material* Material::standardMaterial(StandardMaterial stdMat) {
 		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/PhongShadedMaterial.vert");
 		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/PhongShadedMaterial.frag");
 		break;
+	case PBRMaterial:
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/PBRMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/PBRMaterial.frag");
+		break;
 	}
 	newMat.invalidateCache();
 	return &newMat;

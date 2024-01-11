@@ -26,7 +26,8 @@ public:
 
 	enum StandardMaterial {
 		SampleMaterial,
-		PhongShadedMaterial
+		PhongShadedMaterial,
+		PBRMaterial,
 	};
 	static Material* standardMaterial(StandardMaterial);
 
