@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/A3D">
+        <file>Samples/rustediron2_basecolor.png</file>
+        <file>Samples/rustediron2_metallic.png</file>
+        <file>Samples/rustediron2_normal.png</file>
+        <file>Samples/rustediron2_roughness.png</file>
+    </qresource>
+</RCC>

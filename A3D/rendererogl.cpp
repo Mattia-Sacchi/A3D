@@ -5,7 +5,8 @@ namespace A3D {
 RendererOGL::RendererOGL(QOpenGLContext* ctx, CoreGLFunctions* gl)
 	: Renderer(),
 	  m_context(ctx),
-	  m_gl(gl) {
+	  m_gl(gl),
+	  m_sceneUBO(0) {
 	log(LC_Debug, "Constructor: RendererOGL");
 }
 
@@ -44,10 +45,43 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 			tCache->applyToSlot(m_gl, static_cast<GLuint>(i));
 		}
 	}
-	meshCache->render(m_gl, drawInfo.m_calculatedMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
+	meshCache->render(m_gl, drawInfo.m_modelMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
 
 	if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent || matProp->isTranslucent())
 		m_gl->glEnable(GL_CULL_FACE);
+}
+
+void RendererOGL::BeginDrawing(Camera const& cam) {
+	if(!m_sceneUBO) {
+		m_gl->glGenBuffers(1, &m_sceneUBO);
+
+		if(!m_sceneUBO)
+			return;
+
+		m_gl->glBindBuffer(GL_UNIFORM_BUFFER, m_sceneUBO);
+		m_gl->glBufferData(GL_UNIFORM_BUFFER, sizeof(m_sceneData), nullptr, GL_DYNAMIC_DRAW);
+		m_gl->glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
+
+
+	m_sceneData.m_cameraPos = cam.position();
+	m_sceneData.m_lightPos[0]= QVector4D(1.f, 7.f, 0.f, 0.f);
+	m_sceneData.m_lightColor[0]= QVector4D(1.f, 1.f, 1.f, 2000.f);
+	m_sceneData.m_lightPos[1]= QVector4D(-6.f, 10.f, 3.f, 0.f);
+	m_sceneData.m_lightColor[1]= QVector4D(1.f, 1.f, 1.f, 2000.);
+	m_sceneData.m_lightPos[2]= QVector4D(3.f, -7.f, 0.f, 0.f);
+	m_sceneData.m_lightColor[2]= QVector4D(1.f, 1.f, 1.f, 200.f);
+	m_sceneData.m_lightPos[3]= QVector4D(6.f, -2.f, -5.f, 0.f);
+	m_sceneData.m_lightColor[3]= QVector4D(1.f, 0.f, 0.f, 6000.f);
+
+	m_gl->glBindBuffer(GL_UNIFORM_BUFFER, m_sceneUBO);
+	m_gl->glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(m_sceneData), &m_sceneData);
+	m_gl->glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	m_gl->glBindBufferBase(GL_UNIFORM_BUFFER, RendererOGL::UBO_SceneBinding, m_sceneUBO);
+}
+void RendererOGL::EndDrawing() {
+
 }
 
 void RendererOGL::BeginOpaque() {
@@ -146,6 +180,10 @@ void RendererOGL::DeleteAllResources() {
 	Q_UNUSED(switcher);
 
 	Renderer::runDeleteOnAllResources();
+	if(m_sceneUBO) {
+		m_gl->glDeleteBuffers(1, &m_sceneUBO);
+		m_sceneUBO = 0;
+	}
 }
 
 void RendererOGL::PreLoadEntity(Entity* e) {
@@ -172,13 +210,13 @@ void RendererOGL::PreLoadEntity(Entity* e) {
 		if(mat)
 			buildMaterialCache(mat);
 
-		if(matProp)
+		if(matProp) {
 			buildMaterialPropertiesCache(matProp);
 
-		for(std::size_t i = 0; i < MaterialProperties::MaxTextures; ++i) {
-			Texture* t = matProp->texture(static_cast<MaterialProperties::TextureSlot>(i));
-			if(t)
-				buildTextureCache(t);
+			for(std::size_t i = 0; i < MaterialProperties::MaxTextures; ++i) {
+				if(Texture* t = matProp->texture(static_cast<MaterialProperties::TextureSlot>(i)))
+					buildTextureCache(t);
+			}
 		}
 	}
 }

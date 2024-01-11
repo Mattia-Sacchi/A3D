@@ -7,8 +7,6 @@ MaterialProperties::MaterialProperties(ResourceManager* resourceManager)
 	: Resource{ resourceManager },
 	  m_alwaysTranslucent(false) {
 	log(LC_Debug, "Constructor: MaterialProperties");
-	m_hlValues.opacity          = 1.f;
-	m_hlValues.specularExponent = 32.f;
 }
 
 MaterialProperties::~MaterialProperties() {

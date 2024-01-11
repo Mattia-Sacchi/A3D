@@ -38,6 +38,7 @@ private:
 
 	GLuint m_meshUBO_index;
 	GLuint m_matpropUBO_index;
+	GLuint m_sceneUBO_index;
 };
 
 }
