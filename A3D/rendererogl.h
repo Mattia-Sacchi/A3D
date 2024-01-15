@@ -31,8 +31,8 @@ public:
 	virtual void DeleteAllResources() override;
 
 protected:
-	virtual void BeginDrawing(Camera const&) override;
-	virtual void EndDrawing() override;
+	virtual void BeginDrawing(Camera const&, Scene const*) override;
+	virtual void EndDrawing(Scene const*) override;
 
 	virtual void BeginOpaque() override;
 	virtual void EndOpaque() override;
@@ -40,6 +40,11 @@ protected:
 	virtual void EndTranslucent() override;
 
 private:
+	enum {
+		LightCount = 4
+	};
+
+	void RefreshSceneUBO();
 	void DrawOpaque(Entity* root, QMatrix4x4 const& parentMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix, std::deque<Entity*>* translucentList);
 	void DrawTranslucent(std::deque<Entity*>& entities, QMatrix4x4 const& parentMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix);
 
@@ -51,6 +56,7 @@ private:
 	QPointer<QOpenGLContext> m_context;
 	CoreGLFunctions* m_gl;
 	std::vector<Entity*> m_translucentEntityBuffer;
+	std::vector<std::pair<std::size_t, Scene::PointLightInfo>> m_closestSceneLightsBuffer;
 
 	struct SceneUBO_Data {
 		QVector4D m_cameraPos;

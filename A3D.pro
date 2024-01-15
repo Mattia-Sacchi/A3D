@@ -28,7 +28,6 @@ SOURCES += \
     A3D/rendererogl.cpp \
     A3D/resource.cpp \
     A3D/resourcemanager.cpp \
-    A3D/resourcemanager_ms3d.cpp \
     A3D/resourcemanager_obj.cpp \
     A3D/scene.cpp \
     A3D/texture.cpp \

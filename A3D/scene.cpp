@@ -19,11 +19,17 @@ ResourceManager const& Scene::resourceManager() const {
 	return m_resourceManager;
 }
 
-/*void Scene::setAmbientLight(QVector3D const& ambientLight) {
-	m_ambientLight = ambientLight;
+Scene::PointLightInfo& Scene::getOrCreateLight(std::size_t id) {
+	return m_lights[id];
 }
-QVector3D Scene::ambientLight() const {
-	return m_ambientLight;
-}*/
+Scene::PointLightInfo const* Scene::getLight(std::size_t id) const {
+	auto it = m_lights.find(id);
+	if(it == m_lights.end())
+		return nullptr;
+	return &(it->second);
+}
+std::map<std::size_t, Scene::PointLightInfo> const& Scene::lights() const {
+	return m_lights;
+}
 
 }

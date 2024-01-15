@@ -1,4 +1,5 @@
 #include "A3D/rendererogl.h"
+#include <cstddef>
 
 namespace A3D {
 
@@ -26,6 +27,31 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 	if(!mesh || !mat || !matProp)
 		return;
 
+	{
+		SceneUBO_Data newSceneData = m_sceneData;
+		if(m_closestSceneLightsBuffer.capacity() < LightCount)
+			m_closestSceneLightsBuffer.reserve(LightCount);
+
+		getClosestSceneLights(drawInfo.m_groupPosition, LightCount, m_closestSceneLightsBuffer);
+
+		std::size_t lightCount = std::min<std::size_t>(LightCount, m_closestSceneLightsBuffer.size());
+
+		for(std::size_t i = 0; i < lightCount; ++i) {
+			newSceneData.m_lightPos[i] = QVector4D(m_closestSceneLightsBuffer[i].second.position, 0.f);
+			newSceneData.m_lightColor[i] = m_closestSceneLightsBuffer[i].second.color;
+		}
+		for(std::size_t i = lightCount; i < LightCount; ++i) {
+			newSceneData.m_lightColor[i] = QVector4D(0.f, 0.f, 0.f, 0.f);
+			newSceneData.m_lightPos[i] = QVector4D(0.f, 0.f, 0.f, -1.f);
+		}
+
+		if(std::memcmp(&m_sceneData, &newSceneData, sizeof(m_sceneData))) {
+			std::memcpy(&m_sceneData, &newSceneData, sizeof(m_sceneData));
+			RefreshSceneUBO();
+		}
+	}
+
+
 	MeshCacheOGL* meshCache                  = buildMeshCache(mesh);
 	MaterialCacheOGL* matCache               = buildMaterialCache(mat);
 	MaterialPropertiesCacheOGL* matPropCache = buildMaterialPropertiesCache(matProp);
@@ -51,7 +77,23 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 		m_gl->glEnable(GL_CULL_FACE);
 }
 
-void RendererOGL::BeginDrawing(Camera const& cam) {
+
+void RendererOGL::RefreshSceneUBO() {
+	if(!m_sceneUBO)
+		return;
+	m_gl->glBindBuffer(GL_UNIFORM_BUFFER, m_sceneUBO);
+	m_gl->glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(m_sceneData), &m_sceneData);
+	m_gl->glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void RendererOGL::BeginDrawing(Camera const& cam, Scene const* scene) {
+	Renderer::BeginDrawing(cam, scene);
+	m_gl->glDisable(GL_BLEND);
+	m_gl->glEnable(GL_CULL_FACE);
+	m_gl->glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	m_gl->glClearColor(0.f, 0.f, 0.f, 0.f);
+	m_gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	if(!m_sceneUBO) {
 		m_gl->glGenBuffers(1, &m_sceneUBO);
 
@@ -63,25 +105,18 @@ void RendererOGL::BeginDrawing(Camera const& cam) {
 		m_gl->glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
-
-	m_sceneData.m_cameraPos = cam.position();
-	m_sceneData.m_lightPos[0]= QVector4D(1.f, 7.f, 0.f, 0.f);
-	m_sceneData.m_lightColor[0]= QVector4D(1.f, 1.f, 1.f, 2000.f);
-	m_sceneData.m_lightPos[1]= QVector4D(-6.f, 10.f, 3.f, 0.f);
-	m_sceneData.m_lightColor[1]= QVector4D(1.f, 1.f, 1.f, 2000.);
-	m_sceneData.m_lightPos[2]= QVector4D(3.f, -7.f, 0.f, 0.f);
-	m_sceneData.m_lightColor[2]= QVector4D(1.f, 1.f, 1.f, 200.f);
-	m_sceneData.m_lightPos[3]= QVector4D(6.f, -2.f, -5.f, 0.f);
-	m_sceneData.m_lightColor[3]= QVector4D(1.f, 0.f, 0.f, 6000.f);
-
-	m_gl->glBindBuffer(GL_UNIFORM_BUFFER, m_sceneUBO);
-	m_gl->glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(m_sceneData), &m_sceneData);
-	m_gl->glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	if(m_sceneData.m_cameraPos != cam.position()) {
+		m_sceneData.m_cameraPos = cam.position();
+		m_gl->glBindBuffer(GL_UNIFORM_BUFFER, m_sceneUBO);
+		m_gl->glBufferSubData(GL_UNIFORM_BUFFER, offsetof(SceneUBO_Data, m_cameraPos), sizeof(m_sceneData.m_cameraPos), &m_sceneData.m_cameraPos);
+		m_gl->glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
 
 	m_gl->glBindBufferBase(GL_UNIFORM_BUFFER, RendererOGL::UBO_SceneBinding, m_sceneUBO);
 }
-void RendererOGL::EndDrawing() {
 
+void RendererOGL::EndDrawing(Scene const* scene) {
+	Renderer::EndDrawing(scene);
 }
 
 void RendererOGL::BeginOpaque() {

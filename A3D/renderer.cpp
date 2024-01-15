@@ -27,7 +27,8 @@ Renderer* Renderer::getRenderer(std::uintptr_t rendererID) {
 }
 
 Renderer::Renderer()
-	: m_rendererID(0) {
+	: m_rendererID(0),
+	  m_currentScene(nullptr) {
 	log(LC_Debug, "Constructor: Renderer");
 	m_rendererID = Renderer::createRendererID(this);
 }
@@ -81,11 +82,12 @@ void Renderer::DrawAll(Scene* root, Camera const& camera) {
 	drawInfo.m_projMatrix = camera.getProjection();
 	drawInfo.m_viewMatrix = camera.getView();
 
-	this->BeginDrawing(camera);
+	this->BeginDrawing(camera, root);
 
 	this->BeginOpaque();
 	for(auto it = m_opaqueGroupBuffer.begin(); it != m_opaqueGroupBuffer.end(); ++it) {
 		drawInfo.m_modelMatrix = it->m_transform;
+		drawInfo.m_groupPosition = it->m_position;
 		this->Draw(it->m_group, drawInfo);
 	}
 	this->EndOpaque();
@@ -93,11 +95,12 @@ void Renderer::DrawAll(Scene* root, Camera const& camera) {
 	this->BeginTranslucent();
 	for(auto it = m_translucentGroupBuffer.begin(); it != m_translucentGroupBuffer.end(); ++it) {
 		drawInfo.m_modelMatrix = it->m_transform;
+		drawInfo.m_groupPosition = it->m_position;
 		this->Draw(it->m_group, drawInfo);
 	}
 	this->EndTranslucent();
 
-	this->EndDrawing();
+	this->EndDrawing(root);
 }
 
 void Renderer::BuildDrawLists(Camera const& camera, Entity* e, QMatrix4x4 const& cascadeMatrix) {
@@ -130,7 +133,8 @@ void Renderer::BuildDrawLists(Camera const& camera, Entity* e, QMatrix4x4 const&
 
 				gbd->m_group              = g;
 				gbd->m_transform          = baseMatrix * g->groupMatrix();
-				gbd->m_distanceFromCamera = QVector3D::dotProduct((gbd->m_transform * g->position()) - camera.position(), camera.forward());
+				gbd->m_position = (gbd->m_transform * g->position());
+				gbd->m_distanceFromCamera = QVector3D::dotProduct(gbd->m_position - camera.position(), camera.forward());
 			}
 		}
 	}
@@ -143,8 +147,8 @@ void Renderer::BuildDrawLists(Camera const& camera, Entity* e, QMatrix4x4 const&
 	}
 }
 
-void Renderer::BeginDrawing(Camera const&) {}
-void Renderer::EndDrawing() {}
+void Renderer::BeginDrawing(Camera const&, Scene const* scene) { m_currentScene = scene; }
+void Renderer::EndDrawing(Scene const*) { m_currentScene = nullptr; }
 void Renderer::BeginOpaque() {}
 void Renderer::EndOpaque() {}
 void Renderer::BeginTranslucent() {}
@@ -212,6 +216,31 @@ void Renderer::invalidateCache() {
 			continue;
 		tc->markDirty();
 	}
+}
+
+void Renderer::getClosestSceneLights(QVector3D const& pos, size_t desiredLightCount, std::vector<std::pair<std::size_t, Scene::PointLightInfo>>& result, Scene const* sceneOverride) {
+	if(!sceneOverride)
+		sceneOverride = m_currentScene;
+	if(!sceneOverride) {
+		result.resize(0);
+		return;
+	}
+
+	std::map<std::size_t, Scene::PointLightInfo> const& l = sceneOverride->lights();
+
+	result.resize(std::min<std::size_t>(desiredLightCount, l.size()));
+
+	std::partial_sort_copy(
+		l.begin(),
+		l.end(),
+		result.begin(),
+		result.end(),
+		[&](std::pair<std::size_t, Scene::PointLightInfo> const& l,
+	       std::pair<std::size_t, Scene::PointLightInfo> const& r) -> bool
+		{
+			return l.second.position.distanceToPoint(pos) < r.second.position.distanceToPoint(pos);
+		}
+	);
 }
 
 void Renderer::addToMaterialCaches(QPointer<MaterialCache> material) {

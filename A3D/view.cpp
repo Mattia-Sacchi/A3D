@@ -114,16 +114,7 @@ void View::paintGL() {
 	if(!m_initDoneGL)
 		return;
 
-	glDisable(GL_BLEND);
-	glEnable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
-
-	static float fVal = 0.f;
-	fVal += 1.f / 60.f;
-	if(fVal > 1.f)
-		fVal = 0.f;
-	glClearColor(1.f, 0.f, 0.f, 0.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Don't get fooled by the X/Y names....
 	// x is the pitch (vertical angle)
