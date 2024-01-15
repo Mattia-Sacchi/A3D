@@ -18,6 +18,7 @@ public:
 		QMatrix4x4 m_modelMatrix;
 		QMatrix4x4 m_projMatrix;
 		QMatrix4x4 m_viewMatrix;
+		QVector3D m_groupPosition;
 	};
 
 	virtual ~Renderer();
@@ -37,8 +38,8 @@ public:
 	void DrawAll(Scene* root, Camera const& camera);
 
 protected:
-	virtual void BeginDrawing(Camera const&);
-	virtual void EndDrawing();
+	virtual void BeginDrawing(Camera const&, Scene const*);
+	virtual void EndDrawing(Scene const*);
 
 	virtual void BeginOpaque();
 	virtual void EndOpaque();
@@ -51,6 +52,7 @@ protected:
 	void addToTextureCaches(QPointer<TextureCache>);
 	void runDeleteOnAllResources();
 	void invalidateCache();
+	void getClosestSceneLights(QVector3D const& pos, std::size_t desiredLightCount, std::vector<std::pair<std::size_t, Scene::PointLightInfo>>& result, Scene const* =nullptr);
 
 private:
 	void BuildDrawLists(Camera const& camera, Entity* root, QMatrix4x4 const& cascadeMatrix);
@@ -58,6 +60,7 @@ private:
 	struct GroupBufferData {
 		Group* m_group;
 		QMatrix4x4 m_transform;
+		QVector3D m_position;
 		float m_distanceFromCamera;
 	};
 
@@ -72,6 +75,8 @@ private:
 
 	std::vector<GroupBufferData> m_opaqueGroupBuffer;
 	std::vector<GroupBufferData> m_translucentGroupBuffer;
+
+	Scene const* m_currentScene;
 
 public:
 	static Renderer* getRenderer(std::uintptr_t rendererID);

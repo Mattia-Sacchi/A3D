@@ -27,7 +27,7 @@ vec3 getNormalFromMap()
 	vec3 Q1 = dFdx(WorldPos);
 	vec3 Q2 = dFdy(WorldPos);
 	vec2 st1 = dFdx(TexCoord);
-	vec2 st2 = dFdx(TexCoord);
+	vec2 st2 = dFdy(TexCoord);
 	
 	vec3 N = normalize(Normal);
 	vec3 T = normalize(Q1*st2.t - Q2*st1.t);
@@ -93,6 +93,9 @@ void main() {
 	vec3 sumDebug = vec3(0.0);
 	for(int i = 0; i < 4; ++i)
 	{
+		if(lightsPos[i].w <= -0.001f)
+			continue;
+
 		vec3 lightPos = lightsPos[i].xyz;
 		vec3 lightColor = (lightsColor[i].rgb) * (1 + lightsColor[i].w + lightsPos[i].w);
 
@@ -116,15 +119,13 @@ void main() {
 
 		float NdotL = max(dot(N, L), 0.0);
 		Lo += (kD * albedo / PI + specular) * radiance * NdotL;
-		//sumDebug += NdotL;
 	}
-	//sumDebug = vec3(Lo);
 
 	vec3 ambient = vec3(0.1) * albedo * ao;
 	vec3 color = ambient + Lo;
 
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0 / 2.2));
+
 	fragColor = vec4(color, albedoRGBA.a);
-	//fragColor = vec4(sumDebug, 1.0);
 }

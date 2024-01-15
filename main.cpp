@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QMainWindow>
 #include <QFile>
+#include <QDir>
 
 #include "A3D/view.h"
 
@@ -9,26 +10,45 @@ int main(int argc, char* argv[]) {
 	QMainWindow w;
 
 	A3D::Scene* s = new A3D::Scene(&w);
+	A3D::Scene::PointLightInfo& l = s->getOrCreateLight(0);
+	l.position = QVector3D(0.f, 2.2f, 5.f);
+	l.color = QVector4D(1.f, 1.f, 1.f, 500.f);
+
+	A3D::MaterialProperties* Concrete002 = nullptr;
+	A3D::MaterialProperties* Metal035 = nullptr;
 
 	A3D::Model* sampleModel = nullptr;
-	A3D::MaterialProperties* pbrGold = nullptr;
 
 	{
-		s->resourceManager().registerTexture("Foil_AO", new A3D::Texture(QImage("C:\\Users\\mauro.grassia\\Desktop\\FoilPBR\\Foil_AO.png")));
-		s->resourceManager().registerTexture("Foil_Color", new A3D::Texture(QImage("C:\\Users\\mauro.grassia\\Desktop\\FoilPBR\\Foil_Color.png")));
-		s->resourceManager().registerTexture("Foil_Displacement", new A3D::Texture(QImage("C:\\Users\\mauro.grassia\\Desktop\\FoilPBR\\Foil_Displacement.png")));
-		s->resourceManager().registerTexture("Foil_Metalness", new A3D::Texture(QImage("C:\\Users\\mauro.grassia\\Desktop\\FoilPBR\\Foil_Metalness.png")));
-		s->resourceManager().registerTexture("Foil_Normal", new A3D::Texture(QImage("C:\\Users\\mauro.grassia\\Desktop\\FoilPBR\\Foil_NormalGL.png")));
-		s->resourceManager().registerTexture("Foil_Roughness", new A3D::Texture(QImage("C:\\Users\\mauro.grassia\\Desktop\\FoilPBR\\Foil_Roughness.png")));
+		auto loadPBRMaterial = [s](QString path, QString baseName, QString fileExtension) -> A3D::MaterialProperties* {
+			A3D::MaterialProperties* matProperties = new A3D::MaterialProperties(&s->resourceManager());
+			static std::map<A3D::MaterialProperties::TextureSlot, QString> suffixes = {
+				{A3D::MaterialProperties::AlbedoTextureSlot, "Color"},
+				{A3D::MaterialProperties::NormalTextureSlot, "NormalGL"},
+				{A3D::MaterialProperties::MetallicTextureSlot, "Metallic"},
+				{A3D::MaterialProperties::RoughnessTextureSlot, "Roughness"},
+				{A3D::MaterialProperties::AOTextureSlot, "AO"},
+			};
 
-		pbrGold = new A3D::MaterialProperties(&s->resourceManager());
-		pbrGold->setTexture(s->resourceManager().getLoadedTexture("Foil_AO"), A3D::MaterialProperties::AOTextureSlot);
-		pbrGold->setTexture(s->resourceManager().getLoadedTexture("Foil_Color"), A3D::MaterialProperties::AlbedoTextureSlot);
-		pbrGold->setTexture(s->resourceManager().getLoadedTexture("Foil_Metalness"), A3D::MaterialProperties::MetallicTextureSlot);
-		pbrGold->setTexture(s->resourceManager().getLoadedTexture("Foil_Normal"), A3D::MaterialProperties::NormalTextureSlot);
-		pbrGold->setTexture(s->resourceManager().getLoadedTexture("Foil_Roughness"), A3D::MaterialProperties::RoughnessTextureSlot);
+			for(std::pair<A3D::MaterialProperties::TextureSlot, QString> const& suffix : qAsConst(suffixes)) {
+				QImage img(path + QDir::separator() + baseName + "_" + suffix.second + "." + fileExtension);
+				if(!img.isNull()) {
+					A3D::Texture* texture = new A3D::Texture(std::move(img), &s->resourceManager());
+					s->resourceManager().registerTexture(baseName + "_" + suffix.second, texture);
 
-		sampleModel = s->resourceManager().loadModel("Sample_OBJ", ":/A3D/sphere.obj");
+					matProperties->setTexture(texture, suffix.first);
+				}
+			}
+			return matProperties;
+		};
+
+		Concrete002 = loadPBRMaterial(":/A3D/Materials/Concrete002", "Concrete002_4K", "jpg");
+		Concrete002->setParent(&s->resourceManager()); // Just to get the clang static analyzer to piss off...
+
+		Metal035 = loadPBRMaterial(":/A3D/Materials/Metal035", "Metal035_2K-JPG", "jpg");
+		Metal035->setParent(&s->resourceManager()); // Just to get the clang static analyzer to piss off...
+
+		sampleModel = s->resourceManager().loadModel("Sphere", ":/A3D/Models/Sphere/Sphere.obj");
 	}
 
 	A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
@@ -39,38 +59,7 @@ int main(int argc, char* argv[]) {
 		for(auto it = m->groups().begin(); it != m->groups().end(); ++it) {
 			A3D::Group* g = it->second;
 			g->setMaterial(A3D::Material::standardMaterial(A3D::Material::PBRMaterial));
-			g->setMaterialProperties(pbrGold);
-		}
-	}
-
-
-	{
-		QVector3D const fakeLights[4] = {
-			{1,7,0},
-			{-6,10,3},
-			{3,-7,0},
-			{6,-2,-5}
-		};
-		QVector3D const fakeLightColors[4] = {
-			{1,1,1},
-			{1,1,1},
-			{1,1,1},
-			{1,0,0}
-		};
-
-		for(int i = 0; i < 4; ++i) {
-			A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
-			A3D::Model* m = sampleModel->clone(true);
-			e->setModel(m);
-			e->setScale(QVector3D(0.2f,0.2f,0.2f));
-			e->setPosition(fakeLights[i]);
-
-			for(auto it = m->groups().begin(); it != m->groups().end(); ++it) {
-				A3D::Group* g = it->second;
-				g->setMaterial(A3D::Material::standardMaterial(A3D::Material::SampleMaterial));
-				g->setMaterialProperties(new A3D::MaterialProperties(&s->resourceManager()));
-				g->materialProperties()->setRawValue("Color", fakeLightColors[i]);
-			}
+			g->setMaterialProperties(Metal035);
 		}
 	}
 
