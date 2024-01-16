@@ -26,20 +26,65 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 	case CubeIndexedMesh:
 		newMesh.setDrawMode(IndexedTriangles);
 
-		newMesh.vertices().resize(8);
-		newMesh.vertices()[0].Position3D = QVector3D(-0.5f, -0.5f, +0.5f);
-		newMesh.vertices()[1].Position3D = QVector3D(+0.5f, -0.5f, +0.5f);
-		newMesh.vertices()[2].Position3D = QVector3D(+0.5f, +0.5f, +0.5f);
-		newMesh.vertices()[3].Position3D = QVector3D(-0.5f, +0.5f, +0.5f);
-		newMesh.vertices()[4].Position3D = QVector3D(-0.5f, -0.5f, -0.5f);
-		newMesh.vertices()[5].Position3D = QVector3D(+0.5f, -0.5f, -0.5f);
-		newMesh.vertices()[6].Position3D = QVector3D(+0.5f, +0.5f, -0.5f);
-		newMesh.vertices()[7].Position3D = QVector3D(-0.5f, +0.5f, -0.5f);
+		{
+			struct {
+				QVector3D pos;
+				QVector3D norm;
+				QVector2D tex;
+			} vertices[36] = {
+				{{-1.0f, -1.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, {0.0f, 0.0f}},
+				{{ 1.0f,  1.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, {1.0f, 1.0f}},
+				{{ 1.0f, -1.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, {1.0f, 0.0f}},
+				{{ 1.0f,  1.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, {1.0f, 1.0f}},
+				{{-1.0f, -1.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, {0.0f, 0.0f}},
+				{{-1.0f,  1.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, {0.0f, 1.0f}},
+				{{-1.0f, -1.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
+				{{ 1.0f, -1.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}},
+				{{ 1.0f,  1.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
+				{{ 1.0f,  1.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
+				{{-1.0f,  1.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}},
+				{{-1.0f, -1.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
+				{{-1.0f,  1.0f,  1.0f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
+				{{-1.0f,  1.0f, -1.0f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 1.0f}},
+				{{-1.0f, -1.0f, -1.0f}, {-1.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
+				{{-1.0f, -1.0f, -1.0f}, {-1.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
+				{{-1.0f, -1.0f,  1.0f}, {-1.0f,  0.0f,  0.0f}, {0.0f, 0.0f}},
+				{{-1.0f,  1.0f,  1.0f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
+				{{ 1.0f,  1.0f,  1.0f}, { 1.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
+				{{ 1.0f, -1.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
+				{{ 1.0f,  1.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {1.0f, 1.0f}},
+				{{ 1.0f, -1.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
+				{{ 1.0f,  1.0f,  1.0f}, { 1.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
+				{{ 1.0f, -1.0f,  1.0f}, { 1.0f,  0.0f,  0.0f}, {0.0f, 0.0f}},
+				{{-1.0f, -1.0f, -1.0f}, { 0.0f, -1.0f,  0.0f}, {0.0f, 1.0f}},
+				{{ 1.0f, -1.0f, -1.0f}, { 0.0f, -1.0f,  0.0f}, {1.0f, 1.0f}},
+				{{ 1.0f, -1.0f,  1.0f}, { 0.0f, -1.0f,  0.0f}, {1.0f, 0.0f}},
+				{{ 1.0f, -1.0f,  1.0f}, { 0.0f, -1.0f,  0.0f}, {1.0f, 0.0f}},
+				{{-1.0f, -1.0f,  1.0f}, { 0.0f, -1.0f,  0.0f}, {0.0f, 0.0f}},
+				{{-1.0f, -1.0f, -1.0f}, { 0.0f, -1.0f,  0.0f}, {0.0f, 1.0f}},
+				{{-1.0f,  1.0f, -1.0f}, { 0.0f,  1.0f,  0.0f}, {0.0f, 1.0f}},
+				{{ 1.0f,  1.0f , 1.0f}, { 0.0f,  1.0f,  0.0f}, {1.0f, 0.0f}},
+				{{ 1.0f,  1.0f, -1.0f}, { 0.0f,  1.0f,  0.0f}, {1.0f, 1.0f}},
+				{{ 1.0f,  1.0f,  1.0f}, { 0.0f,  1.0f,  0.0f}, {1.0f, 0.0f}},
+				{{-1.0f,  1.0f, -1.0f}, { 0.0f,  1.0f,  0.0f}, {0.0f, 1.0f}},
+				{{-1.0f,  1.0f,  1.0f}, { 0.0f,  1.0f,  0.0f}, {0.0f, 0.0f}}
+			};
 
-		newMesh.setContents(Position3D);
+			newMesh.vertices().reserve(36);
 
-		for(std::uint32_t i: { 0, 1, 2, 2, 3, 0, 1, 5, 6, 6, 2, 1, 7, 6, 5, 5, 4, 7, 4, 0, 3, 3, 7, 4, 4, 5, 1, 1, 0, 4, 3, 2, 6, 6, 7, 3 })
-			newMesh.indices().push_back(i);
+			for(auto it = std::begin(vertices); it != std::end(vertices); ++it) {
+				newMesh.indices().push_back(newMesh.vertices().size());
+				newMesh.vertices().push_back(A3D::Mesh::Vertex());
+
+				A3D::Mesh::Vertex& v = newMesh.vertices().back();
+				v.Position3D = it->pos;
+				v.Normal3D = it->norm;
+				v.TextureCoord2D = it->tex;
+			}
+		}
+
+		newMesh.setContents(Position3D | Normal3D | TextureCoord2D);
+		newMesh.optimizeIndices();
 		break;
 	};
 	newMesh.invalidateCache();

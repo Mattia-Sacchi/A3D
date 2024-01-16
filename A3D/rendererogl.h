@@ -7,6 +7,7 @@
 #include "A3D/materialcacheogl.h"
 #include "A3D/materialpropertiescacheogl.h"
 #include "A3D/texturecacheogl.h"
+#include "A3D/cubemapcacheogl.h"
 #include <queue>
 
 namespace A3D {
@@ -28,6 +29,7 @@ public:
 	virtual void Delete(MaterialCache*) override;
 	virtual void Delete(MaterialPropertiesCache*) override;
 	virtual void Delete(TextureCache*) override;
+	virtual void Delete(CubemapCache*) override;
 	virtual void DeleteAllResources() override;
 
 protected:
@@ -52,11 +54,18 @@ private:
 	MaterialCacheOGL* buildMaterialCache(Material*);
 	MaterialPropertiesCacheOGL* buildMaterialPropertiesCache(MaterialProperties*);
 	TextureCacheOGL* buildTextureCache(Texture*);
+	CubemapCacheOGL* buildCubemapCache(Cubemap*);
 
 	QPointer<QOpenGLContext> m_context;
 	CoreGLFunctions* m_gl;
 	std::vector<Entity*> m_translucentEntityBuffer;
-	std::vector<std::pair<std::size_t, Scene::PointLightInfo>> m_closestSceneLightsBuffer;
+	std::vector<std::pair<std::size_t, PointLightInfo>> m_closestSceneLightsBuffer;
+
+	// Skybox data
+	A3D::Material* m_skyboxMaterial;
+	A3D::Mesh* m_skyboxMesh;
+	QMatrix4x4 m_skyboxView;
+	QMatrix4x4 m_skyboxProj;
 
 	struct SceneUBO_Data {
 		QVector4D m_cameraPos;

@@ -47,6 +47,7 @@ void Renderer::CleanupRenderCache() {
 	cleanupQPointers(m_materialCaches);
 	cleanupQPointers(m_materialCaches);
 	cleanupQPointers(m_textureCaches);
+	cleanupQPointers(m_cubemapCaches);
 }
 
 bool Renderer::OpaqueSorter(GroupBufferData const& a, GroupBufferData const& b) {
@@ -186,6 +187,14 @@ void Renderer::runDeleteOnAllResources() {
 		delete tc;
 	}
 	m_textureCaches.clear();
+
+	for(auto it = m_cubemapCaches.begin(); it != m_cubemapCaches.end(); ++it) {
+		QPointer<CubemapCache>& cc = *it;
+		if(cc.isNull())
+			continue;
+		delete cc;
+	}
+	m_cubemapCaches.clear();
 }
 
 void Renderer::invalidateCache() {
@@ -216,9 +225,16 @@ void Renderer::invalidateCache() {
 			continue;
 		tc->markDirty();
 	}
+
+	for(auto it = m_cubemapCaches.begin(); it != m_cubemapCaches.end(); ++it) {
+		QPointer<CubemapCache>& cc = *it;
+		if(cc.isNull())
+			continue;
+		cc->markDirty();
+	}
 }
 
-void Renderer::getClosestSceneLights(QVector3D const& pos, size_t desiredLightCount, std::vector<std::pair<std::size_t, Scene::PointLightInfo>>& result, Scene const* sceneOverride) {
+void Renderer::getClosestSceneLights(QVector3D const& pos, size_t desiredLightCount, std::vector<std::pair<std::size_t, PointLightInfo>>& result, Scene const* sceneOverride) {
 	if(!sceneOverride)
 		sceneOverride = m_currentScene;
 	if(!sceneOverride) {
@@ -226,7 +242,7 @@ void Renderer::getClosestSceneLights(QVector3D const& pos, size_t desiredLightCo
 		return;
 	}
 
-	std::map<std::size_t, Scene::PointLightInfo> const& l = sceneOverride->lights();
+	std::map<std::size_t, PointLightInfo> const& l = sceneOverride->lights();
 
 	result.resize(std::min<std::size_t>(desiredLightCount, l.size()));
 
@@ -235,12 +251,16 @@ void Renderer::getClosestSceneLights(QVector3D const& pos, size_t desiredLightCo
 		l.end(),
 		result.begin(),
 		result.end(),
-		[&](std::pair<std::size_t, Scene::PointLightInfo> const& l,
-	       std::pair<std::size_t, Scene::PointLightInfo> const& r) -> bool
+		[&](std::pair<std::size_t, PointLightInfo> const& l,
+	       std::pair<std::size_t, PointLightInfo> const& r) -> bool
 		{
 			return l.second.position.distanceToPoint(pos) < r.second.position.distanceToPoint(pos);
 		}
 	);
+}
+
+Scene const* Renderer::currentScene() const {
+	return m_currentScene;
 }
 
 void Renderer::addToMaterialCaches(QPointer<MaterialCache> material) {
@@ -257,6 +277,10 @@ void Renderer::addToMeshCaches(QPointer<MeshCache> mesh) {
 
 void Renderer::addToTextureCaches(QPointer<TextureCache> texture) {
 	m_textureCaches.push_back(std::move(texture));
+}
+
+void Renderer::addToCubemapCaches(QPointer<CubemapCache> cubemap) {
+	m_cubemapCaches.push_back(std::move(cubemap));
 }
 
 }

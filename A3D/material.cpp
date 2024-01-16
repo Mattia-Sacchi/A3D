@@ -14,17 +14,13 @@ Material* Material::standardMaterial(StandardMaterial stdMat) {
 
 	Material& newMat = standardMaterials[stdMat];
 	switch(stdMat) {
-	case SampleMaterial:
-		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/SampleMaterial.vert");
-		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/SampleMaterial.frag");
-		break;
-	case PhongShadedMaterial:
-		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/PhongShadedMaterial.vert");
-		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/PhongShadedMaterial.frag");
-		break;
 	case PBRMaterial:
 		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/PBRMaterial.vert");
 		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/PBRMaterial.frag");
+		break;
+	case SkyboxMaterial:
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/SkyboxMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/SkyboxMaterial.frag");
 		break;
 	}
 	newMat.invalidateCache();

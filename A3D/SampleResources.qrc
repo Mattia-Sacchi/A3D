@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/A3D">
+        <file>SampleResources/Materials/Concrete002/Concrete002_4K_Color.jpg</file>
+        <file>SampleResources/Materials/Concrete002/Concrete002_4K_Displacement.jpg</file>
+        <file>SampleResources/Materials/Concrete002/Concrete002_4K_NormalGL.jpg</file>
+        <file>SampleResources/Materials/Concrete002/Concrete002_4K_Roughness.jpg</file>
+        <file>SampleResources/Materials/Concrete002/License.txt</file>
+        <file>SampleResources/Materials/Cubemap001/License.txt</file>
+        <file>SampleResources/Materials/Cubemap001/nx.png</file>
+        <file>SampleResources/Materials/Cubemap001/ny.png</file>
+        <file>SampleResources/Materials/Cubemap001/nz.png</file>
+        <file>SampleResources/Materials/Cubemap001/px.png</file>
+        <file>SampleResources/Materials/Cubemap001/py.png</file>
+        <file>SampleResources/Materials/Cubemap001/pz.png</file>
+        <file>SampleResources/Materials/Metal035/License.txt</file>
+        <file>SampleResources/Materials/Metal035/Metal035_2K-JPG_Color.jpg</file>
+        <file>SampleResources/Materials/Metal035/Metal035_2K-JPG_Displacement.jpg</file>
+        <file>SampleResources/Materials/Metal035/Metal035_2K-JPG_Metalness.jpg</file>
+        <file>SampleResources/Materials/Metal035/Metal035_2K-JPG_NormalGL.jpg</file>
+        <file>SampleResources/Materials/Metal035/Metal035_2K-JPG_Roughness.jpg</file>
+        <file>SampleResources/Models/Sphere/Sphere.obj</file>
+    </qresource>
+</RCC>

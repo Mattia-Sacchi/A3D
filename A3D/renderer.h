@@ -31,6 +31,7 @@ public:
 	virtual void Delete(MaterialCache*)           = 0;
 	virtual void Delete(MaterialPropertiesCache*) = 0;
 	virtual void Delete(TextureCache*)            = 0;
+	virtual void Delete(CubemapCache*)            = 0;
 	virtual void DeleteAllResources()             = 0;
 
 	void PreLoadEntityTree(Entity*);
@@ -50,9 +51,11 @@ protected:
 	void addToMaterialCaches(QPointer<MaterialCache>);
 	void addToMaterialPropertiesCaches(QPointer<MaterialPropertiesCache>);
 	void addToTextureCaches(QPointer<TextureCache>);
+	void addToCubemapCaches(QPointer<CubemapCache>);
 	void runDeleteOnAllResources();
 	void invalidateCache();
-	void getClosestSceneLights(QVector3D const& pos, std::size_t desiredLightCount, std::vector<std::pair<std::size_t, Scene::PointLightInfo>>& result, Scene const* =nullptr);
+	void getClosestSceneLights(QVector3D const& pos, std::size_t desiredLightCount, std::vector<std::pair<std::size_t, PointLightInfo>>& result, Scene const* =nullptr);
+	Scene const* currentScene() const;
 
 private:
 	void BuildDrawLists(Camera const& camera, Entity* root, QMatrix4x4 const& cascadeMatrix);
@@ -72,6 +75,7 @@ private:
 	std::vector<QPointer<MaterialCache>> m_materialCaches;
 	std::vector<QPointer<MaterialPropertiesCache>> m_materialPropertiesCaches;
 	std::vector<QPointer<TextureCache>> m_textureCaches;
+	std::vector<QPointer<CubemapCache>> m_cubemapCaches;
 
 	std::vector<GroupBufferData> m_opaqueGroupBuffer;
 	std::vector<GroupBufferData> m_translucentGroupBuffer;

@@ -355,7 +355,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 		MaterialProperties* matProp                      = new MaterialProperties(this);
 		MaterialProperties::HighLevelProperties& hlProps = matProp->highLevelProperties();
 		newGroup->setMaterialProperties(matProp);
-		newGroup->setMaterial(Material::standardMaterial(Material::PhongShadedMaterial));
+		newGroup->setMaterial(Material::standardMaterial(Material::PBRMaterial));
 
 		auto foundMaterial = materials.find(gi.material);
 		if(foundMaterial != materials.end()) {
@@ -385,7 +385,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 				}
 
 				if(t)
-					matProp->setTexture(t, MaterialProperties::AmbientTextureSlot);
+					matProp->setTexture(t, MaterialProperties::AlbedoTextureSlot);
 			}
 
 			if(!mat.specularMap.isEmpty()) {
@@ -397,9 +397,10 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 				}
 
 				if(t)
-					matProp->setTexture(t, MaterialProperties::SpecularTextureSlot);
+					matProp->setTexture(t, MaterialProperties::MetallicTextureSlot);
 			}
 
+			/*
 			if(!mat.emissiveMap.isEmpty()) {
 				Texture* t = getLoadedTexture(mat.emissiveMap);
 				if(!t) {
@@ -411,6 +412,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 				if(t)
 					matProp->setTexture(t, MaterialProperties::MetallicTextureSlot);
 			}
+			*/
 
 			if(!mat.bumpMap.isEmpty()) {
 				Texture* t = getLoadedTexture(mat.emissiveMap);

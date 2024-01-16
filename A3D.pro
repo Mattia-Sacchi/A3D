@@ -12,6 +12,9 @@ CONFIG += c++17
 SOURCES += \
     A3D/camera.cpp \
     A3D/common.cpp \
+    A3D/cubemap.cpp \
+    A3D/cubemapcache.cpp \
+    A3D/cubemapcacheogl.cpp \
     A3D/entity.cpp \
     A3D/group.cpp \
     A3D/material.cpp \
@@ -39,6 +42,9 @@ SOURCES += \
 HEADERS += \
 	A3D/camera.h \
 	A3D/common.h \
+	A3D/cubemap.h \
+	A3D/cubemapcache.h \
+	A3D/cubemapcacheogl.h \
 	A3D/entity.h \
 	A3D/group.h \
 	A3D/material.h \
@@ -67,4 +73,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-	A3D/A3D.qrc
+	A3D/A3D.qrc \
+	A3D/SampleResources.qrc

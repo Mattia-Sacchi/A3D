@@ -24,10 +24,12 @@ public:
 		MetallicTextureSlot,
 		RoughnessTextureSlot,
 		AOTextureSlot,
-		AmbientTextureSlot,
-		SpecularTextureSlot,
+		EnvMapTextureSlot,
 
-		MaxTextures = 8
+		MaxTextures = 8,
+
+		// Aliases
+		CubeMapTextureSlot = EnvMapTextureSlot,
 	};
 
 	MaterialProperties(ResourceManager* = nullptr);
