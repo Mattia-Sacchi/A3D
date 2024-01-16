@@ -25,9 +25,8 @@ public:
 	Q_DECLARE_FLAGS(RenderOptions, RenderOption)
 
 	enum StandardMaterial {
-		SampleMaterial,
-		PhongShadedMaterial,
 		PBRMaterial,
+		SkyboxMaterial,
 	};
 	static Material* standardMaterial(StandardMaterial);
 

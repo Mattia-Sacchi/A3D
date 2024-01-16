@@ -152,10 +152,11 @@ void MaterialCacheOGL::update(CoreGLFunctions* gl) {
 
 	// Phong mode
 	applyUniform("DiffuseTexture", GLuint(MaterialProperties::AlbedoTextureSlot));
-	applyUniform("AmbientTexture", GLuint(MaterialProperties::AmbientTextureSlot));
-	applyUniform("SpecularTexture", GLuint(MaterialProperties::SpecularTextureSlot));
 	applyUniform("EmissiveTexture", GLuint(MaterialProperties::MetallicTextureSlot));
 	applyUniform("BumpMapTexture", GLuint(MaterialProperties::NormalTextureSlot));
+
+	applyUniform("EnvironmentMapTexture", GLuint(MaterialProperties::EnvMapTextureSlot));
+	applyUniform("CubeMapTexture", GLuint(MaterialProperties::CubeMapTextureSlot));
 
 	m_meshUBO_index    = gl->glGetUniformBlockIndex(m_program->programId(), "MeshUBO_Data");
 	m_matpropUBO_index = gl->glGetUniformBlockIndex(m_program->programId(), "MaterialUBO_Data");

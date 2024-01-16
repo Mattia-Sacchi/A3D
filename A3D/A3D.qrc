@@ -1,22 +1,8 @@
 <RCC>
     <qresource prefix="/">
-        <file>A3D/SampleMaterial.frag</file>
-        <file>A3D/SampleMaterial.vert</file>
-        <file>A3D/PhongShadedMaterial.frag</file>
-        <file>A3D/PhongShadedMaterial.vert</file>
         <file>A3D/PBRMaterial.vert</file>
         <file>A3D/PBRMaterial.frag</file>
-        <file>A3D/Materials/Concrete002/Concrete002_4K_Color.jpg</file>
-        <file>A3D/Materials/Concrete002/Concrete002_4K_Displacement.jpg</file>
-        <file>A3D/Materials/Concrete002/Concrete002_4K_NormalGL.jpg</file>
-        <file>A3D/Materials/Concrete002/Concrete002_4K_Roughness.jpg</file>
-        <file>A3D/Materials/Concrete002/License.txt</file>
-        <file>A3D/Models/Sphere/Sphere.obj</file>
-        <file>A3D/Materials/Metal035/License.txt</file>
-        <file>A3D/Materials/Metal035/Metal035_2K-JPG_Color.jpg</file>
-        <file>A3D/Materials/Metal035/Metal035_2K-JPG_Displacement.jpg</file>
-        <file>A3D/Materials/Metal035/Metal035_2K-JPG_Metalness.jpg</file>
-        <file>A3D/Materials/Metal035/Metal035_2K-JPG_NormalGL.jpg</file>
-        <file>A3D/Materials/Metal035/Metal035_2K-JPG_Roughness.jpg</file>
+        <file>A3D/SkyboxMaterial.frag</file>
+        <file>A3D/SkyboxMaterial.vert</file>
     </qresource>
 </RCC>

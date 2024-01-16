@@ -10,18 +10,19 @@ int main(int argc, char* argv[]) {
 	QMainWindow w;
 
 	A3D::Scene* s = new A3D::Scene(&w);
-	A3D::Scene::PointLightInfo& l = s->getOrCreateLight(0);
+	A3D::PointLightInfo& l = s->getOrCreateLight(0);
 	l.position = QVector3D(0.f, 2.2f, 5.f);
 	l.color = QVector4D(1.f, 1.f, 1.f, 500.f);
 
 	A3D::MaterialProperties* Concrete002 = nullptr;
 	A3D::MaterialProperties* Metal035 = nullptr;
+	A3D::Cubemap* Cubemap001 = nullptr;
 
 	A3D::Model* sampleModel = nullptr;
 
 	{
 		auto loadPBRMaterial = [s](QString path, QString baseName, QString fileExtension) -> A3D::MaterialProperties* {
-			A3D::MaterialProperties* matProperties = new A3D::MaterialProperties(&s->resourceManager());
+			A3D::MaterialProperties* matProperties = new A3D::MaterialProperties(s->resourceManager());
 			static std::map<A3D::MaterialProperties::TextureSlot, QString> suffixes = {
 				{A3D::MaterialProperties::AlbedoTextureSlot, "Color"},
 				{A3D::MaterialProperties::NormalTextureSlot, "NormalGL"},
@@ -33,8 +34,8 @@ int main(int argc, char* argv[]) {
 			for(std::pair<A3D::MaterialProperties::TextureSlot, QString> const& suffix : qAsConst(suffixes)) {
 				QImage img(path + QDir::separator() + baseName + "_" + suffix.second + "." + fileExtension);
 				if(!img.isNull()) {
-					A3D::Texture* texture = new A3D::Texture(std::move(img), &s->resourceManager());
-					s->resourceManager().registerTexture(baseName + "_" + suffix.second, texture);
+					A3D::Texture* texture = new A3D::Texture(std::move(img), s->resourceManager());
+					s->resourceManager()->registerTexture(baseName + "_" + suffix.second, texture);
 
 					matProperties->setTexture(texture, suffix.first);
 				}
@@ -42,13 +43,36 @@ int main(int argc, char* argv[]) {
 			return matProperties;
 		};
 
-		Concrete002 = loadPBRMaterial(":/A3D/Materials/Concrete002", "Concrete002_4K", "jpg");
-		Concrete002->setParent(&s->resourceManager()); // Just to get the clang static analyzer to piss off...
+		auto loadCubemap = [s](QString path, QString fileExtension) -> A3D::Cubemap* {
+			A3D::Cubemap* cubemap = new A3D::Cubemap(s->resourceManager());
 
-		Metal035 = loadPBRMaterial(":/A3D/Materials/Metal035", "Metal035_2K-JPG", "jpg");
-		Metal035->setParent(&s->resourceManager()); // Just to get the clang static analyzer to piss off...
+			cubemap->setNX(QImage(path + "/nx." + fileExtension));
+			cubemap->setNY(QImage(path + "/ny." + fileExtension));
+			cubemap->setNZ(QImage(path + "/nz." + fileExtension));
+			cubemap->setPX(QImage(path + "/px." + fileExtension));
+			cubemap->setPY(QImage(path + "/py." + fileExtension));
+			cubemap->setPZ(QImage(path + "/pz." + fileExtension));
 
-		sampleModel = s->resourceManager().loadModel("Sphere", ":/A3D/Models/Sphere/Sphere.obj");
+			if(!cubemap->isValid()) {
+				delete cubemap;
+				return nullptr;
+			}
+			return cubemap;
+		};
+
+		Cubemap001 = loadCubemap(":/A3D/SampleResources/Materials/Cubemap001", "png");
+		if(Cubemap001) {
+			Cubemap001->setParent(s->resourceManager());
+			s->setSkybox(Cubemap001);
+		}
+
+		Concrete002 = loadPBRMaterial(":/A3D/SampleResources/Materials/Concrete002", "Concrete002_4K", "jpg");
+		Concrete002->setParent(s->resourceManager()); // Just to get the clang static analyzer to piss off...
+
+		Metal035 = loadPBRMaterial(":/A3D/SampleResources/Materials/Metal035", "Metal035_2K-JPG", "jpg");
+		Metal035->setParent(s->resourceManager()); // Just to get the clang static analyzer to piss off...
+
+		sampleModel = s->resourceManager()->loadModel("Sphere", ":/A3D/SampleResources/Models/Sphere/Sphere.obj");
 	}
 
 	A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
@@ -58,6 +82,7 @@ int main(int argc, char* argv[]) {
 
 		for(auto it = m->groups().begin(); it != m->groups().end(); ++it) {
 			A3D::Group* g = it->second;
+			g->setMesh(A3D::Mesh::standardMesh(A3D::Mesh::CubeIndexedMesh));
 			g->setMaterial(A3D::Material::standardMaterial(A3D::Material::PBRMaterial));
 			g->setMaterialProperties(Metal035);
 		}

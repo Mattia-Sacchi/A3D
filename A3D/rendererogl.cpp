@@ -7,6 +7,8 @@ RendererOGL::RendererOGL(QOpenGLContext* ctx, CoreGLFunctions* gl)
 	: Renderer(),
 	  m_context(ctx),
 	  m_gl(gl),
+	  m_skyboxMaterial(nullptr),
+	  m_skyboxMesh(nullptr),
 	  m_sceneUBO(0) {
 	log(LC_Debug, "Constructor: RendererOGL");
 }
@@ -94,6 +96,9 @@ void RendererOGL::BeginDrawing(Camera const& cam, Scene const* scene) {
 	m_gl->glClearColor(0.f, 0.f, 0.f, 0.f);
 	m_gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	m_skyboxView = cam.getView();
+	m_skyboxProj = cam.getProjection();
+
 	if(!m_sceneUBO) {
 		m_gl->glGenBuffers(1, &m_sceneUBO);
 
@@ -120,10 +125,35 @@ void RendererOGL::EndDrawing(Scene const* scene) {
 }
 
 void RendererOGL::BeginOpaque() {
+
+	if(currentScene() && currentScene()->skybox()) {
+		Cubemap* c = currentScene()->skybox();
+
+		// Draw skybox
+		if(!m_skyboxMesh)
+			m_skyboxMesh = A3D::Mesh::standardMesh(A3D::Mesh::CubeIndexedMesh);
+		if(!m_skyboxMaterial)
+			m_skyboxMaterial = A3D::Material::standardMaterial(A3D::Material::SkyboxMaterial);
+
+		MeshCacheOGL* meshCache = buildMeshCache(m_skyboxMesh);
+		MaterialCacheOGL* matCache = buildMaterialCache(m_skyboxMaterial);
+		CubemapCacheOGL* ccCache = buildCubemapCache(c);
+
+		m_gl->glDepthMask(GL_FALSE);
+		m_gl->glDisable(GL_CULL_FACE);
+		matCache->install(m_gl);
+		ccCache->applyToSlot(m_gl, static_cast<GLuint>(A3D::MaterialProperties::CubeMapTextureSlot));
+		meshCache->render(m_gl, QMatrix4x4(), m_skyboxView, m_skyboxProj);
+		m_gl->glEnable(GL_CULL_FACE);
+		m_gl->glDepthMask(GL_TRUE);
+	}
+
 	m_gl->glEnable(GL_DEPTH_TEST);
 	m_gl->glDepthFunc(GL_LESS);
 }
-void RendererOGL::EndOpaque() {}
+void RendererOGL::EndOpaque() {
+}
+
 void RendererOGL::BeginTranslucent() {
 	m_gl->glDepthMask(GL_FALSE);
 	m_gl->glEnable(GL_BLEND);
@@ -205,6 +235,18 @@ void RendererOGL::Delete(TextureCache* texCache) {
 	delete texCache;
 }
 
+void RendererOGL::Delete(CubemapCache* cubemapCache) {
+	if(m_context.isNull()) {
+		log(LC_Debug, "Couldn't delete CubemapCache: OpenGL context is unavailable. A memory leak might have happened.");
+		return;
+	}
+
+	ContextSwitcher switcher(m_context);
+	Q_UNUSED(switcher);
+
+	delete cubemapCache;
+}
+
 void RendererOGL::DeleteAllResources() {
 	if(m_context.isNull()) {
 		log(LC_Debug, "Couldn't delete resources: OpenGL context is unavailable. A memory leak might have happened.");
@@ -215,6 +257,7 @@ void RendererOGL::DeleteAllResources() {
 	Q_UNUSED(switcher);
 
 	Renderer::runDeleteOnAllResources();
+
 	if(m_sceneUBO) {
 		m_gl->glDeleteBuffers(1, &m_sceneUBO);
 		m_sceneUBO = 0;
@@ -301,6 +344,18 @@ TextureCacheOGL* RendererOGL::buildTextureCache(Texture* texture) {
 		addToTextureCaches(tc.first);
 
 	return tc.first;
+}
+
+CubemapCacheOGL* RendererOGL::buildCubemapCache(Cubemap* cubemap) {
+	std::pair<CubemapCacheOGL*, bool> cc = cubemap->getOrEmplaceCubemapCache<CubemapCacheOGL>(rendererID());
+
+	if(cc.first->isDirty())
+		cc.first->update(m_gl);
+
+	if(cc.second)
+		addToCubemapCaches(cc.first);
+
+	return cc.first;
 }
 
 }
