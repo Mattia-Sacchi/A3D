@@ -70,7 +70,7 @@ HEADERS += \
 	A3D/view.h \
 	Dependencies/stb/stb_image.h
 
-DEFINES += -DSTBI_NO_STDIO -DSTBI_NO_ZLIB -DSTBI_ONLY_HDR
+DEFINES += STBI_NO_STDIO=1 STBI_NO_ZLIB=1 STBI_ONLY_HDR=1
 INCLUDEPATH += Dependencies/stb/
 
 # Default rules for deployment.
