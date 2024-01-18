@@ -35,19 +35,19 @@ Cubemap* Cubemap::clone() const {
 	return newCubemap;
 }
 
-void Cubemap::setNX(QImage const& img) { m_nx = img; }
-void Cubemap::setNY(QImage const& img) { m_ny = img; }
-void Cubemap::setNZ(QImage const& img) { m_nz = img; }
-void Cubemap::setPX(QImage const& img) { m_px = img; }
-void Cubemap::setPY(QImage const& img) { m_py = img; }
-void Cubemap::setPZ(QImage const& img) { m_pz = img; }
+void Cubemap::setNX(Image const& img) { m_nx = img; }
+void Cubemap::setNY(Image const& img) { m_ny = img; }
+void Cubemap::setNZ(Image const& img) { m_nz = img; }
+void Cubemap::setPX(Image const& img) { m_px = img; }
+void Cubemap::setPY(Image const& img) { m_py = img; }
+void Cubemap::setPZ(Image const& img) { m_pz = img; }
 
-QImage const& Cubemap::nx() const { return m_nx; }
-QImage const& Cubemap::ny() const { return m_ny; }
-QImage const& Cubemap::nz() const { return m_nz; }
-QImage const& Cubemap::px() const { return m_px; }
-QImage const& Cubemap::py() const { return m_py; }
-QImage const& Cubemap::pz() const { return m_pz; }
+Image const& Cubemap::nx() const { return m_nx; }
+Image const& Cubemap::ny() const { return m_ny; }
+Image const& Cubemap::nz() const { return m_nz; }
+Image const& Cubemap::px() const { return m_px; }
+Image const& Cubemap::py() const { return m_py; }
+Image const& Cubemap::pz() const { return m_pz; }
 
 bool Cubemap::isValid() const {
 	if(m_nx.isNull()

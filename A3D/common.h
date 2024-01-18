@@ -12,6 +12,7 @@
 #include <QStringView>
 #include <QVariant>
 #include <QObject>
+#include <QImage>
 
 #include <QOpenGLContext>
 #include <QOpenGLFunctions_3_3_Core>
@@ -67,6 +68,14 @@ void cleanupQPointers(std::map<K, QPointer<T>>& container) {
 			++it;
 	}
 }
+
+inline QImage const* imageWithFormat(QImage::Format format, QImage const& base, QImage& storage) {
+	if(base.format() == format)
+		return &base;
+	storage = base.convertToFormat(format);
+	return &storage;
+}
+
 }
 
 #endif // A3DCOMMON_H

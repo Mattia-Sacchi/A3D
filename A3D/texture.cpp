@@ -1,6 +1,6 @@
 #include "A3D/texture.h"
 #include "A3D/renderer.h"
-
+#include <QFile>
 namespace A3D {
 
 static QImage const& missingTexture() {
@@ -19,6 +19,24 @@ static QImage const& missingTexture() {
 	return imgMissingTexture;
 }
 
+static QImage const& whiteTexture() {
+	static QImage imgWhiteTexture;
+	if(imgWhiteTexture.isNull()) {
+		imgWhiteTexture = QImage(1, 1, QImage::Format_RGB888);
+		imgWhiteTexture.setPixelColor(0, 0, QColor(255, 255, 255));
+	}
+	return imgWhiteTexture;
+}
+
+static QImage const& blackTexture() {
+	static QImage imgBlackTexture;
+	if(imgBlackTexture.isNull()) {
+		imgBlackTexture = QImage(1, 1, QImage::Format_RGB888);
+		imgBlackTexture.setPixelColor(0, 0, QColor(0, 0, 0));
+	}
+	return imgBlackTexture;
+}
+
 Texture* Texture::standardTexture(StandardTexture stdTex) {
 	static std::map<StandardTexture, Texture> standardTextures;
 
@@ -29,7 +47,6 @@ Texture* Texture::standardTexture(StandardTexture stdTex) {
 	Texture& newTex = standardTextures[stdTex];
 	switch(stdTex) {
 	case MissingTexture:
-	{
 		newTex.setImage(missingTexture());
 		newTex.setMinFilter(Nearest);
 		newTex.setMagFilter(Nearest);
@@ -38,7 +55,24 @@ Texture* Texture::standardTexture(StandardTexture stdTex) {
 		newTex.setWrapMode(WrapDirectionY, Repeat);
 		newTex.setWrapMode(WrapDirectionZ, Repeat);
 		break;
-	}
+	case WhiteTexture:
+		newTex.setImage(whiteTexture());
+		newTex.setMinFilter(Nearest);
+		newTex.setMagFilter(Nearest);
+		newTex.setRenderOptions(NoOptions);
+		newTex.setWrapMode(WrapDirectionX, Clamp);
+		newTex.setWrapMode(WrapDirectionY, Clamp);
+		newTex.setWrapMode(WrapDirectionZ, Clamp);
+		break;
+	case BlackTexture:
+		newTex.setImage(blackTexture());
+		newTex.setMinFilter(Nearest);
+		newTex.setMagFilter(Nearest);
+		newTex.setRenderOptions(NoOptions);
+		newTex.setWrapMode(WrapDirectionX, Clamp);
+		newTex.setWrapMode(WrapDirectionY, Clamp);
+		newTex.setWrapMode(WrapDirectionZ, Clamp);
+		break;
 	default:
 		break;
 	}
@@ -51,7 +85,7 @@ Texture::Texture(ResourceManager* resourceManager)
 	log(LC_Debug, "Constructor: Texture");
 }
 
-Texture::Texture(QImage image, ResourceManager* resourceManager)
+Texture::Texture(Image image, ResourceManager* resourceManager)
 	: Resource{ resourceManager },
 	  m_image(std::move(image)),
 	  m_minFilter(LinearMipMapLinear),
@@ -98,10 +132,10 @@ void Texture::setRenderOptions(RenderOptions renderOptions) {
 	m_renderOptions = renderOptions;
 }
 
-QImage const& Texture::image() const {
+Image const& Texture::image() const {
 	return m_image;
 }
-void Texture::setImage(QImage image) {
+void Texture::setImage(Image image) {
 	m_image = std::move(image);
 }
 

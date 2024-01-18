@@ -22,6 +22,18 @@ Material* Material::standardMaterial(StandardMaterial stdMat) {
 		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/SkyboxMaterial.vert");
 		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/SkyboxMaterial.frag");
 		break;
+	case IrradianceMaterial:
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/IrradianceMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/IrradianceMaterial.frag");
+		break;
+	case PrefilterMaterial:
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/PrefilterMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/PrefilterMaterial.frag");
+		break;
+	case BRDFMaterial:
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/BRDFMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/BRDFMaterial.frag");
+		break;
 	}
 	newMat.invalidateCache();
 	return &newMat;

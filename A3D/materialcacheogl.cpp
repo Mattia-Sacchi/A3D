@@ -107,7 +107,7 @@ void MaterialCacheOGL::install(CoreGLFunctions* gl) {
 		gl->glUniformBlockBinding(m_program->programId(), m_sceneUBO_index, RendererOGL::UBO_SceneBinding);
 }
 
-void MaterialCacheOGL::update(CoreGLFunctions* gl) {
+void MaterialCacheOGL::update(RendererOGL*, CoreGLFunctions* gl) {
 	Material* m = material();
 	if(!m) {
 		m_program.reset();
@@ -155,8 +155,11 @@ void MaterialCacheOGL::update(CoreGLFunctions* gl) {
 	applyUniform("EmissiveTexture", GLuint(MaterialProperties::MetallicTextureSlot));
 	applyUniform("BumpMapTexture", GLuint(MaterialProperties::NormalTextureSlot));
 
-	applyUniform("EnvironmentMapTexture", GLuint(MaterialProperties::EnvMapTextureSlot));
-	applyUniform("CubeMapTexture", GLuint(MaterialProperties::CubeMapTextureSlot));
+	applyUniform("EnvironmentMapTexture", GLuint(MaterialProperties::EnvironmentTextureSlot));
+	applyUniform("CubeMapTexture", GLuint(MaterialProperties::EnvironmentTextureSlot));
+	applyUniform("IrradianceTexture", GLuint(MaterialProperties::EnvironmentTextureSlot));
+	applyUniform("PrefilterTexture", GLuint(MaterialProperties::PrefilterTextureSlot));
+	applyUniform("BrdfTexture", GLuint(MaterialProperties::BrdfTextureSlot));
 
 	m_meshUBO_index    = gl->glGetUniformBlockIndex(m_program->programId(), "MeshUBO_Data");
 	m_matpropUBO_index = gl->glGetUniformBlockIndex(m_program->programId(), "MaterialUBO_Data");

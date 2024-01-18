@@ -29,7 +29,6 @@ MaterialProperties::~MaterialProperties() {
 MaterialProperties* MaterialProperties::clone() const {
 	MaterialProperties* newMatProp  = new MaterialProperties(resourceManager());
 	newMatProp->m_alwaysTranslucent = m_alwaysTranslucent;
-	newMatProp->m_hlValues          = m_hlValues;
 	newMatProp->m_rawValues         = m_rawValues;
 	for(std::size_t i = 0; i < MaxTextures; ++i)
 		newMatProp->m_textures[i] = m_textures[i];
@@ -50,13 +49,6 @@ void MaterialProperties::setTexture(Texture* texture, TextureSlot slot) {
 	if(m_textures[slot] && m_textures[slot]->parent() == this)
 		delete m_textures[slot];
 	m_textures[slot] = texture;
-}
-
-MaterialProperties::HighLevelProperties& MaterialProperties::highLevelProperties() {
-	return m_hlValues;
-}
-MaterialProperties::HighLevelProperties const& MaterialProperties::highLevelProperties() const {
-	return m_hlValues;
 }
 
 QVariant MaterialProperties::rawValue(QString name, QVariant fallback) {
@@ -82,7 +74,7 @@ void MaterialProperties::setAlwaysTranslucent(bool always) {
 	m_alwaysTranslucent = always;
 }
 bool MaterialProperties::isTranslucent() const {
-	if(m_alwaysTranslucent || m_hlValues.opacity < 1.f)
+	if(m_alwaysTranslucent)
 		return true;
 
 	for(std::size_t i = 0; i < MaxTextures; ++i) {

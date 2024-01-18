@@ -65,7 +65,7 @@ void MeshCacheOGL::render(CoreGLFunctions* gl, QMatrix4x4 const& modelMatrix, QM
 	m_vao.release();
 }
 
-void MeshCacheOGL::update(CoreGLFunctions* gl) {
+void MeshCacheOGL::update(RendererOGL*, CoreGLFunctions* gl) {
 	Mesh* m = mesh();
 	if(!m) {
 		m_elementCount = 0;

@@ -9,6 +9,7 @@
 #include "A3D/texturecacheogl.h"
 #include "A3D/cubemapcacheogl.h"
 #include <queue>
+#include <stack>
 
 namespace A3D {
 
@@ -42,6 +43,30 @@ protected:
 	virtual void EndTranslucent() override;
 
 private:
+	friend class MeshCacheOGL;
+	friend class MaterialCacheOGL;
+	friend class MaterialPropertiesCacheOGL;
+	friend class TextureCacheOGL;
+	friend class CubemapCacheOGL;
+
+	void pushState(bool withFramebuffer);
+	void popState();
+
+	struct StateStorage {
+		GLint m_viewport[4];
+		std::map<GLenum, GLboolean> m_features;
+		std::map<GLenum, GLint> m_textureBindings;
+		GLenum m_activeTexture;
+		GLint m_drawFramebuffer;
+		GLint m_readFramebuffer;
+		GLint m_program;
+		GLboolean m_depthMask;
+
+		GLuint m_newFramebuffer;
+	};
+
+	std::stack<StateStorage> m_stateStorage;
+
 	enum {
 		LightCount = 4
 	};
@@ -56,10 +81,19 @@ private:
 	TextureCacheOGL* buildTextureCache(Texture*);
 	CubemapCacheOGL* buildCubemapCache(Cubemap*);
 
+	// Will draw on screen for one frame!
+	// Should be called when a framebuffer is active, and you have to assume that the framebuffer
+	// will be dirty afterwards.
+	// Perfect opportunity to call this during Cubemap update().
+	void genBrdfLUT();
+
+	GLuint getBrdfLUT();
+
 	QPointer<QOpenGLContext> m_context;
 	CoreGLFunctions* m_gl;
 	std::vector<Entity*> m_translucentEntityBuffer;
 	std::vector<std::pair<std::size_t, PointLightInfo>> m_closestSceneLightsBuffer;
+
 
 	// Skybox data
 	A3D::Material* m_skyboxMaterial;
@@ -75,6 +109,9 @@ private:
 	};
 	SceneUBO_Data m_sceneData;
 	GLuint m_sceneUBO;
+
+	bool m_brdfCalculated;
+	GLuint m_brdfLUT;
 };
 
 }

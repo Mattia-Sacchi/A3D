@@ -27,6 +27,9 @@ public:
 	enum StandardMaterial {
 		PBRMaterial,
 		SkyboxMaterial,
+		IrradianceMaterial,
+		PrefilterMaterial,
+		BRDFMaterial,
 	};
 	static Material* standardMaterial(StandardMaterial);
 

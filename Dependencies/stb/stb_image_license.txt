@@ -1,0 +1,5 @@
+stb_image - v2.29 - public domain image loader - https://github.com/nothings/stb
+no warranty implied; use at your own risk
+
+stb_image_write - v1.16 - public domain - https://github.com/nothings/stb
+no warranty implied; use at your own risk

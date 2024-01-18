@@ -18,6 +18,10 @@ uniform sampler2D MetallicTexture;
 uniform sampler2D RoughnessTexture;
 uniform sampler2D AOTexture;
 
+uniform samplerCube IrradianceTexture;
+uniform samplerCube PrefilterTexture;
+uniform sampler2D BrdfTexture;
+
 const float PI = 3.14159265359;
 
 vec3 getNormalFromMap()
@@ -77,6 +81,11 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
 void main() {
 	vec4 albedoRGBA = texture(AlbedoTexture, TexCoord);
 	vec3 albedo = pow(albedoRGBA.rgb, vec3(2.2));
@@ -86,11 +95,11 @@ void main() {
 	
 	vec3 N = getNormalFromMap();
 	vec3 V = normalize(cameraPos.xyz - WorldPos.xyz);
+	vec3 R = reflect(-V, N);
 	
 	vec3 F0 = mix(vec3(0.04), albedo, metallic);
 	vec3 Lo = vec3(0.0);
 
-	vec3 sumDebug = vec3(0.0);
 	for(int i = 0; i < 4; ++i)
 	{
 		if(lightsPos[i].w <= -0.001f)
@@ -121,7 +130,24 @@ void main() {
 		Lo += (kD * albedo / PI + specular) * radiance * NdotL;
 	}
 
-	vec3 ambient = vec3(0.1) * albedo * ao;
+	vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+	//vec3 F = fresnelSchlick(max(dot(N, V), 0.0), F0);
+
+	vec3 kD = (1.0 - F) * (1.0 - metallic);
+	vec3 irradiance = texture(IrradianceTexture, N).rgb;
+	vec3 diffuse = irradiance * albedo;
+
+	//vec3 specular = vec3(0.0);
+
+	// if(F.x > 0.01 || F.y > 0.01 || F.z > 0.01) {
+	const float MAX_REFLECTION_LOD = 4.0;
+	vec3 prefilteredColor = textureLod(PrefilterTexture, R, roughness * MAX_REFLECTION_LOD).rgb;
+	vec2 brdf = texture(BrdfTexture, vec2(max(dot(N, V), 0.0), roughness)).rg;
+	vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+	// }
+
+	vec3 ambient = (kD * diffuse + specular) * ao;
+
 	vec3 color = ambient + Lo;
 
 	color = color / (color + vec3(1.0));

@@ -4,5 +4,11 @@
         <file>A3D/PBRMaterial.frag</file>
         <file>A3D/SkyboxMaterial.frag</file>
         <file>A3D/SkyboxMaterial.vert</file>
+        <file>A3D/IrradianceMaterial.frag</file>
+        <file>A3D/IrradianceMaterial.vert</file>
+        <file>A3D/PrefilterMaterial.frag</file>
+        <file>A3D/PrefilterMaterial.vert</file>
+        <file>A3D/BRDFMaterial.frag</file>
+        <file>A3D/BRDFMaterial.vert</file>
     </qresource>
 </RCC>

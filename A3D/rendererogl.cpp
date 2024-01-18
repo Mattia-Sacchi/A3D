@@ -9,7 +9,9 @@ RendererOGL::RendererOGL(QOpenGLContext* ctx, CoreGLFunctions* gl)
 	  m_gl(gl),
 	  m_skyboxMaterial(nullptr),
 	  m_skyboxMesh(nullptr),
-	  m_sceneUBO(0) {
+	  m_sceneUBO(0),
+	  m_brdfCalculated(false),
+	  m_brdfLUT(0) {
 	log(LC_Debug, "Constructor: RendererOGL");
 }
 
@@ -17,6 +19,93 @@ RendererOGL::~RendererOGL() {
 	log(LC_Debug, "Destructor: RendererOGL (start)");
 	DeleteAllResources();
 	log(LC_Debug, "Destructor: RendererOGL (end)");
+}
+
+void RendererOGL::pushState(bool withFramebuffer) {
+	if(m_stateStorage.size() > 24) {
+		log(LC_Critical, "RendererOGL::pushState: GL State stack is too big.");
+		return;
+	}
+
+	StateStorage newStateStorage;
+
+	m_gl->glGetIntegerv(GL_VIEWPORT, newStateStorage.m_viewport);
+	m_gl->glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &newStateStorage.m_drawFramebuffer);
+	m_gl->glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &newStateStorage.m_readFramebuffer);
+	m_gl->glGetBooleanv(GL_DEPTH_WRITEMASK, &newStateStorage.m_depthMask);
+	m_gl->glGetIntegerv(GL_CURRENT_PROGRAM, &newStateStorage.m_program);
+	for(GLenum e : {
+	    GL_DEPTH_TEST,
+		GL_CULL_FACE,
+		GL_BLEND
+	}) {
+		GLboolean feature;
+		m_gl->glGetBooleanv(e, &feature);
+		newStateStorage.m_features[e] = feature;
+	}
+
+	for(std::pair<GLenum, GLenum> e : {
+		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_1D, GL_TEXTURE_1D},
+		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_2D, GL_TEXTURE_2D},
+		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_3D, GL_TEXTURE_3D},
+		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_1D_ARRAY, GL_TEXTURE_1D_ARRAY},
+		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_2D_ARRAY, GL_TEXTURE_2D_ARRAY},
+		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_RECTANGLE, GL_TEXTURE_RECTANGLE},
+		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_CUBE_MAP, GL_TEXTURE_CUBE_MAP},
+		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_CUBE_MAP_ARRAY, GL_TEXTURE_CUBE_MAP_ARRAY},
+		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_BUFFER, GL_TEXTURE_BUFFER},
+		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_2D_MULTISAMPLE, GL_TEXTURE_2D_MULTISAMPLE},
+		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY, GL_TEXTURE_2D_MULTISAMPLE_ARRAY}
+	}) {
+		GLint textureBinding = 0;
+		m_gl->glGetIntegerv(e.first, &textureBinding);
+		newStateStorage.m_textureBindings[e.second] = textureBinding;
+	}
+
+	GLint activeTexture = 0;
+	m_gl->glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTexture);
+	newStateStorage.m_activeTexture = activeTexture;
+
+	newStateStorage.m_newFramebuffer = 0;
+	if(withFramebuffer) {
+		m_gl->glGenFramebuffers(1, &newStateStorage.m_newFramebuffer);
+		if(newStateStorage.m_newFramebuffer)
+			m_gl->glBindFramebuffer(GL_FRAMEBUFFER, newStateStorage.m_newFramebuffer);
+	}
+
+	m_stateStorage.emplace(std::move(newStateStorage));
+}
+
+void RendererOGL::popState() {
+	if(m_stateStorage.empty()) {
+		log(LC_Critical, "RendererOGL::popState: GL State stack is empty.");
+		return;
+	}
+
+	StateStorage& lastState = m_stateStorage.top();
+
+	for(auto it = lastState.m_features.begin(); it != lastState.m_features.end(); ++it) {
+		if(it->second)
+			m_gl->glEnable(it->first);
+		else
+			m_gl->glDisable(it->first);
+	}
+	m_gl->glViewport(lastState.m_viewport[0], lastState.m_viewport[1], lastState.m_viewport[2], lastState.m_viewport[3]);
+	m_gl->glBindFramebuffer(GL_READ_FRAMEBUFFER, lastState.m_readFramebuffer);
+	m_gl->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastState.m_drawFramebuffer);
+
+	for(auto it = lastState.m_textureBindings.begin(); it != lastState.m_textureBindings.end(); ++it) {
+		m_gl->glBindTexture(it->first, it->second);
+	}
+
+	m_gl->glActiveTexture(lastState.m_activeTexture);
+	m_gl->glDepthMask(lastState.m_depthMask);
+	m_gl->glUseProgram(lastState.m_program);
+
+	if(lastState.m_newFramebuffer)
+		m_gl->glDeleteFramebuffers(1, &lastState.m_newFramebuffer);
+
+	m_stateStorage.pop();
 }
 
 void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
@@ -72,7 +161,12 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 			TextureCacheOGL* tCache = buildTextureCache(t);
 			tCache->applyToSlot(m_gl, static_cast<GLuint>(i));
 		}
+		else if(i == MaterialProperties::BrdfTextureSlot) {
+			m_gl->glActiveTexture(GL_TEXTURE0 + MaterialProperties::BrdfTextureSlot);
+			m_gl->glBindTexture(GL_TEXTURE_2D, getBrdfLUT());
+		}
 	}
+
 	meshCache->render(m_gl, drawInfo.m_modelMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
 
 	if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent || matProp->isTranslucent())
@@ -90,6 +184,9 @@ void RendererOGL::RefreshSceneUBO() {
 
 void RendererOGL::BeginDrawing(Camera const& cam, Scene const* scene) {
 	Renderer::BeginDrawing(cam, scene);
+
+	genBrdfLUT();
+
 	m_gl->glDisable(GL_BLEND);
 	m_gl->glEnable(GL_CULL_FACE);
 	m_gl->glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -131,9 +228,9 @@ void RendererOGL::BeginOpaque() {
 
 		// Draw skybox
 		if(!m_skyboxMesh)
-			m_skyboxMesh = A3D::Mesh::standardMesh(A3D::Mesh::CubeIndexedMesh);
+			m_skyboxMesh = Mesh::standardMesh(Mesh::CubeIndexedMesh);
 		if(!m_skyboxMaterial)
-			m_skyboxMaterial = A3D::Material::standardMaterial(A3D::Material::SkyboxMaterial);
+			m_skyboxMaterial = Material::standardMaterial(Material::SkyboxMaterial);
 
 		MeshCacheOGL* meshCache = buildMeshCache(m_skyboxMesh);
 		MaterialCacheOGL* matCache = buildMaterialCache(m_skyboxMaterial);
@@ -142,10 +239,20 @@ void RendererOGL::BeginOpaque() {
 		m_gl->glDepthMask(GL_FALSE);
 		m_gl->glDisable(GL_CULL_FACE);
 		matCache->install(m_gl);
-		ccCache->applyToSlot(m_gl, static_cast<GLuint>(A3D::MaterialProperties::CubeMapTextureSlot));
+		ccCache->applyToSlot(m_gl,
+		    static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot),
+			-1,
+			-1
+		);
 		meshCache->render(m_gl, QMatrix4x4(), m_skyboxView, m_skyboxProj);
 		m_gl->glEnable(GL_CULL_FACE);
 		m_gl->glDepthMask(GL_TRUE);
+
+		ccCache->applyToSlot(m_gl,
+			-1,
+			static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot),
+			static_cast<GLuint>(MaterialProperties::PrefilterTextureSlot)
+		);
 	}
 
 	m_gl->glEnable(GL_DEPTH_TEST);
@@ -262,6 +369,13 @@ void RendererOGL::DeleteAllResources() {
 		m_gl->glDeleteBuffers(1, &m_sceneUBO);
 		m_sceneUBO = 0;
 	}
+
+	if(m_brdfLUT) {
+		m_gl->glDeleteTextures(1, &m_brdfLUT);
+		m_brdfLUT = 0;
+	}
+
+	m_brdfCalculated = false;
 }
 
 void RendererOGL::PreLoadEntity(Entity* e) {
@@ -299,11 +413,55 @@ void RendererOGL::PreLoadEntity(Entity* e) {
 	}
 }
 
+void RendererOGL::genBrdfLUT() {
+	if(m_brdfCalculated)
+		return;
+
+	GLuint texSlot = getBrdfLUT();
+	if(!texSlot)
+		return;
+
+	pushState(true);
+	Mesh* brdfMesh = Mesh::standardMesh(Mesh::ScreenQuadMesh);
+	Material* brdfMat = Material::standardMaterial(Material::BRDFMaterial);
+
+	MeshCacheOGL* meshCache = buildMeshCache(brdfMesh);
+	MaterialCacheOGL* matCache = buildMaterialCache(brdfMat);
+
+	static QSize const brdfLutSize(512, 512);
+	m_gl->glBindTexture(GL_TEXTURE_2D, texSlot);
+	m_gl->glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, brdfLutSize.width(), brdfLutSize.height(), 0, GL_RG, GL_FLOAT, 0);
+	m_gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	m_gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	m_gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	m_gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	m_gl->glViewport(0, 0, brdfLutSize.width(), brdfLutSize.height());
+	m_gl->glDisable(GL_DEPTH_TEST);
+	m_gl->glDisable(GL_CULL_FACE);
+
+	m_gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_brdfLUT, 0);
+	m_gl->glClear(GL_COLOR_BUFFER_BIT);
+
+	matCache->install(m_gl);
+	meshCache->render(m_gl, QMatrix4x4(), QMatrix4x4(), QMatrix4x4());
+	popState();
+
+	m_brdfCalculated = true;
+}
+
+GLuint RendererOGL::getBrdfLUT() {
+	if(!m_brdfLUT)
+		m_gl->glGenTextures(1, &m_brdfLUT);
+
+	return m_brdfLUT;
+}
+
 MeshCacheOGL* RendererOGL::buildMeshCache(Mesh* mesh) {
 	std::pair<MeshCacheOGL*, bool> mc = mesh->getOrEmplaceMeshCache<MeshCacheOGL>(rendererID());
 
 	if(mc.first->isDirty())
-		mc.first->update(m_gl);
+		mc.first->update(this, m_gl);
 
 	if(mc.second)
 		addToMeshCaches(mc.first);
@@ -315,7 +473,7 @@ MaterialCacheOGL* RendererOGL::buildMaterialCache(Material* material) {
 	std::pair<MaterialCacheOGL*, bool> mc = material->getOrEmplaceMaterialCache<MaterialCacheOGL>(rendererID());
 
 	if(mc.first->isDirty())
-		mc.first->update(m_gl);
+		mc.first->update(this, m_gl);
 
 	if(mc.second)
 		addToMaterialCaches(mc.first);
@@ -326,7 +484,7 @@ MaterialPropertiesCacheOGL* RendererOGL::buildMaterialPropertiesCache(MaterialPr
 	std::pair<MaterialPropertiesCacheOGL*, bool> mc = materialProperties->getOrEmplaceMaterialPropertiesCache<MaterialPropertiesCacheOGL>(rendererID());
 
 	if(mc.first->isDirty())
-		mc.first->update(m_gl);
+		mc.first->update(this, m_gl);
 
 	if(mc.second)
 		addToMaterialPropertiesCaches(mc.first);
@@ -338,7 +496,7 @@ TextureCacheOGL* RendererOGL::buildTextureCache(Texture* texture) {
 	std::pair<TextureCacheOGL*, bool> tc = texture->getOrEmplaceTextureCache<TextureCacheOGL>(rendererID());
 
 	if(tc.first->isDirty())
-		tc.first->update(m_gl);
+		tc.first->update(this, m_gl);
 
 	if(tc.second)
 		addToTextureCaches(tc.first);
@@ -350,7 +508,7 @@ CubemapCacheOGL* RendererOGL::buildCubemapCache(Cubemap* cubemap) {
 	std::pair<CubemapCacheOGL*, bool> cc = cubemap->getOrEmplaceCubemapCache<CubemapCacheOGL>(rendererID());
 
 	if(cc.first->isDirty())
-		cc.first->update(m_gl);
+		cc.first->update(this, m_gl);
 
 	if(cc.second)
 		addToCubemapCaches(cc.first);
