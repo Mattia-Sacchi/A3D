@@ -8,6 +8,7 @@
 
 namespace A3D {
 
+class RendererOGL;
 class MaterialCacheOGL;
 class MaterialPropertiesCacheOGL : public MaterialPropertiesCache {
 	Q_OBJECT
@@ -15,17 +16,12 @@ public:
 	explicit MaterialPropertiesCacheOGL(MaterialProperties*);
 	~MaterialPropertiesCacheOGL();
 
-	void update(CoreGLFunctions*);
+	void update(RendererOGL*, CoreGLFunctions*);
 	void install(CoreGLFunctions*, MaterialCacheOGL*);
 
 private:
 	struct MaterialUBO_Data {
-		QVector4D diffuse;
-		QVector4D ambient;
-		QVector4D specular;
-		QVector4D emissive;
-		float opacity;
-		float specularExponent;
+		QVector4D placeholder;
 	} m_materialUBO_data;
 
 	GLuint m_materialUBO;

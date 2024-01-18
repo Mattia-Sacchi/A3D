@@ -37,6 +37,7 @@ public:
 
 	enum StandardMesh {
 		Triangle2DMesh,
+		ScreenQuadMesh,
 		CubeIndexedMesh,
 	};
 	static Mesh* standardMesh(StandardMesh);

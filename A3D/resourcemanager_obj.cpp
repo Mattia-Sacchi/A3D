@@ -353,7 +353,6 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 		newGroup->setProperty("obj_Material", gi.material);
 
 		MaterialProperties* matProp                      = new MaterialProperties(this);
-		MaterialProperties::HighLevelProperties& hlProps = matProp->highLevelProperties();
 		newGroup->setMaterialProperties(matProp);
 		newGroup->setMaterial(Material::standardMaterial(Material::PBRMaterial));
 
@@ -362,12 +361,10 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 
 			MaterialInformations const& mat = foundMaterial->second;
 
-			hlProps.opacity = mat.opacity;
-
 			if(!mat.diffuseMap.isEmpty()) {
 				Texture* t = getLoadedTexture(mat.diffuseMap);
 				if(!t) {
-					QImage i(mat.diffuseMap);
+					Image i(QImage(mat.diffuseMap));
 					if(!i.isNull())
 						t = registerTexture(mat.diffuseMap, new Texture(i, this));
 				}
@@ -379,7 +376,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 			if(!mat.ambientMap.isEmpty()) {
 				Texture* t = getLoadedTexture(mat.ambientMap);
 				if(!t) {
-					QImage i(mat.ambientMap);
+					Image i(QImage(mat.ambientMap));
 					if(!i.isNull())
 						t = registerTexture(mat.ambientMap, new Texture(i, this));
 				}
@@ -391,7 +388,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 			if(!mat.specularMap.isEmpty()) {
 				Texture* t = getLoadedTexture(mat.specularMap);
 				if(!t) {
-					QImage i(mat.specularMap);
+					Image i(QImage(mat.specularMap));
 					if(!i.isNull())
 						t = registerTexture(mat.specularMap, new Texture(i, this));
 				}
@@ -404,7 +401,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 			if(!mat.emissiveMap.isEmpty()) {
 				Texture* t = getLoadedTexture(mat.emissiveMap);
 				if(!t) {
-					QImage i(mat.emissiveMap);
+					Image i(QImage(mat.emissiveMap));
 					if(!i.isNull())
 						t = registerTexture(mat.emissiveMap, new Texture(i, this));
 				}
@@ -417,7 +414,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 			if(!mat.bumpMap.isEmpty()) {
 				Texture* t = getLoadedTexture(mat.emissiveMap);
 				if(!t) {
-					QImage i(mat.emissiveMap);
+					Image i(QImage(mat.emissiveMap));
 					if(!i.isNull())
 						t = registerTexture(mat.emissiveMap, new Texture(i, this));
 				}

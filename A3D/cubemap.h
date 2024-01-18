@@ -3,10 +3,10 @@
 
 #include "A3D/common.h"
 #include <QObject>
-#include <QImage>
 #include "A3D/texture.h"
 #include "A3D/cubemapcache.h"
 #include "A3D/resource.h"
+#include "A3D/image.h"
 
 namespace A3D {
 
@@ -18,19 +18,19 @@ public:
 
 	Cubemap* clone() const;
 
-	void setNX(QImage const&);
-	void setNY(QImage const&);
-	void setNZ(QImage const&);
-	void setPX(QImage const&);
-	void setPY(QImage const&);
-	void setPZ(QImage const&);
+	void setNX(Image const&);
+	void setNY(Image const&);
+	void setNZ(Image const&);
+	void setPX(Image const&);
+	void setPY(Image const&);
+	void setPZ(Image const&);
 
-	QImage const& nx() const;
-	QImage const& ny() const;
-	QImage const& nz() const;
-	QImage const& px() const;
-	QImage const& py() const;
-	QImage const& pz() const;
+	Image const& nx() const;
+	Image const& ny() const;
+	Image const& nz() const;
+	Image const& px() const;
+	Image const& py() const;
+	Image const& pz() const;
 
 	bool isValid() const;
 
@@ -61,12 +61,12 @@ public:
 	}
 
 private:
-	QImage m_nx;
-	QImage m_ny;
-	QImage m_nz;
-	QImage m_px;
-	QImage m_py;
-	QImage m_pz;
+	Image m_nx;
+	Image m_ny;
+	Image m_nz;
+	Image m_px;
+	Image m_py;
+	Image m_pz;
 
 	std::map<std::uintptr_t, QPointer<CubemapCache>> m_cubemapCache;
 };

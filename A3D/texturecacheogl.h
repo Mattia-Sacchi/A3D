@@ -7,13 +7,14 @@
 
 namespace A3D {
 
+class RendererOGL;
 class TextureCacheOGL : public TextureCache {
 	Q_OBJECT
 public:
 	explicit TextureCacheOGL(Texture*);
 	~TextureCacheOGL();
 
-	void update(CoreGLFunctions*);
+	void update(RendererOGL*, CoreGLFunctions*);
 	void applyToSlot(CoreGLFunctions*, GLuint slot);
 
 private:

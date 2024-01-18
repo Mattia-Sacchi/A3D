@@ -12,24 +12,18 @@ namespace A3D {
 class MaterialProperties : public Resource {
 	Q_OBJECT
 public:
-	struct HighLevelProperties {
-		inline HighLevelProperties()
-			: opacity(1.f) {}
-		float opacity;
-	};
-
 	enum TextureSlot {
 		AlbedoTextureSlot,
 		NormalTextureSlot,
 		MetallicTextureSlot,
 		RoughnessTextureSlot,
 		AOTextureSlot,
-		EnvMapTextureSlot,
+
+		EnvironmentTextureSlot, // In Cubemap: Enviroment Slot. In Shaders: Irradiance Map.
+		PrefilterTextureSlot,
+		BrdfTextureSlot,
 
 		MaxTextures = 8,
-
-		// Aliases
-		CubeMapTextureSlot = EnvMapTextureSlot,
 	};
 
 	MaterialProperties(ResourceManager* = nullptr);
@@ -39,9 +33,6 @@ public:
 
 	Texture* texture(TextureSlot slot) const;
 	void setTexture(Texture*, TextureSlot slot);
-
-	HighLevelProperties& highLevelProperties();
-	HighLevelProperties const& highLevelProperties() const;
 
 	QVariant rawValue(QString name, QVariant fallback = QVariant());
 	void setRawValue(QString name, QVariant value);
@@ -80,7 +71,6 @@ public:
 
 private:
 	bool m_alwaysTranslucent;
-	HighLevelProperties m_hlValues;
 	std::map<QString, QVariant> m_rawValues;
 	QPointer<Texture> m_textures[MaxTextures];
 

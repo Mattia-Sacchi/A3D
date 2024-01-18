@@ -8,7 +8,7 @@
 #include <QOpenGLVertexArrayObject>
 
 namespace A3D {
-
+class RendererOGL;
 class MeshCacheOGL : public MeshCache {
 	Q_OBJECT
 public:
@@ -27,7 +27,7 @@ public:
 	explicit MeshCacheOGL(Mesh*);
 	~MeshCacheOGL();
 
-	void update(CoreGLFunctions*);
+	void update(RendererOGL*, CoreGLFunctions*);
 	void render(CoreGLFunctions*, QMatrix4x4 const& modelMatrix, QMatrix4x4 const& viewMatrix, QMatrix4x4 const& projMatrix);
 
 private:

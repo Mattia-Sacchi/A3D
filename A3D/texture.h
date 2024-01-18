@@ -3,9 +3,9 @@
 
 #include "A3D/common.h"
 #include <QObject>
-#include <QImage>
 #include "A3D/texturecache.h"
 #include "A3D/resource.h"
+#include "A3D/image.h"
 
 namespace A3D {
 
@@ -21,6 +21,8 @@ public:
 
 	enum StandardTexture {
 		MissingTexture,
+		WhiteTexture,
+		BlackTexture,
 	};
 	static Texture* standardTexture(StandardTexture);
 
@@ -46,7 +48,7 @@ public:
 	};
 
 	explicit Texture(ResourceManager* = nullptr);
-	explicit Texture(QImage image, ResourceManager* = nullptr);
+	explicit Texture(Image image, ResourceManager* = nullptr);
 	~Texture();
 
 	Texture* clone() const;
@@ -54,8 +56,8 @@ public:
 	RenderOptions renderOptions() const;
 	void setRenderOptions(RenderOptions);
 
-	QImage const& image() const;
-	void setImage(QImage);
+	Image const& image() const;
+	void setImage(Image);
 
 	WrapMode wrapMode(WrapDirection) const;
 	void setWrapMode(WrapDirection, WrapMode);
@@ -101,7 +103,7 @@ public:
 	}
 
 private:
-	QImage m_image;
+	Image m_image;
 	std::map<WrapDirection, WrapMode> m_wrapMode;
 	Filter m_minFilter;
 	Filter m_magFilter;

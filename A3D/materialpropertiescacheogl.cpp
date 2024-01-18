@@ -30,13 +30,12 @@ void MaterialPropertiesCacheOGL::install(CoreGLFunctions* gl, MaterialCacheOGL* 
 	gl->glBindBufferBase(GL_UNIFORM_BUFFER, RendererOGL::UBO_MaterialPropertiesBinding, m_materialUBO);
 }
 
-void MaterialPropertiesCacheOGL::update(CoreGLFunctions* gl) {
+void MaterialPropertiesCacheOGL::update(RendererOGL*, CoreGLFunctions* gl) {
 	MaterialProperties* p = materialProperties();
 	if(!p)
 		return;
 
-	MaterialProperties::HighLevelProperties& hlProps = p->highLevelProperties();
-	m_materialUBO_data.opacity                       = hlProps.opacity;
+	m_materialUBO_data.placeholder = QVector4D();
 
 	if(!m_materialUBO) {
 		gl->glGenBuffers(1, &m_materialUBO);

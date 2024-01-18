@@ -1,5 +1,6 @@
 #include "A3D/texturecacheogl.h"
 #include "A3D/texture.h"
+#include <QOpenGLPixelTransferOptions>
 
 namespace A3D {
 
@@ -40,7 +41,7 @@ inline QOpenGLTexture::Filter translateFilter(Texture::Filter f) {
 		return QOpenGLTexture::LinearMipMapLinear;
 	}
 }
-void TextureCacheOGL::update(CoreGLFunctions*) {
+void TextureCacheOGL::update(RendererOGL*, CoreGLFunctions* gl) {
 	Texture* t = texture();
 	if(!t || t->image().isNull()) {
 		m_texture.reset();
@@ -56,7 +57,55 @@ void TextureCacheOGL::update(CoreGLFunctions*) {
 	m_texture->setMinMagFilters(translateFilter(t->minFilter()), translateFilter(t->magFilter()));
 	m_texture->setLevelofDetailBias(t->lodBias());
 
-	m_texture->setData(t->image(), (t->renderOptions() & Texture::GenerateMipMaps) ? QOpenGLTexture::GenerateMipMaps : QOpenGLTexture::DontGenerateMipMaps);
+	Image const& i = t->image();
+	if(i.isQImage()) {
+		if(i.hasAlphaChannel()) {
+			QImage temp;
+			QImage const* glImage = imageWithFormat(QImage::Format_RGBA8888, i.qimage(), temp);
+
+			m_texture->bind();
+			m_texture->setFormat(QOpenGLTexture::RGBA8_UNorm);
+			m_texture->setSize(glImage->width(), glImage->height());
+			m_texture->setMipLevels((t->renderOptions() & Texture::GenerateMipMaps) ? m_texture->maximumMipLevels() : 1);
+			m_texture->allocateStorage();
+
+			QOpenGLPixelTransferOptions uploadOptions;
+			uploadOptions.setAlignment(1);
+			m_texture->setData(0, QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, glImage->bits(), &uploadOptions);
+		}
+		else {
+			QImage temp;
+			QImage const* glImage = imageWithFormat(QImage::Format_RGB888, i.qimage(), temp);
+
+			m_texture->bind();
+			m_texture->setFormat(QOpenGLTexture::RGB8_UNorm);
+			m_texture->setSize(glImage->width(), glImage->height());
+			m_texture->setMipLevels((t->renderOptions() & Texture::GenerateMipMaps) ? m_texture->maximumMipLevels() : 1);
+			m_texture->allocateStorage();
+
+			QOpenGLPixelTransferOptions uploadOptions;
+			uploadOptions.setAlignment(1);
+			m_texture->setData(0, QOpenGLTexture::RGB, QOpenGLTexture::UInt8, glImage->bits(), &uploadOptions);
+		}
+	}
+	else if(i.isHDR()) {
+		m_texture->bind();
+		switch(i.hdr().nrComponents) {
+		case 1:
+			gl->glTexSubImage2D(m_texture->target(), 0, 0, 0, i.hdr().w, i.hdr().h, QOpenGLTexture::Red, QOpenGLTexture::Float32, i.hdr().m_data.data());
+			break;
+		case 2:
+			gl->glTexSubImage2D(m_texture->target(), 0, 0, 0, i.hdr().w, i.hdr().h, QOpenGLTexture::RG, QOpenGLTexture::Float32, i.hdr().m_data.data());
+			break;
+		case 3:
+			gl->glTexSubImage2D(m_texture->target(), 0, 0, 0, i.hdr().w, i.hdr().h, QOpenGLTexture::RGB, QOpenGLTexture::Float32, i.hdr().m_data.data());
+			break;
+		case 4:
+			gl->glTexSubImage2D(m_texture->target(), 0, 0, 0, i.hdr().w, i.hdr().h, QOpenGLTexture::RGBA, QOpenGLTexture::Float32, i.hdr().m_data.data());
+			break;
+		}
+		m_texture->release();
+	}
 
 	markClean();
 }

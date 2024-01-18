@@ -10,13 +10,14 @@
 namespace A3D {
 
 class MaterialPropertiesCacheOGL;
+class RendererOGL;
 class MaterialCacheOGL : public MaterialCache {
 	Q_OBJECT
 public:
 	explicit MaterialCacheOGL(Material*);
 	~MaterialCacheOGL();
 
-	void update(CoreGLFunctions*);
+	void update(RendererOGL*, CoreGLFunctions*);
 	void install(CoreGLFunctions*);
 
 	int searchUniform(QString const& name);
