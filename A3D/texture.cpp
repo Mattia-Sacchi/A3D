@@ -180,12 +180,13 @@ void Texture::setLodBias(float bias) {
 void Texture::invalidateCache(std::uintptr_t rendererID) {
 	if(rendererID == std::numeric_limits<std::uintptr_t>::max()) {
 		for(auto it = m_textureCache.begin(); it != m_textureCache.end();) {
-			if(it->second.isNull())
+			if(it->second.isNull()) {
 				it = m_textureCache.erase(it);
-			else {
-				it->second->markDirty();
-				++it;
+				continue;
 			}
+
+			it->second->markDirty();
+			++it;
 		}
 	}
 	else {

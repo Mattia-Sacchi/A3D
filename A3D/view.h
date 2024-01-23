@@ -6,6 +6,7 @@
 #include "A3D/camera.h"
 #include "A3D/rendererogl.h"
 #include "A3D/scene.h"
+#include "A3D/viewcontroller.h"
 
 namespace A3D {
 
@@ -15,16 +16,31 @@ public:
 	explicit View(QWidget* parent = nullptr);
 	~View();
 
-	void setRenderTimerEnabled(bool enabled);
-
 	Camera const& camera() const;
 	Camera& camera();
+
+	Scene* scene() const;
 	void setScene(Scene*);
+
+	ViewController* controller() const;
+	void setController(ViewController*);
+
+	float runTimeMultiplier() const;
+	void setRunTimeMultiplier(float);
+
+	bool isRunning() const;
+	void setRunning(bool running);
+
+	inline void run() { setRunning(true); }
+	inline void stop() { setRunning(false); }
 
 	Renderer* renderer();
 
 	QSize minimumSizeHint() const override;
 	QSize sizeHint() const override;
+
+public slots:
+	void updateView();
 
 signals:
 	void frameRendered();
@@ -33,8 +49,6 @@ protected:
 	void initializeGL() override;
 	void resizeGL(int w, int h) override;
 	void paintGL() override;
-	void keyPressEvent(QKeyEvent* e) override;
-	void keyReleaseEvent(QKeyEvent* e) override;
 
 private slots:
 	void sceneChanged();
@@ -44,12 +58,14 @@ private:
 
 	bool m_initDoneGL;
 
+	QElapsedTimer m_viewRunTimer;
+	float m_runTimeMultiplier;
+
+	QPointer<ViewController> m_viewController;
 	Camera m_camera;
 	std::unique_ptr<RendererOGL> m_renderer;
-	Scene* m_scene;
-	QTimer* m_renderTimer;
-
-	std::map<Qt::Key, bool> m_keyPressed;
+	QPointer<Scene> m_scene;
+	QMetaObject::Connection m_sceneConnection;
 };
 
 }

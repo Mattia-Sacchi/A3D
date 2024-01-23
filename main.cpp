@@ -2,20 +2,22 @@
 #include <QMainWindow>
 #include <QFile>
 #include <QDir>
+#include <QTimer>
 
 #include "A3D/view.h"
+#include "A3D/keyboardcameracontroller.h"
 
 int main(int argc, char* argv[]) {
 	QApplication a(argc, argv);
 	QMainWindow w;
 
-	A3D::Scene* s = new A3D::Scene(&w);
-	//A3D::PointLightInfo& l = s->getOrCreateLight(0);
-	//l.position = QVector3D(0.f, 2.2f, 5.f);
-	//l.color = QVector4D(1.f, 1.f, 1.f, 500.f);
+	A3D::Scene* s          = new A3D::Scene(&w);
+	A3D::PointLightInfo& l = s->getOrCreateLight(0);
+	l.position             = QVector3D(0.f, 2.2f, 5.f);
+	l.color                = QVector4D(1.f, 1.f, 1.f, 500.f);
 
-	A3D::MaterialProperties* Concrete002 = nullptr;
-	A3D::MaterialProperties* Metal035 = nullptr;
+	A3D::MaterialProperties* Concrete002  = nullptr;
+	A3D::MaterialProperties* Metal035     = nullptr;
 	A3D::MaterialProperties* FloorTiles06 = nullptr;
 
 	A3D::Cubemap* Cubemap001 = nullptr;
@@ -24,16 +26,16 @@ int main(int argc, char* argv[]) {
 
 	{
 		auto loadPBRMaterial = [s](QString path, QString baseName, QString fileExtension) -> A3D::MaterialProperties* {
-			A3D::MaterialProperties* matProperties = new A3D::MaterialProperties(s->resourceManager());
+			A3D::MaterialProperties* matProperties                                  = new A3D::MaterialProperties(s->resourceManager());
 			static std::map<A3D::MaterialProperties::TextureSlot, QString> suffixes = {
-				{A3D::MaterialProperties::AlbedoTextureSlot, "Color"},
-				{A3D::MaterialProperties::NormalTextureSlot, "NormalGL"},
-				{A3D::MaterialProperties::MetallicTextureSlot, "Metallic"},
+				{   A3D::MaterialProperties::AlbedoTextureSlot,     "Color"},
+				{   A3D::MaterialProperties::NormalTextureSlot,  "NormalGL"},
+				{ A3D::MaterialProperties::MetallicTextureSlot,  "Metallic"},
 				{A3D::MaterialProperties::RoughnessTextureSlot, "Roughness"},
-				{A3D::MaterialProperties::AOTextureSlot, "AO"},
+				{       A3D::MaterialProperties::AOTextureSlot,        "AO"},
 			};
 
-			for(std::pair<A3D::MaterialProperties::TextureSlot, QString> const& suffix : qAsConst(suffixes)) {
+			for(std::pair<A3D::MaterialProperties::TextureSlot, QString> const& suffix: qAsConst(suffixes)) {
 				A3D::Image img(QImage(path + QDir::separator() + baseName + "_" + suffix.second + "." + fileExtension));
 				if(!img.isNull()) {
 					A3D::Texture* texture = new A3D::Texture(std::move(img), s->resourceManager());
@@ -83,14 +85,14 @@ int main(int argc, char* argv[]) {
 
 		sampleModel = s->resourceManager()->loadModel("Sphere", ":/A3D/SampleResources/Models/Sphere/Sphere.obj");
 		if(!sampleModel) {
-			sampleModel = new A3D::Model(s->resourceManager());
+			sampleModel   = new A3D::Model(s->resourceManager());
 			A3D::Group* g = sampleModel->getOrAddGroup("Default");
 			g->setMesh(A3D::Mesh::standardMesh(A3D::Mesh::CubeIndexedMesh));
 		}
 	}
 
 	A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
-	A3D::Model* m = sampleModel->clone(true);
+	A3D::Model* m  = sampleModel->clone(true);
 	e->setModel(m);
 
 	for(auto it = m->groups().begin(); it != m->groups().end(); ++it) {
@@ -100,12 +102,27 @@ int main(int argc, char* argv[]) {
 		g->setMaterialProperties(FloorTiles06);
 	}
 
-
 	A3D::View* v = new A3D::View(&w);
 	v->camera().setPosition(QVector3D(10.f, 0.f, 2.f));
 	v->camera().setOrientationTarget(QVector3D(0.f, 0.f, 0.f));
 	v->setScene(s);
-	v->setRenderTimerEnabled(true);
+
+	A3D::KeyboardCameraController* keyCamController = new A3D::KeyboardCameraController(v);
+	keyCamController->setBaseMovementSpeed(QVector3D(3.f, 3.f, 3.f));
+	v->setController(keyCamController);
+
+	QTimer t;
+	if(v->format().swapInterval() > 0)
+		t.setInterval(0);
+	else
+		t.setInterval(10);
+	t.start();
+
+	QObject::connect(&t, &QTimer::timeout, v, &A3D::View::updateView);
+	QObject::connect(&t, &QTimer::timeout, s, &A3D::Scene::updateScene);
+
+	v->run();
+	s->run();
 
 	w.setCentralWidget(v);
 	w.show();

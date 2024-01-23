@@ -104,12 +104,13 @@ QString Material::shader(ShaderMode mode, ShaderType type) const {
 void Material::invalidateCache(std::uintptr_t rendererID) {
 	if(rendererID == std::numeric_limits<std::uintptr_t>::max()) {
 		for(auto it = m_materialCache.begin(); it != m_materialCache.end();) {
-			if(it->second.isNull())
+			if(it->second.isNull()) {
 				it = m_materialCache.erase(it);
-			else {
-				it->second->markDirty();
-				++it;
+				continue;
 			}
+
+			it->second->markDirty();
+			++it;
 		}
 	}
 	else {

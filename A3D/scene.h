@@ -6,6 +6,7 @@
 #include "A3D/entity.h"
 #include "A3D/resourcemanager.h"
 #include "A3D/cubemap.h"
+#include "A3D/scenecontroller.h"
 
 namespace A3D {
 
@@ -18,7 +19,6 @@ struct PointLightInfo {
 class Scene : public Entity {
 	Q_OBJECT
 public:
-
 	explicit Scene(QObject* parent = nullptr);
 	~Scene();
 
@@ -29,10 +29,32 @@ public:
 	PointLightInfo const* getLight(std::size_t id) const;
 	std::map<std::size_t, PointLightInfo> const& lights() const;
 
-	void setSkybox(Cubemap*);
 	Cubemap* skybox() const;
+	void setSkybox(Cubemap*);
+
+	void addController(SceneController*);
+	void removeController(SceneController*);
+
+	float runTimeMultiplier() const;
+	void setRunTimeMultiplier(float);
+
+	bool isRunning() const;
+	void setRunning(bool running);
+
+	inline void run() { setRunning(true); }
+	inline void stop() { setRunning(false); }
+
+signals:
+	void sceneUpdated();
+
+public slots:
+	void updateScene();
 
 private:
+	QElapsedTimer m_sceneRunTimer;
+	float m_runTimeMultiplier;
+
+	std::vector<QPointer<SceneController>> m_sceneControllers;
 	ResourceManager m_resourceManager;
 	std::map<std::size_t, PointLightInfo> m_lights;
 

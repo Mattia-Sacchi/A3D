@@ -7,6 +7,7 @@
 #include <QMatrix4x4>
 #include <vector>
 #include "A3D/model.h"
+#include "A3D/entitycontroller.h"
 
 namespace A3D {
 
@@ -59,12 +60,20 @@ public:
 
 	QMatrix4x4 const& entityMatrix() const;
 
+	void addController(EntityController*);
+	void removeController(EntityController*);
+
+protected:
+	// Returns true if anything changed.
+	bool updateEntity(std::chrono::milliseconds);
+
 private:
 	// Adds a child Entity
 	void addChildEntity(Entity*);
 
 	QPointer<Entity> m_parent;
 	std::vector<QPointer<Entity>> m_entities;
+	std::vector<QPointer<EntityController>> m_entityControllers;
 	RenderOptions m_renderOptions;
 
 	mutable bool m_matrixDirty;
