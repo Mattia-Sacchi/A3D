@@ -16,7 +16,7 @@ ResourceManager::ResourceManager(QObject* parent)
 Model* ResourceManager::getLoadedModel(QString const& name) const {
 	auto it = m_models.find(name);
 	if(it == m_models.end() || !it->second)
-		return nullptr; // TODO: Fallback?
+		return nullptr;
 	return it->second;
 }
 
@@ -160,7 +160,7 @@ Model* ResourceManager::loadModel(QString name, QString const& path, InputFormat
 		int lastDot = path.lastIndexOf('.');
 		if(lastDot < 0)
 			return nullptr;
-		QString extension = path.mid(lastDot+1).toLower();
+		QString extension = path.mid(lastDot + 1).toLower();
 
 		if(extension == "obj")
 			fmt = IF_OBJ;

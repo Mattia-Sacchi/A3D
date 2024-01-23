@@ -3,11 +3,15 @@
 namespace A3D {
 
 inline void normalizeAngleVector(QVector3D& angle) {
-	float const fMaxVerticalAngle = 89.f;
-	if(angle.x() > fMaxVerticalAngle)
-		angle.setX(fMaxVerticalAngle);
-	else if(angle.x() < -fMaxVerticalAngle)
-		angle.setX(-fMaxVerticalAngle);
+	// float const fMaxVerticalAngle = 89.f;
+	// if(angle.x() > fMaxVerticalAngle)
+	// 		angle.setX(fMaxVerticalAngle);
+	// else if(angle.x() < -fMaxVerticalAngle)
+	// 		angle.setX(-fMaxVerticalAngle);
+
+	angle.setX(fmodf(angle.x(), 360.f));
+	if(angle.x() < 0.f)
+		angle.setX(angle.x() + 360.f);
 
 	angle.setY(fmodf(angle.y(), 360.f));
 	if(angle.y() < 0.f)
@@ -45,8 +49,8 @@ void Camera::setPosition(QVector3D const& pos) {
 QMatrix4x4 Camera::orientation() const {
 	QMatrix4x4 matrix;
 	matrix.rotate(m_angle.x(), QVector3D(1.f, 0.f, 0.f));
-	matrix.rotate(m_angle.y(), QVector3D(0.f, 1.f, 0.f));
 	matrix.rotate(m_angle.z(), QVector3D(0.f, 0.f, 1.f));
+	matrix.rotate(m_angle.y(), QVector3D(0.f, 1.f, 0.f));
 	return matrix;
 }
 QVector3D const& Camera::angle() const {

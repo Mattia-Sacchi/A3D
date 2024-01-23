@@ -10,8 +10,7 @@ View::View(QWidget* parent)
 	: QOpenGLWidget{ parent },
 	  m_initDoneGL(false),
 	  m_renderer(nullptr),
-	  m_scene(nullptr),
-	  m_renderTimer(nullptr) {
+	  m_scene(nullptr) {
 	log(LC_Debug, "Constructor: View");
 	setMouseTracking(true);
 	setFocusPolicy(Qt::StrongFocus);
@@ -27,29 +26,10 @@ View::View(QWidget* parent)
 	fmt.setSwapInterval(1);
 	fmt.setSwapBehavior(QSurfaceFormat::TripleBuffer);
 	setFormat(fmt);
-
-	m_renderTimer = new QTimer(this);
-	connect(m_renderTimer, &QTimer::timeout, this, [this]() {
-		this->update();
-	});
 }
 
 View::~View() {
 	log(LC_Debug, "Destructor: View");
-}
-
-void View::setRenderTimerEnabled(bool enabled) {
-	if(!enabled) {
-		m_renderTimer->stop();
-		return;
-	}
-	else {
-		if(format().swapInterval() >= 1)
-			m_renderTimer->setInterval(0);
-		else
-			m_renderTimer->setInterval(16);
-		m_renderTimer->start();
-	}
 }
 
 Camera& View::camera() {
@@ -64,8 +44,56 @@ Renderer* View::renderer() {
 	return m_renderer.get();
 }
 
+Scene* View::scene() const {
+	return m_scene;
+}
+
 void View::setScene(Scene* newScene) {
+	if(m_sceneConnection) {
+		disconnect(m_sceneConnection);
+		m_sceneConnection = QMetaObject::Connection();
+	}
+
 	m_scene = newScene;
+
+	if(m_scene)
+		m_sceneConnection = connect(m_scene, &Scene::sceneUpdated, this, &View::sceneChanged);
+}
+
+ViewController* View::controller() const {
+	return m_viewController;
+}
+
+void View::setController(ViewController* viewController) {
+	if(m_viewController)
+		removeEventFilter(m_viewController);
+
+	m_viewController = viewController;
+
+	if(m_viewController)
+		installEventFilter(m_viewController);
+}
+
+float View::runTimeMultiplier() const {
+	return m_runTimeMultiplier;
+}
+
+void View::setRunTimeMultiplier(float rtm) {
+	m_runTimeMultiplier = rtm;
+}
+
+bool View::isRunning() const {
+	return m_viewRunTimer.isValid();
+}
+
+void View::setRunning(bool running) {
+	if(m_viewRunTimer.isValid() == running)
+		return;
+
+	if(running)
+		m_viewRunTimer.restart();
+	else
+		m_viewRunTimer.invalidate();
 }
 
 QSize View::minimumSizeHint() const {
@@ -114,68 +142,21 @@ void View::paintGL() {
 	if(!m_initDoneGL)
 		return;
 
-	glEnable(GL_MULTISAMPLE);
-
-	// Don't get fooled by the X/Y names....
-	// x is the pitch (vertical angle)
-	// y is the yaw (horizontal angle)
-	// z is the roll (tilt/peek angle)
-	float const fRotSpeed = 0.6f;
-	QVector3D orientation;
-	if(m_keyPressed[Qt::Key_W])
-		orientation.setX(orientation.x() - fRotSpeed);
-	if(m_keyPressed[Qt::Key_S])
-		orientation.setX(orientation.x() + fRotSpeed);
-	if(m_keyPressed[Qt::Key_A])
-		orientation.setY(orientation.y() - fRotSpeed);
-	if(m_keyPressed[Qt::Key_D])
-		orientation.setY(orientation.y() + fRotSpeed);
-
-	camera().offsetOrientation(orientation);
-
-	// Coordinate Convention is RHS/CCW:
-	// X = -Left / +Right
-	// Y = +Up / -Down
-	// Z = -Further / +Closer
-
-	QVector3D const forward = camera().forward();
-	QVector3D const right   = camera().right();
-	QVector3D const up      = camera().up();
-
-	float const fMovSpeed = 0.2f;
-	QVector3D movement;
-	if(m_keyPressed[Qt::Key_Up] && m_keyPressed[Qt::Key_Shift])
-		movement += up * fMovSpeed;
-	if(m_keyPressed[Qt::Key_Down] && m_keyPressed[Qt::Key_Shift])
-		movement -= up * fMovSpeed;
-	if(m_keyPressed[Qt::Key_Up] && !m_keyPressed[Qt::Key_Shift])
-		movement += forward * fMovSpeed;
-	if(m_keyPressed[Qt::Key_Down] && !m_keyPressed[Qt::Key_Shift])
-		movement -= forward * fMovSpeed;
-	if(m_keyPressed[Qt::Key_Left])
-		movement -= right * fMovSpeed;
-	if(m_keyPressed[Qt::Key_Right])
-		movement += right * fMovSpeed;
-
-	camera().setPosition(camera().position() + movement);
-
-	if(m_keyPressed[Qt::Key_H])
-		camera().setOrientationTarget(QVector3D(0.f, 0.f, 0.f));
-
 	m_renderer->DrawAll(m_scene, camera());
 	m_renderer->CleanupRenderCache();
 
 	emit frameRendered();
 }
 
-void View::keyPressEvent(QKeyEvent* e) {
-	QOpenGLWidget::keyPressEvent(e);
-	m_keyPressed[static_cast<Qt::Key>(e->key())] = true;
-}
+void View::updateView() {
+	if(!m_viewController || !m_viewRunTimer.isValid() || m_viewRunTimer.elapsed() <= 0)
+		return;
 
-void View::keyReleaseEvent(QKeyEvent* e) {
-	QOpenGLWidget::keyPressEvent(e);
-	m_keyPressed[static_cast<Qt::Key>(e->key())] = false;
+	std::chrono::milliseconds t = std::chrono::milliseconds(m_viewRunTimer.restart());
+	bool hasChanges             = m_viewController->update(t);
+
+	if(hasChanges)
+		update(); // Redraw
 }
 
 }

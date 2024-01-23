@@ -2,6 +2,7 @@
 #define A3DCOMMON_H
 
 #include <QGenericMatrix>
+#include <QElapsedTimer>
 #include <QMatrix4x4>
 #include <QVector2D>
 #include <QVector3D>
@@ -22,6 +23,7 @@
 #include <map>
 #include <vector>
 #include <list>
+#include <chrono>
 
 namespace A3D {
 

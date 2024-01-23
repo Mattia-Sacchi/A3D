@@ -7,7 +7,10 @@
 namespace A3D {
 
 CubemapCacheOGL::CubemapCacheOGL(Cubemap* parent)
-	: CubemapCache{ parent }, m_cubemap(0), m_cubemapIrradiance(0), m_cubemapPrefilter(0) {
+	: CubemapCache{ parent },
+	  m_cubemap(0),
+	  m_cubemapIrradiance(0),
+	  m_cubemapPrefilter(0) {
 	log(LC_Debug, "Constructor: CubemapCacheOGL");
 }
 CubemapCacheOGL::~CubemapCacheOGL() {
@@ -41,27 +44,15 @@ void CubemapCacheOGL::update(RendererOGL* renderer, CoreGLFunctions* gl) {
 	if(s.width() != s.height())
 		return;
 
-	if(s != c->ny().size()
-	   || s != c->nz().size()
-	   || s != c->px().size()
-	   || s != c->py().size()
-	   || s != c->pz().size())
+	if(s != c->ny().size() || s != c->nz().size() || s != c->px().size() || s != c->py().size() || s != c->pz().size())
 		return;
 
 	bool isqimage = c->nx().isQImage();
-	if(isqimage != c->ny().isQImage()
-	   || isqimage != c->nz().isQImage()
-	   || isqimage != c->px().isQImage()
-	   || isqimage != c->py().isQImage()
-	   || isqimage != c->pz().isQImage())
+	if(isqimage != c->ny().isQImage() || isqimage != c->nz().isQImage() || isqimage != c->px().isQImage() || isqimage != c->py().isQImage() || isqimage != c->pz().isQImage())
 		return;
 
 	bool ishdr = c->nx().isHDR();
-	if(ishdr != c->ny().isHDR()
-	   || ishdr != c->nz().isHDR()
-	   || ishdr != c->px().isHDR()
-	   || ishdr != c->py().isHDR()
-	   || ishdr != c->pz().isHDR())
+	if(ishdr != c->ny().isHDR() || ishdr != c->nz().isHDR() || ishdr != c->px().isHDR() || ishdr != c->py().isHDR() || ishdr != c->pz().isHDR())
 		return;
 
 	if(!m_cubemap)
@@ -77,12 +68,12 @@ void CubemapCacheOGL::update(RendererOGL* renderer, CoreGLFunctions* gl) {
 	gl->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	gl->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	static GLenum const FORMAT_FLOAT_R = GL_R16F;
-	static GLenum const FORMAT_FLOAT_RG = GL_RG16F;
-	static GLenum const FORMAT_FLOAT_RGB = GL_RGB16F;
+	static GLenum const FORMAT_FLOAT_R    = GL_R16F;
+	static GLenum const FORMAT_FLOAT_RG   = GL_RG16F;
+	static GLenum const FORMAT_FLOAT_RGB  = GL_RGB16F;
 	static GLenum const FORMAT_FLOAT_RGBA = GL_RGBA16F;
 	static GLenum const FORMAT_IRRADIANCE = GL_RGBA16F;
-	static GLenum const FORMAT_PREFILTER = GL_RGBA16F;
+	static GLenum const FORMAT_PREFILTER  = GL_RGBA16F;
 
 	auto setCubemapFace = [this, gl](Image const& i, QOpenGLTexture::CubeMapFace face) {
 		if(i.isQImage()) {
@@ -91,7 +82,8 @@ void CubemapCacheOGL::update(RendererOGL* renderer, CoreGLFunctions* gl) {
 				QImage const* glImage = imageWithFormat(QImage::Format_RGBA8888, i.qimage(), temp);
 
 				gl->glTexImage2D(face, 0, GL_RGBA, glImage->width(), glImage->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glImage->constBits());
-			} else {
+			}
+			else {
 				QImage temp;
 				QImage const* glImage = imageWithFormat(QImage::Format_RGB888, i.qimage(), temp);
 
@@ -101,16 +93,16 @@ void CubemapCacheOGL::update(RendererOGL* renderer, CoreGLFunctions* gl) {
 		else if(i.isHDR()) {
 			switch(i.hdr().nrComponents) {
 			case 1:
-				gl->glTexImage2D(face, 0, FORMAT_FLOAT_R, i.hdr().w, i.hdr().h, 0, GL_RED, GL_FLOAT, i.hdr().m_data.data());
+				gl->glTexImage2D(face, 0, FORMAT_FLOAT_R, static_cast<GLsizei>(i.hdr().w), static_cast<GLsizei>(i.hdr().h), 0, GL_RED, GL_FLOAT, i.hdr().m_data.data());
 				break;
 			case 2:
-				gl->glTexImage2D(face, 0, FORMAT_FLOAT_RG, i.hdr().w, i.hdr().h, 0, GL_RG, GL_FLOAT, i.hdr().m_data.data());
+				gl->glTexImage2D(face, 0, FORMAT_FLOAT_RG, static_cast<GLsizei>(i.hdr().w), static_cast<GLsizei>(i.hdr().h), 0, GL_RG, GL_FLOAT, i.hdr().m_data.data());
 				break;
 			case 3:
-				gl->glTexImage2D(face, 0, FORMAT_FLOAT_RGB, i.hdr().w, i.hdr().h, 0, GL_RGB, GL_FLOAT, i.hdr().m_data.data());
+				gl->glTexImage2D(face, 0, FORMAT_FLOAT_RGB, static_cast<GLsizei>(i.hdr().w), static_cast<GLsizei>(i.hdr().h), 0, GL_RGB, GL_FLOAT, i.hdr().m_data.data());
 				break;
 			case 4:
-				gl->glTexImage2D(face, 0, FORMAT_FLOAT_RGBA, i.hdr().w, i.hdr().h, 0, GL_RGBA, GL_FLOAT, i.hdr().m_data.data());
+				gl->glTexImage2D(face, 0, FORMAT_FLOAT_RGBA, static_cast<GLsizei>(i.hdr().w), static_cast<GLsizei>(i.hdr().h), 0, GL_RGBA, GL_FLOAT, i.hdr().m_data.data());
 				break;
 			}
 		}
@@ -127,8 +119,8 @@ void CubemapCacheOGL::update(RendererOGL* renderer, CoreGLFunctions* gl) {
 
 	// Save the GL state that might change because of our post-processing phases
 	renderer->pushState(true);
-		calcIrradiance(FORMAT_IRRADIANCE, renderer, gl);
-		calcPrefilter(FORMAT_PREFILTER, renderer, gl);
+	calcIrradiance(FORMAT_IRRADIANCE, renderer, gl);
+	calcPrefilter(FORMAT_PREFILTER, renderer, gl);
 	renderer->popState();
 
 	markClean();
@@ -146,10 +138,10 @@ void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* renderer, CoreGL
 	if(!m_cubemapPrefilter)
 		return;
 
-	Mesh* prefilterMesh = Mesh::standardMesh(Mesh::CubeIndexedMesh);
+	Mesh* prefilterMesh    = Mesh::standardMesh(Mesh::CubeIndexedMesh);
 	Material* prefilterMat = Material::standardMaterial(Material::PrefilterMaterial);
 
-	MeshCacheOGL* meshCache = renderer->buildMeshCache(prefilterMesh);
+	MeshCacheOGL* meshCache    = renderer->buildMeshCache(prefilterMesh);
 	MaterialCacheOGL* matCache = renderer->buildMaterialCache(prefilterMat);
 
 	// Mip Levels = 5 -> Size = 128x128
@@ -158,7 +150,7 @@ void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* renderer, CoreGL
 	// Mip Levels = 2 -> Size =  16x16
 	// Mip Levels = 1 -> Size =   8x8
 
-	static int const maxMipLevels = 5;
+	static int const maxMipLevels        = 5;
 	static int const prefilterSideLength = 4 * static_cast<int>(std::powf(2.f, static_cast<float>(maxMipLevels)) + 0.1f);
 	static QSize const prefilterSize(prefilterSideLength, prefilterSideLength);
 
@@ -186,12 +178,9 @@ void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* renderer, CoreGL
 	};
 
 	static QMatrix4x4 const viewMatrices[6] = {
-		lookAt(QVector3D( 1.f, 0.f, 0.f), QVector3D(0.f, -1.f, 0.f)),
-		lookAt(QVector3D(-1.f, 0.f, 0.f), QVector3D(0.f, -1.f, 0.f)),
-		lookAt(QVector3D( 0.f, 1.f, 0.f), QVector3D(0.f,  0.f, 1.f)),
-		lookAt(QVector3D( 0.f,-1.f, 0.f), QVector3D(0.f,  0.f,-1.f)),
-		lookAt(QVector3D( 0.f, 0.f, 1.f), QVector3D(0.f, -1.f, 0.f)),
-		lookAt(QVector3D( 0.f, 0.f,-1.f), QVector3D(0.f, -1.f, 0.f)),
+		lookAt(QVector3D(1.f, 0.f, 0.f), QVector3D(0.f, -1.f, 0.f)), lookAt(QVector3D(-1.f, 0.f, 0.f), QVector3D(0.f, -1.f, 0.f)),
+		lookAt(QVector3D(0.f, 1.f, 0.f), QVector3D(0.f, 0.f, 1.f)),  lookAt(QVector3D(0.f, -1.f, 0.f), QVector3D(0.f, 0.f, -1.f)),
+		lookAt(QVector3D(0.f, 0.f, 1.f), QVector3D(0.f, -1.f, 0.f)), lookAt(QVector3D(0.f, 0.f, -1.f), QVector3D(0.f, -1.f, 0.f)),
 	};
 	static QMatrix4x4 const projMatrix = proj();
 
@@ -211,7 +200,7 @@ void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* renderer, CoreGL
 
 		gl->glViewport(0, 0, mipLevelSize.width(), mipLevelSize.height());
 
-		float roughness = static_cast<float>(i-1) / static_cast<float>(maxMipLevels - 1);
+		float roughness = static_cast<float>(i - 1) / static_cast<float>(maxMipLevels - 1);
 		matCache->applyUniform("Roughness", roughness);
 
 		gl->glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot));
@@ -223,7 +212,6 @@ void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* renderer, CoreGL
 			// Bind shader & set matrices
 			gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + j, m_cubemapPrefilter, glMipLevel);
 			gl->glClear(GL_COLOR_BUFFER_BIT);
-
 
 			meshCache->render(gl, QMatrix4x4(), viewMatrices[j], projMatrix);
 		}
@@ -242,10 +230,10 @@ void CubemapCacheOGL::calcIrradiance(GLenum format, RendererOGL* renderer, CoreG
 	if(!m_cubemapIrradiance)
 		return;
 
-	Mesh* irradianceMesh = Mesh::standardMesh(Mesh::CubeIndexedMesh);
+	Mesh* irradianceMesh    = Mesh::standardMesh(Mesh::CubeIndexedMesh);
 	Material* irradianceMat = Material::standardMaterial(Material::IrradianceMaterial);
 
-	MeshCacheOGL* meshCache = renderer->buildMeshCache(irradianceMesh);
+	MeshCacheOGL* meshCache    = renderer->buildMeshCache(irradianceMesh);
 	MaterialCacheOGL* matCache = renderer->buildMaterialCache(irradianceMat);
 
 	gl->glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemapIrradiance);
@@ -260,7 +248,6 @@ void CubemapCacheOGL::calcIrradiance(GLenum format, RendererOGL* renderer, CoreG
 	for(int i = 0; i < 6; ++i)
 		gl->glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, irradianceSize.width(), irradianceSize.height(), 0, GL_RGB, GL_FLOAT, nullptr);
 
-
 	auto lookAt = [](QVector3D const& target, QVector3D const& up) -> QMatrix4x4 {
 		QMatrix4x4 mx;
 		mx.lookAt(QVector3D(), target, up);
@@ -273,12 +260,9 @@ void CubemapCacheOGL::calcIrradiance(GLenum format, RendererOGL* renderer, CoreG
 	};
 
 	static QMatrix4x4 const viewMatrices[6] = {
-		lookAt(QVector3D( 1.f, 0.f, 0.f), QVector3D(0.f, -1.f, 0.f)),
-		lookAt(QVector3D(-1.f, 0.f, 0.f), QVector3D(0.f, -1.f, 0.f)),
-		lookAt(QVector3D( 0.f, 1.f, 0.f), QVector3D(0.f,  0.f, 1.f)),
-		lookAt(QVector3D( 0.f,-1.f, 0.f), QVector3D(0.f,  0.f,-1.f)),
-		lookAt(QVector3D( 0.f, 0.f, 1.f), QVector3D(0.f, -1.f, 0.f)),
-		lookAt(QVector3D( 0.f, 0.f,-1.f), QVector3D(0.f, -1.f, 0.f)),
+		lookAt(QVector3D(1.f, 0.f, 0.f), QVector3D(0.f, -1.f, 0.f)), lookAt(QVector3D(-1.f, 0.f, 0.f), QVector3D(0.f, -1.f, 0.f)),
+		lookAt(QVector3D(0.f, 1.f, 0.f), QVector3D(0.f, 0.f, 1.f)),  lookAt(QVector3D(0.f, -1.f, 0.f), QVector3D(0.f, 0.f, -1.f)),
+		lookAt(QVector3D(0.f, 0.f, 1.f), QVector3D(0.f, -1.f, 0.f)), lookAt(QVector3D(0.f, 0.f, -1.f), QVector3D(0.f, -1.f, 0.f)),
 	};
 	static QMatrix4x4 const projMatrix = proj();
 

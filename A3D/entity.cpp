@@ -83,4 +83,40 @@ QMatrix4x4 const& Entity::entityMatrix() const {
 	return m_matrix;
 }
 
+void Entity::addController(EntityController* ec) {
+	removeController(ec);
+	m_entityControllers.push_back(ec);
+}
+
+void Entity::removeController(EntityController* ec) {
+	m_entityControllers.erase(std::remove_if(m_entityControllers.begin(), m_entityControllers.end(), [ec](QPointer<EntityController> it) -> bool {
+		return (!it || it != ec);
+	}));
+}
+
+bool Entity::updateEntity(std::chrono::milliseconds t) {
+	bool hasChanges = false;
+	for(auto it = m_entityControllers.begin(); it != m_entityControllers.end();) {
+		if(!*it) {
+			it = m_entityControllers.erase(it);
+			continue;
+		}
+
+		hasChanges = (*it)->update(t) || hasChanges;
+		++it;
+	}
+
+	for(auto it = m_entities.begin(); it != m_entities.end();) {
+		if(!*it) {
+			it = m_entities.erase(it);
+			continue;
+		}
+
+		hasChanges = (*it)->updateEntity(t) || hasChanges;
+		++it;
+	}
+
+	return hasChanges;
+}
+
 }

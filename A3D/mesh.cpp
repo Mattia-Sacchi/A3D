@@ -17,9 +17,9 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 		newMesh.setDrawMode(Triangles);
 
 		newMesh.vertices().resize(3);
-		newMesh.vertices()[0].Position3D = QVector3D(0.0f, 0.5f, 0.f);
+		newMesh.vertices()[0].Position3D = QVector3D(+0.0f, +0.5f, 0.f);
 		newMesh.vertices()[1].Position3D = QVector3D(-0.5f, -0.5f, 0.f);
-		newMesh.vertices()[2].Position3D = QVector3D(0.5f, -0.5f, 0.f);
+		newMesh.vertices()[2].Position3D = QVector3D(+0.5f, -0.5f, 0.f);
 
 		newMesh.setContents(Position3D);
 		break;
@@ -27,15 +27,15 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 		newMesh.setDrawMode(TriangleStrips);
 
 		newMesh.vertices().resize(4);
-		newMesh.vertices()[0].Position3D     = QVector3D(-1.f, +1.f, 0.f);
-		newMesh.vertices()[1].Position3D     = QVector3D(-1.f, -1.f, 0.f);
-		newMesh.vertices()[2].Position3D     = QVector3D(+1.f, +1.f, 0.f);
-		newMesh.vertices()[3].Position3D     = QVector3D(+1.f, -1.f, 0.f);
+		newMesh.vertices()[0].Position3D = QVector3D(-1.f, +1.f, 0.f);
+		newMesh.vertices()[1].Position3D = QVector3D(-1.f, -1.f, 0.f);
+		newMesh.vertices()[2].Position3D = QVector3D(+1.f, +1.f, 0.f);
+		newMesh.vertices()[3].Position3D = QVector3D(+1.f, -1.f, 0.f);
 
-		newMesh.vertices()[0].TextureCoord2D = QVector2D( 0.f,  1.f);
-		newMesh.vertices()[1].TextureCoord2D = QVector2D( 0.f,  0.f);
-		newMesh.vertices()[2].TextureCoord2D = QVector2D( 1.f,  1.f);
-		newMesh.vertices()[3].TextureCoord2D = QVector2D( 1.f,  0.f);
+		newMesh.vertices()[0].TextureCoord2D = QVector2D(0.f, 1.f);
+		newMesh.vertices()[1].TextureCoord2D = QVector2D(0.f, 0.f);
+		newMesh.vertices()[2].TextureCoord2D = QVector2D(1.f, 1.f);
+		newMesh.vertices()[3].TextureCoord2D = QVector2D(1.f, 0.f);
 
 		newMesh.setContents(Position3D | TextureCoord2D);
 		break;
@@ -48,54 +48,54 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 				QVector3D norm;
 				QVector2D tex;
 			} vertices[36] = {
-				{{-1.0f, -1.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, {0.0f, 0.0f}},
-				{{ 1.0f,  1.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, {1.0f, 1.0f}},
-				{{ 1.0f, -1.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, {1.0f, 0.0f}},
-				{{ 1.0f,  1.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, {1.0f, 1.0f}},
-				{{-1.0f, -1.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, {0.0f, 0.0f}},
-				{{-1.0f,  1.0f, -1.0f}, { 0.0f,  0.0f, -1.0f}, {0.0f, 1.0f}},
-				{{-1.0f, -1.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
-				{{ 1.0f, -1.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}},
-				{{ 1.0f,  1.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
-				{{ 1.0f,  1.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
-				{{-1.0f,  1.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}},
-				{{-1.0f, -1.0f,  1.0f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
-				{{-1.0f,  1.0f,  1.0f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
-				{{-1.0f,  1.0f, -1.0f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 1.0f}},
-				{{-1.0f, -1.0f, -1.0f}, {-1.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
-				{{-1.0f, -1.0f, -1.0f}, {-1.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
-				{{-1.0f, -1.0f,  1.0f}, {-1.0f,  0.0f,  0.0f}, {0.0f, 0.0f}},
-				{{-1.0f,  1.0f,  1.0f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
-				{{ 1.0f,  1.0f,  1.0f}, { 1.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
-				{{ 1.0f, -1.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
-				{{ 1.0f,  1.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {1.0f, 1.0f}},
-				{{ 1.0f, -1.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
-				{{ 1.0f,  1.0f,  1.0f}, { 1.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
-				{{ 1.0f, -1.0f,  1.0f}, { 1.0f,  0.0f,  0.0f}, {0.0f, 0.0f}},
-				{{-1.0f, -1.0f, -1.0f}, { 0.0f, -1.0f,  0.0f}, {0.0f, 1.0f}},
-				{{ 1.0f, -1.0f, -1.0f}, { 0.0f, -1.0f,  0.0f}, {1.0f, 1.0f}},
-				{{ 1.0f, -1.0f,  1.0f}, { 0.0f, -1.0f,  0.0f}, {1.0f, 0.0f}},
-				{{ 1.0f, -1.0f,  1.0f}, { 0.0f, -1.0f,  0.0f}, {1.0f, 0.0f}},
-				{{-1.0f, -1.0f,  1.0f}, { 0.0f, -1.0f,  0.0f}, {0.0f, 0.0f}},
-				{{-1.0f, -1.0f, -1.0f}, { 0.0f, -1.0f,  0.0f}, {0.0f, 1.0f}},
-				{{-1.0f,  1.0f, -1.0f}, { 0.0f,  1.0f,  0.0f}, {0.0f, 1.0f}},
-				{{ 1.0f,  1.0f , 1.0f}, { 0.0f,  1.0f,  0.0f}, {1.0f, 0.0f}},
-				{{ 1.0f,  1.0f, -1.0f}, { 0.0f,  1.0f,  0.0f}, {1.0f, 1.0f}},
-				{{ 1.0f,  1.0f,  1.0f}, { 0.0f,  1.0f,  0.0f}, {1.0f, 0.0f}},
-				{{-1.0f,  1.0f, -1.0f}, { 0.0f,  1.0f,  0.0f}, {0.0f, 1.0f}},
-				{{-1.0f,  1.0f,  1.0f}, { 0.0f,  1.0f,  0.0f}, {0.0f, 0.0f}}
+				{{ -1.0f, -1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 0.0f, 0.0f }},
+                {{ +1.0f, +1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 1.0f, 1.0f }},
+				{{ +1.0f, -1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 1.0f, 0.0f }},
+                {{ +1.0f, +1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 1.0f, 1.0f }},
+				{{ -1.0f, -1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 0.0f, 0.0f }},
+                {{ -1.0f, +1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 0.0f, 1.0f }},
+				{{ -1.0f, -1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 0.0f, 0.0f }},
+                {{ +1.0f, -1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 1.0f, 0.0f }},
+				{{ +1.0f, +1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 1.0f, 1.0f }},
+                {{ +1.0f, +1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 1.0f, 1.0f }},
+				{{ -1.0f, +1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 0.0f, 1.0f }},
+                {{ -1.0f, -1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 0.0f, 0.0f }},
+				{{ -1.0f, +1.0f, +1.0f }, { -1.0f, +0.0f, +0.0f }, { 1.0f, 0.0f }},
+                {{ -1.0f, +1.0f, -1.0f }, { -1.0f, +0.0f, +0.0f }, { 1.0f, 1.0f }},
+				{{ -1.0f, -1.0f, -1.0f }, { -1.0f, +0.0f, +0.0f }, { 0.0f, 1.0f }},
+                {{ -1.0f, -1.0f, -1.0f }, { -1.0f, +0.0f, +0.0f }, { 0.0f, 1.0f }},
+				{{ -1.0f, -1.0f, +1.0f }, { -1.0f, +0.0f, +0.0f }, { 0.0f, 0.0f }},
+                {{ -1.0f, +1.0f, +1.0f }, { -1.0f, +0.0f, +0.0f }, { 1.0f, 0.0f }},
+				{{ +1.0f, +1.0f, +1.0f }, { +1.0f, +0.0f, +0.0f }, { 1.0f, 0.0f }},
+                {{ +1.0f, -1.0f, -1.0f }, { +1.0f, +0.0f, +0.0f }, { 0.0f, 1.0f }},
+				{{ +1.0f, +1.0f, -1.0f }, { +1.0f, +0.0f, +0.0f }, { 1.0f, 1.0f }},
+                {{ +1.0f, -1.0f, -1.0f }, { +1.0f, +0.0f, +0.0f }, { 0.0f, 1.0f }},
+				{{ +1.0f, +1.0f, +1.0f }, { +1.0f, +0.0f, +0.0f }, { 1.0f, 0.0f }},
+                {{ +1.0f, -1.0f, +1.0f }, { +1.0f, +0.0f, +0.0f }, { 0.0f, 0.0f }},
+				{{ -1.0f, -1.0f, -1.0f }, { +0.0f, -1.0f, +0.0f }, { 0.0f, 1.0f }},
+                {{ +1.0f, -1.0f, -1.0f }, { +0.0f, -1.0f, +0.0f }, { 1.0f, 1.0f }},
+				{{ +1.0f, -1.0f, +1.0f }, { +0.0f, -1.0f, +0.0f }, { 1.0f, 0.0f }},
+                {{ +1.0f, -1.0f, +1.0f }, { +0.0f, -1.0f, +0.0f }, { 1.0f, 0.0f }},
+				{{ -1.0f, -1.0f, +1.0f }, { +0.0f, -1.0f, +0.0f }, { 0.0f, 0.0f }},
+                {{ -1.0f, -1.0f, -1.0f }, { +0.0f, -1.0f, +0.0f }, { 0.0f, 1.0f }},
+				{{ -1.0f, +1.0f, -1.0f }, { +0.0f, +1.0f, +0.0f }, { 0.0f, 1.0f }},
+                {{ +1.0f, +1.0f, +1.0f }, { +0.0f, +1.0f, +0.0f }, { 1.0f, 0.0f }},
+				{{ +1.0f, +1.0f, -1.0f }, { +0.0f, +1.0f, +0.0f }, { 1.0f, 1.0f }},
+                {{ +1.0f, +1.0f, +1.0f }, { +0.0f, +1.0f, +0.0f }, { 1.0f, 0.0f }},
+				{{ -1.0f, +1.0f, -1.0f }, { +0.0f, +1.0f, +0.0f }, { 0.0f, 1.0f }},
+                {{ -1.0f, +1.0f, +1.0f }, { +0.0f, +1.0f, +0.0f }, { 0.0f, 0.0f }}
 			};
 
 			newMesh.vertices().reserve(36);
 
 			for(auto it = std::begin(vertices); it != std::end(vertices); ++it) {
-				newMesh.indices().push_back(newMesh.vertices().size());
+				newMesh.indices().push_back(static_cast<std::uint32_t>(newMesh.vertices().size()));
 				newMesh.vertices().push_back(A3D::Mesh::Vertex());
 
 				A3D::Mesh::Vertex& v = newMesh.vertices().back();
-				v.Position3D = it->pos;
-				v.Normal3D = it->norm;
-				v.TextureCoord2D = it->tex;
+				v.Position3D         = it->pos;
+				v.Normal3D           = it->norm;
+				v.TextureCoord2D     = it->tex;
 			}
 		}
 
@@ -312,12 +312,13 @@ void Mesh::invalidateCache(std::uintptr_t rendererID) {
 	if(rendererID == std::numeric_limits<std::uintptr_t>::max()) {
 		m_packedData.clear();
 		for(auto it = m_meshCache.begin(); it != m_meshCache.end();) {
-			if(it->second.isNull())
+			if(it->second.isNull()) {
 				it = m_meshCache.erase(it);
-			else {
-				it->second->markDirty();
-				++it;
+				continue;
 			}
+
+			it->second->markDirty();
+			++it;
 		}
 	}
 	else {

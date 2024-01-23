@@ -10,6 +10,10 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    $$PWD/A3D/entitycontroller.cpp \
+    $$PWD/A3D/keyboardcameracontroller.cpp \
+    $$PWD/A3D/scenecontroller.cpp \
+    $$PWD/A3D/viewcontroller.cpp \
     A3D/camera.cpp \
     A3D/common.cpp \
     A3D/cubemap.cpp \
@@ -40,6 +44,10 @@ SOURCES += \
     A3D/view.cpp
 
 HEADERS += \
+	$$PWD/A3D/entitycontroller.h \
+	$$PWD/A3D/keyboardcameracontroller.h \
+	$$PWD/A3D/scenecontroller.h \
+	$$PWD/A3D/viewcontroller.h \
 	$$PWD/Dependencies/stb/stb_image_write.h \
 	A3D/camera.h \
 	A3D/common.h \

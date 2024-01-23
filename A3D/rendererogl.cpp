@@ -34,29 +34,26 @@ void RendererOGL::pushState(bool withFramebuffer) {
 	m_gl->glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &newStateStorage.m_readFramebuffer);
 	m_gl->glGetBooleanv(GL_DEPTH_WRITEMASK, &newStateStorage.m_depthMask);
 	m_gl->glGetIntegerv(GL_CURRENT_PROGRAM, &newStateStorage.m_program);
-	for(GLenum e : {
-	    GL_DEPTH_TEST,
-		GL_CULL_FACE,
-		GL_BLEND
-	}) {
+	for(GLenum e: { GL_DEPTH_TEST, GL_CULL_FACE, GL_BLEND }) {
 		GLboolean feature;
 		m_gl->glGetBooleanv(e, &feature);
 		newStateStorage.m_features[e] = feature;
 	}
 
-	for(std::pair<GLenum, GLenum> e : {
-		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_1D, GL_TEXTURE_1D},
-		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_2D, GL_TEXTURE_2D},
-		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_3D, GL_TEXTURE_3D},
-		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_1D_ARRAY, GL_TEXTURE_1D_ARRAY},
-		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_2D_ARRAY, GL_TEXTURE_2D_ARRAY},
-		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_RECTANGLE, GL_TEXTURE_RECTANGLE},
-		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_CUBE_MAP, GL_TEXTURE_CUBE_MAP},
-		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_CUBE_MAP_ARRAY, GL_TEXTURE_CUBE_MAP_ARRAY},
-		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_BUFFER, GL_TEXTURE_BUFFER},
-		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_2D_MULTISAMPLE, GL_TEXTURE_2D_MULTISAMPLE},
-		std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY, GL_TEXTURE_2D_MULTISAMPLE_ARRAY}
-	}) {
+	for(std::pair<GLenum, GLenum> e: {
+			std::pair<GLenum, GLenum>{                  GL_TEXTURE_BINDING_1D,                   GL_TEXTURE_1D},
+             std::pair<GLenum, GLenum>{                  GL_TEXTURE_BINDING_2D,                   GL_TEXTURE_2D},
+			std::pair<GLenum, GLenum>{                  GL_TEXTURE_BINDING_3D,                   GL_TEXTURE_3D},
+             std::pair<GLenum, GLenum>{            GL_TEXTURE_BINDING_1D_ARRAY,             GL_TEXTURE_1D_ARRAY},
+			std::pair<GLenum, GLenum>{            GL_TEXTURE_BINDING_2D_ARRAY,             GL_TEXTURE_2D_ARRAY},
+             std::pair<GLenum, GLenum>{           GL_TEXTURE_BINDING_RECTANGLE,            GL_TEXTURE_RECTANGLE},
+			std::pair<GLenum, GLenum>{            GL_TEXTURE_BINDING_CUBE_MAP,             GL_TEXTURE_CUBE_MAP},
+			std::pair<GLenum, GLenum>{      GL_TEXTURE_BINDING_CUBE_MAP_ARRAY,       GL_TEXTURE_CUBE_MAP_ARRAY},
+             std::pair<GLenum, GLenum>{              GL_TEXTURE_BINDING_BUFFER,               GL_TEXTURE_BUFFER},
+			std::pair<GLenum, GLenum>{      GL_TEXTURE_BINDING_2D_MULTISAMPLE,       GL_TEXTURE_2D_MULTISAMPLE},
+			std::pair<GLenum, GLenum>{GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY, GL_TEXTURE_2D_MULTISAMPLE_ARRAY}
+    })
+	{
 		GLint textureBinding = 0;
 		m_gl->glGetIntegerv(e.first, &textureBinding);
 		newStateStorage.m_textureBindings[e.second] = textureBinding;
@@ -128,12 +125,12 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 		std::size_t lightCount = std::min<std::size_t>(LightCount, m_closestSceneLightsBuffer.size());
 
 		for(std::size_t i = 0; i < lightCount; ++i) {
-			newSceneData.m_lightPos[i] = QVector4D(m_closestSceneLightsBuffer[i].second.position, 0.f);
+			newSceneData.m_lightPos[i]   = QVector4D(m_closestSceneLightsBuffer[i].second.position, 0.f);
 			newSceneData.m_lightColor[i] = m_closestSceneLightsBuffer[i].second.color;
 		}
 		for(std::size_t i = lightCount; i < LightCount; ++i) {
 			newSceneData.m_lightColor[i] = QVector4D(0.f, 0.f, 0.f, 0.f);
-			newSceneData.m_lightPos[i] = QVector4D(0.f, 0.f, 0.f, -1.f);
+			newSceneData.m_lightPos[i]   = QVector4D(0.f, 0.f, 0.f, -1.f);
 		}
 
 		if(std::memcmp(&m_sceneData, &newSceneData, sizeof(m_sceneData))) {
@@ -141,7 +138,6 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 			RefreshSceneUBO();
 		}
 	}
-
 
 	MeshCacheOGL* meshCache                  = buildMeshCache(mesh);
 	MaterialCacheOGL* matCache               = buildMaterialCache(mat);
@@ -173,7 +169,6 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 		m_gl->glEnable(GL_CULL_FACE);
 }
 
-
 void RendererOGL::RefreshSceneUBO() {
 	if(!m_sceneUBO)
 		return;
@@ -188,6 +183,7 @@ void RendererOGL::BeginDrawing(Camera const& cam, Scene const* scene) {
 	genBrdfLUT();
 
 	m_gl->glDisable(GL_BLEND);
+	m_gl->glEnable(GL_MULTISAMPLE);
 	m_gl->glEnable(GL_CULL_FACE);
 	m_gl->glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	m_gl->glClearColor(0.f, 0.f, 0.f, 0.f);
@@ -207,8 +203,9 @@ void RendererOGL::BeginDrawing(Camera const& cam, Scene const* scene) {
 		m_gl->glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
-	if(m_sceneData.m_cameraPos != cam.position()) {
-		m_sceneData.m_cameraPos = cam.position();
+	QVector4D const newCamPos = QVector4D(cam.position());
+	if(m_sceneData.m_cameraPos != newCamPos) {
+		m_sceneData.m_cameraPos = newCamPos;
 		m_gl->glBindBuffer(GL_UNIFORM_BUFFER, m_sceneUBO);
 		m_gl->glBufferSubData(GL_UNIFORM_BUFFER, offsetof(SceneUBO_Data, m_cameraPos), sizeof(m_sceneData.m_cameraPos), &m_sceneData.m_cameraPos);
 		m_gl->glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -232,34 +229,25 @@ void RendererOGL::BeginOpaque() {
 		if(!m_skyboxMaterial)
 			m_skyboxMaterial = Material::standardMaterial(Material::SkyboxMaterial);
 
-		MeshCacheOGL* meshCache = buildMeshCache(m_skyboxMesh);
+		MeshCacheOGL* meshCache    = buildMeshCache(m_skyboxMesh);
 		MaterialCacheOGL* matCache = buildMaterialCache(m_skyboxMaterial);
-		CubemapCacheOGL* ccCache = buildCubemapCache(c);
+		CubemapCacheOGL* ccCache   = buildCubemapCache(c);
 
 		m_gl->glDepthMask(GL_FALSE);
 		m_gl->glDisable(GL_CULL_FACE);
 		matCache->install(m_gl);
-		ccCache->applyToSlot(m_gl,
-		    static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot),
-			-1,
-			-1
-		);
+		ccCache->applyToSlot(m_gl, static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot), -1, -1);
 		meshCache->render(m_gl, QMatrix4x4(), m_skyboxView, m_skyboxProj);
 		m_gl->glEnable(GL_CULL_FACE);
 		m_gl->glDepthMask(GL_TRUE);
 
-		ccCache->applyToSlot(m_gl,
-			-1,
-			static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot),
-			static_cast<GLuint>(MaterialProperties::PrefilterTextureSlot)
-		);
+		ccCache->applyToSlot(m_gl, -1, static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot), static_cast<GLuint>(MaterialProperties::PrefilterTextureSlot));
 	}
 
 	m_gl->glEnable(GL_DEPTH_TEST);
 	m_gl->glDepthFunc(GL_LESS);
 }
-void RendererOGL::EndOpaque() {
-}
+void RendererOGL::EndOpaque() {}
 
 void RendererOGL::BeginTranslucent() {
 	m_gl->glDepthMask(GL_FALSE);
@@ -422,10 +410,10 @@ void RendererOGL::genBrdfLUT() {
 		return;
 
 	pushState(true);
-	Mesh* brdfMesh = Mesh::standardMesh(Mesh::ScreenQuadMesh);
+	Mesh* brdfMesh    = Mesh::standardMesh(Mesh::ScreenQuadMesh);
 	Material* brdfMat = Material::standardMaterial(Material::BRDFMaterial);
 
-	MeshCacheOGL* meshCache = buildMeshCache(brdfMesh);
+	MeshCacheOGL* meshCache    = buildMeshCache(brdfMesh);
 	MaterialCacheOGL* matCache = buildMaterialCache(brdfMat);
 
 	static QSize const brdfLutSize(512, 512);
