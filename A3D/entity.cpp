@@ -6,8 +6,8 @@ Entity::Entity(Entity* parent)
 	: QObject{ parent },
 	  m_parent(parent),
 	  m_renderOptions(NoOptions),
-	  m_scale(1.f, 1.f, 1.f),
-	  m_matrixDirty(true) {
+	  m_matrixDirty(true),
+	  m_scale(1.f, 1.f, 1.f) {
 	log(LC_Debug, "Constructor: Entity");
 }
 

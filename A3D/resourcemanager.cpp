@@ -169,6 +169,8 @@ Model* ResourceManager::loadModel(QString name, QString const& path, InputFormat
 	switch(fmt) {
 	case IF_OBJ:
 		return loadModel_OBJ(std::move(ofr));
+	default:
+		break;
 	}
 
 	return nullptr;
