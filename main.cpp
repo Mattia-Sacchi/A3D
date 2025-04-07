@@ -129,11 +129,6 @@ int main(int argc, char* argv[]) {
 		model->setPosition(QVector3D(2, 0, 0));
 	}
 
-	A3D::View* v = new A3D::View(&w);
-	v->camera().setPosition(QVector3D(10.f, 0.f, 2.f));
-	v->camera().setOrientationTarget(QVector3D(0.f, 0.f, 0.f));
-	v->setScene(s);
-
 	{
 		auto text = s->emplaceChildEntity<A3D::TextBillboardEntity>();
 
@@ -150,9 +145,13 @@ int main(int argc, char* argv[]) {
 			text->setProperty("Value", val);
 
 			text->setText(QString("Hello, world! %1").arg(val));
-			v->update();
 		});
 	}
+
+	A3D::View* v = new A3D::View(&w);
+	v->camera().setPosition(QVector3D(10.f, 0.f, 2.f));
+	v->camera().setOrientationTarget(QVector3D(0.f, 0.f, 0.f));
+	v->setScene(s);
 
 	A3D::KeyboardCameraController* keyCamController = new A3D::KeyboardCameraController(v);
 	keyCamController->setBaseMovementSpeed(QVector3D(9.f, 9.f, 9.f));

@@ -7,6 +7,7 @@ TextBillboardEntity::TextBillboardEntity(Entity* parent)
 	  m_text(),
 	  m_font(),
 	  m_color(Qt::black),
+	  m_textureDirty(true),
 	  m_group(nullptr),
 	  m_texture(nullptr),
 	  m_fontMetrics(m_font) {
@@ -28,19 +29,25 @@ TextBillboardEntity::TextBillboardEntity(Entity* parent)
 }
 
 void TextBillboardEntity::setText(QString text) {
-	m_text = std::move(text);
-	refresh();
+	if(m_text != text) {
+		m_text         = std::move(text);
+		m_textureDirty = true;
+	}
 }
 
 void TextBillboardEntity::setFont(QFont font) {
-	m_font        = std::move(font);
-	m_fontMetrics = QFontMetrics(m_font);
-	refresh();
+	if(m_font != font) {
+		m_font         = std::move(font);
+		m_fontMetrics  = QFontMetrics(m_font);
+		m_textureDirty = true;
+	}
 }
 
 void TextBillboardEntity::setColor(QColor color) {
-	m_color = std::move(color);
-	refresh();
+	if(color != m_color) {
+		m_color        = std::move(color);
+		m_textureDirty = true;
+	}
 }
 
 QString TextBillboardEntity::text() const {
@@ -55,7 +62,23 @@ QColor TextBillboardEntity::color() const {
 	return m_color;
 }
 
+bool TextBillboardEntity::updateEntity(std::chrono::milliseconds ms) {
+	if(m_textureDirty) {
+		refresh();
+		Entity::updateEntity(ms);
+		return true;
+	}
+	else {
+		return Entity::updateEntity(ms);
+	}
+}
+
 void TextBillboardEntity::refresh() {
+	if(!m_textureDirty)
+		return;
+
+	m_textureDirty = false;
+
 	if(m_text.isEmpty()) {
 		m_image = QImage(1, 1, QImage::Format_RGBA8888);
 		m_image.fill(Qt::transparent);

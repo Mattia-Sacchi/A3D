@@ -22,12 +22,16 @@ public:
 	QFont font() const;
 	QColor color() const;
 
+protected:
+	virtual bool updateEntity(std::chrono::milliseconds t) override;
+
 private:
 	void refresh();
 
 	QString m_text;
 	QFont m_font;
 	QColor m_color;
+	bool m_textureDirty;
 
 	Group* m_group;
 	Texture* m_texture;

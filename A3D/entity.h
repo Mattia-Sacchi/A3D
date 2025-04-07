@@ -65,7 +65,7 @@ public:
 
 protected:
 	// Returns true if anything changed.
-	bool updateEntity(std::chrono::milliseconds);
+	virtual bool updateEntity(std::chrono::milliseconds);
 
 private:
 	// Adds a child Entity
