@@ -37,7 +37,33 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 		newMesh.vertices()[2].TextureCoord2D = QVector2D(1.f, 1.f);
 		newMesh.vertices()[3].TextureCoord2D = QVector2D(1.f, 0.f);
 
-		newMesh.setContents(Position3D | TextureCoord2D);
+		newMesh.vertices()[0].Normal3D = QVector3D(0.f, 0.f, 1.f);
+		newMesh.vertices()[1].Normal3D = QVector3D(0.f, 0.f, 1.f);
+		newMesh.vertices()[2].Normal3D = QVector3D(0.f, 0.f, 1.f);
+		newMesh.vertices()[3].Normal3D = QVector3D(0.f, 0.f, 1.f);
+
+		newMesh.setContents(Position3D | TextureCoord2D | Normal3D);
+		break;
+	case UnitQuadMesh:
+		newMesh.setDrawMode(TriangleStrips);
+
+		newMesh.vertices().resize(4);
+		newMesh.vertices()[0].Position3D = QVector3D(-0.5f, +0.5f, 0.f);
+		newMesh.vertices()[1].Position3D = QVector3D(-0.5f, -0.5f, 0.f);
+		newMesh.vertices()[2].Position3D = QVector3D(+0.5f, +0.5f, 0.f);
+		newMesh.vertices()[3].Position3D = QVector3D(+0.5f, -0.5f, 0.f);
+
+		newMesh.vertices()[0].TextureCoord2D = QVector2D(0.f, 1.f);
+		newMesh.vertices()[1].TextureCoord2D = QVector2D(0.f, 0.f);
+		newMesh.vertices()[2].TextureCoord2D = QVector2D(1.f, 1.f);
+		newMesh.vertices()[3].TextureCoord2D = QVector2D(1.f, 0.f);
+
+		newMesh.vertices()[0].Normal3D = QVector3D(0.f, 0.f, 1.f);
+		newMesh.vertices()[1].Normal3D = QVector3D(0.f, 0.f, 1.f);
+		newMesh.vertices()[2].Normal3D = QVector3D(0.f, 0.f, 1.f);
+		newMesh.vertices()[3].Normal3D = QVector3D(0.f, 0.f, 1.f);
+
+		newMesh.setContents(Position3D | TextureCoord2D | Normal3D);
 		break;
 	case CubeIndexedMesh:
 		newMesh.setDrawMode(IndexedTriangles);
@@ -267,6 +293,7 @@ bool Mesh::Vertex::Equals(Vertex const& o, Contents c) const {
 void Mesh::optimizeIndices() {
 	if(drawMode() != Mesh::IndexedTriangles && drawMode() != Mesh::IndexedTriangleStrips)
 		return;
+
 	std::vector<Mesh::Vertex> optimizedVertices;
 	std::vector<std::uint32_t> optimizedIndices;
 

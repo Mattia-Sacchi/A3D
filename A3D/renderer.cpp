@@ -134,7 +134,7 @@ void Renderer::BuildDrawLists(Camera const& camera, Entity* e, QMatrix4x4 const&
 
 				gbd->m_group              = g;
 				gbd->m_transform          = baseMatrix * g->groupMatrix();
-				gbd->m_position = (gbd->m_transform * g->position());
+				gbd->m_position = gbd->m_transform.map(g->position());
 				gbd->m_distanceFromCamera = QVector3D::dotProduct(gbd->m_position - camera.position(), camera.forward());
 			}
 		}

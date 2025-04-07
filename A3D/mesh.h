@@ -2,10 +2,6 @@
 #define A3DMESH_H
 
 #include "A3D/common.h"
-#include <QObject>
-#include <vector>
-#include <limits>
-#include <cstdint>
 #include "A3D/meshcache.h"
 #include "A3D/resource.h"
 
@@ -38,9 +34,12 @@ public:
 	enum StandardMesh {
 		Triangle2DMesh,
 		ScreenQuadMesh,
+		UnitQuadMesh,
 		CubeIndexedMesh,
 	};
 	static Mesh* standardMesh(StandardMesh);
+
+	static Mesh* generateSurfaceMesh(ResourceManager* parent, std::vector<float> horizontalAxis, std::vector<float> verticalAxis, std::vector<float> data);
 
 	enum DrawMode {
 		Triangles,

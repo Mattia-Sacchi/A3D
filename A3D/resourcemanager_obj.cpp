@@ -106,7 +106,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 			else if(token == "f") {
 				requireGroup();
 				QString vertexDefinition;
-				std::int32_t indices[4][3] = { 0 };
+				std::int32_t indices[4][3] = {};
 
 				std::size_t verticesRead = 0;
 				for(std::size_t currentVertex = 0; currentVertex < 4; ++currentVertex, ++verticesRead) {
