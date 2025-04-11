@@ -32,7 +32,10 @@ CubemapCacheOGL::~CubemapCacheOGL() {
 	}
 }
 
-void CubemapCacheOGL::update(RendererOGL* renderer, CoreGLFunctions* gl) {
+void CubemapCacheOGL::update(RendererOGL* r, CoreGLFunctions* gl) {
+	auto glErrorCheck = r->checkGlErrors("CubemapCacheOGL::update");
+	Q_UNUSED(glErrorCheck)
+
 	Cubemap* c = cubemap();
 	if(!c)
 		return;
@@ -118,15 +121,18 @@ void CubemapCacheOGL::update(RendererOGL* renderer, CoreGLFunctions* gl) {
 	// Post-processing
 
 	// Save the GL state that might change because of our post-processing phases
-	renderer->pushState(true);
-	calcIrradiance(FORMAT_IRRADIANCE, renderer, gl);
-	calcPrefilter(FORMAT_PREFILTER, renderer, gl);
-	renderer->popState();
+	r->pushState(true);
+	calcIrradiance(FORMAT_IRRADIANCE, r, gl);
+	calcPrefilter(FORMAT_PREFILTER, r, gl);
+	r->popState();
 
 	markClean();
 }
 
-void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* renderer, CoreGLFunctions* gl) {
+void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* r, CoreGLFunctions* gl) {
+	auto glErrorCheck = r->checkGlErrors("CubemapCacheOGL::calcPrefilter");
+	Q_UNUSED(glErrorCheck)
+
 	// Consider that calcIrradiance gets called with an active Framebuffer object.
 
 	if(!m_cubemap)
@@ -141,8 +147,8 @@ void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* renderer, CoreGL
 	Mesh* prefilterMesh    = Mesh::standardMesh(Mesh::CubeIndexedMesh);
 	Material* prefilterMat = Material::standardMaterial(Material::PrefilterMaterial);
 
-	MeshCacheOGL* meshCache    = renderer->buildMeshCache(prefilterMesh);
-	MaterialCacheOGL* matCache = renderer->buildMaterialCache(prefilterMat);
+	MeshCacheOGL* meshCache    = r->buildMeshCache(prefilterMesh);
+	MaterialCacheOGL* matCache = r->buildMaterialCache(prefilterMat);
 
 	// Mip Levels = 5 -> Size = 128x128
 	// Mip Levels = 4 -> Size =  64x64
@@ -190,7 +196,7 @@ void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* renderer, CoreGL
 	if(c)
 		resolution = c->nx().size().width();
 
-	matCache->applyUniform("CubemapResolution", resolution);
+	matCache->applyUniform(r, "CubemapResolution", resolution);
 
 	for(int i = maxMipLevels; i >= 1; --i) {
 		int const glMipLevel = maxMipLevels - i;
@@ -201,24 +207,27 @@ void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* renderer, CoreGL
 		gl->glViewport(0, 0, mipLevelSize.width(), mipLevelSize.height());
 
 		float roughness = static_cast<float>(i - 1) / static_cast<float>(maxMipLevels - 1);
-		matCache->applyUniform("Roughness", roughness);
+		matCache->applyUniform(r, "Roughness", roughness);
 
 		gl->glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot));
 		gl->glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap);
 
-		matCache->install(gl);
+		matCache->install(r, gl);
 
 		for(int j = 0; j < 6; ++j) {
 			// Bind shader & set matrices
 			gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + j, m_cubemapPrefilter, glMipLevel);
 			gl->glClear(GL_COLOR_BUFFER_BIT);
 
-			meshCache->render(gl, QMatrix4x4(), viewMatrices[j], projMatrix);
+			meshCache->render(r, gl, QMatrix4x4(), viewMatrices[j], projMatrix);
 		}
 	}
 }
 
-void CubemapCacheOGL::calcIrradiance(GLenum format, RendererOGL* renderer, CoreGLFunctions* gl) {
+void CubemapCacheOGL::calcIrradiance(GLenum format, RendererOGL* r, CoreGLFunctions* gl) {
+	auto glErrorCheck = r->checkGlErrors("CubemapCacheOGL::calcIrradiance");
+	Q_UNUSED(glErrorCheck)
+
 	// Consider that calcIrradiance gets called with an active Framebuffer object.
 
 	if(!m_cubemap)
@@ -233,8 +242,8 @@ void CubemapCacheOGL::calcIrradiance(GLenum format, RendererOGL* renderer, CoreG
 	Mesh* irradianceMesh    = Mesh::standardMesh(Mesh::CubeIndexedMesh);
 	Material* irradianceMat = Material::standardMaterial(Material::IrradianceMaterial);
 
-	MeshCacheOGL* meshCache    = renderer->buildMeshCache(irradianceMesh);
-	MaterialCacheOGL* matCache = renderer->buildMaterialCache(irradianceMat);
+	MeshCacheOGL* meshCache    = r->buildMeshCache(irradianceMesh);
+	MaterialCacheOGL* matCache = r->buildMaterialCache(irradianceMat);
 
 	gl->glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemapIrradiance);
 	gl->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -273,18 +282,21 @@ void CubemapCacheOGL::calcIrradiance(GLenum format, RendererOGL* renderer, CoreG
 	gl->glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot));
 	gl->glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap);
 
-	matCache->install(gl);
+	matCache->install(r, gl);
 
 	for(int i = 0; i < 6; ++i) {
 		// Bind shader & set matrices
 		gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_cubemapIrradiance, 0);
 		gl->glClear(GL_COLOR_BUFFER_BIT);
 
-		meshCache->render(gl, QMatrix4x4(), viewMatrices[i], projMatrix);
+		meshCache->render(r, gl, QMatrix4x4(), viewMatrices[i], projMatrix);
 	}
 }
 
-void CubemapCacheOGL::applyToSlot(CoreGLFunctions* gl, GLint environmentSlot, GLint irradianceSlot, GLint prefilterSlot) {
+void CubemapCacheOGL::applyToSlot(RendererOGL* r, CoreGLFunctions* gl, GLint environmentSlot, GLint irradianceSlot, GLint prefilterSlot) {
+	auto glErrorCheck = r->checkGlErrors("CubemapCacheOGL::applyToSlot");
+	Q_UNUSED(glErrorCheck)
+
 	if(!m_cubemap)
 		return;
 

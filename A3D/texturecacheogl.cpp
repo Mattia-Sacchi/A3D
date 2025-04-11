@@ -1,5 +1,6 @@
 #include "texturecacheogl.h"
 #include "texture.h"
+#include "rendererogl.h"
 #include <QOpenGLPixelTransferOptions>
 
 namespace A3D {
@@ -41,7 +42,10 @@ inline QOpenGLTexture::Filter translateFilter(Texture::Filter f) {
 		return QOpenGLTexture::LinearMipMapLinear;
 	}
 }
-void TextureCacheOGL::update(RendererOGL*, CoreGLFunctions* gl) {
+void TextureCacheOGL::update(RendererOGL* r, CoreGLFunctions* gl) {
+	auto glErrorCheck = r->checkGlErrors("TextureCacheOGL::update");
+	Q_UNUSED(glErrorCheck)
+
 	Texture* t = texture();
 	if(!t || t->image().isNull()) {
 		m_texture.reset();
@@ -110,11 +114,13 @@ void TextureCacheOGL::update(RendererOGL*, CoreGLFunctions* gl) {
 	markClean();
 }
 
-void TextureCacheOGL::applyToSlot(CoreGLFunctions* gl, GLuint slot) {
+void TextureCacheOGL::applyToSlot(RendererOGL* r, CoreGLFunctions* gl, GLuint slot) {
+	auto glErrorCheck = r->checkGlErrors("TextureCacheOGL::applyToSlot");
+	Q_UNUSED(glErrorCheck)
+
 	if(!m_texture)
 		return;
 	gl->glActiveTexture(GL_TEXTURE0 + slot);
 	gl->glBindTexture(GL_TEXTURE_2D, m_texture->textureId());
 }
-
 }

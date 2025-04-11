@@ -36,6 +36,23 @@ public:
 	virtual void Delete(LineGroupCache*) override;
 	virtual void DeleteAllResources() override;
 
+	class DeferredCaller {
+	public:
+		inline DeferredCaller(std::function<void()> f)
+			: m_f(std::move(f)) {}
+		~DeferredCaller() {
+			if(m_f)
+				m_f();
+		}
+
+	private:
+		std::function<void()> m_f;
+		DeferredCaller(DeferredCaller const&)            = delete;
+		DeferredCaller(DeferredCaller&&)                 = delete;
+		DeferredCaller& operator=(DeferredCaller const&) = delete;
+		DeferredCaller& operator=(DeferredCaller&&)      = delete;
+	};
+
 protected:
 	virtual void BeginDrawing(Camera const&, Scene const*) override;
 	virtual void EndDrawing(Scene const*) override;
@@ -55,6 +72,7 @@ private:
 
 	void pushState(bool withFramebuffer);
 	void popState();
+	std::shared_ptr<DeferredCaller> checkGlErrors(QString const& context);
 
 	struct StateStorage {
 		GLint m_viewport[4];
@@ -92,6 +110,7 @@ private:
 
 	GLuint getBrdfLUT();
 
+	// OpenGL Data
 	QPointer<QOpenGLContext> m_context;
 	CoreGLFunctions* m_gl;
 	std::vector<Entity*> m_translucentEntityBuffer;
@@ -106,6 +125,7 @@ private:
 	QMatrix4x4 m_skyboxView;
 	QMatrix4x4 m_skyboxProj;
 
+	// Scene data
 	struct SceneUBO_Data {
 		QVector4D m_cameraPos;
 
@@ -115,6 +135,7 @@ private:
 	SceneUBO_Data m_sceneData;
 	GLuint m_sceneUBO;
 
+	// BRDF precalculated LUT
 	bool m_brdfCalculated;
 	GLuint m_brdfLUT;
 };

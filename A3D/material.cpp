@@ -14,6 +14,10 @@ Material* Material::standardMaterial(StandardMaterial stdMat) {
 
 	Material& newMat = standardMaterials[stdMat];
 	switch(stdMat) {
+	case OITMaterial:
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/OITMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/OITMaterial.frag");
+		break;
 	case UnshadedMaterial:
 		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/UnshadedMaterial.vert");
 		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/UnshadedMaterial.frag");

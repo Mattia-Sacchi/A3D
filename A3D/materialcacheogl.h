@@ -18,11 +18,11 @@ public:
 	~MaterialCacheOGL();
 
 	void update(RendererOGL*, CoreGLFunctions*);
-	void install(CoreGLFunctions*);
+	void install(RendererOGL*, CoreGLFunctions*);
 
-	int searchUniform(QString const& name);
-	void applyUniform(QString const& name, QVariant const& value);
-	void applyUniforms(std::map<QString, QVariant> const& uniforms);
+	int searchUniform(RendererOGL*, QString const& name);
+	void applyUniform(RendererOGL* r, QString const& name, QVariant const& value);
+	void applyUniforms(RendererOGL* r, std::map<QString, QVariant> const& uniforms);
 
 private:
 	std::unique_ptr<QOpenGLShaderProgram> m_program;

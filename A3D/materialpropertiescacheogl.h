@@ -17,7 +17,7 @@ public:
 	~MaterialPropertiesCacheOGL();
 
 	void update(RendererOGL*, CoreGLFunctions*);
-	void install(CoreGLFunctions*, MaterialCacheOGL*);
+	void install(RendererOGL*, CoreGLFunctions*, MaterialCacheOGL*);
 
 private:
 	struct MaterialUBO_Data {
