@@ -27,11 +27,11 @@ int main(int argc, char* argv[]) {
 		auto loadPBRMaterial = [s](QString path, QString baseName, QString fileExtension) -> A3D::MaterialProperties* {
 			A3D::MaterialProperties* matProperties                                  = new A3D::MaterialProperties(s->resourceManager());
 			static std::map<A3D::MaterialProperties::TextureSlot, QString> suffixes = {
-				{    A3D::MaterialProperties::AlbedoTextureSlot,     "Color" },
-				{    A3D::MaterialProperties::NormalTextureSlot,  "NormalGL" },
-				{  A3D::MaterialProperties::MetallicTextureSlot,  "Metallic" },
-				{ A3D::MaterialProperties::RoughnessTextureSlot, "Roughness" },
-				{        A3D::MaterialProperties::AOTextureSlot,        "AO" },
+				{   A3D::MaterialProperties::AlbedoTextureSlot,     "Color"},
+				{   A3D::MaterialProperties::NormalTextureSlot,  "NormalGL"},
+				{ A3D::MaterialProperties::MetallicTextureSlot,  "Metallic"},
+				{A3D::MaterialProperties::RoughnessTextureSlot, "Roughness"},
+				{       A3D::MaterialProperties::AOTextureSlot,        "AO"},
 			};
 
 			for(auto it = suffixes.begin(); it != suffixes.end(); ++it) {
@@ -119,6 +119,31 @@ int main(int argc, char* argv[]) {
 			);
 
 			A3D::Group* g = model->getOrAddGroup("Default");
+
+			A3D::LineGroup* lg = new A3D::LineGroup(s->resourceManager());
+
+			{
+				A3D::LineGroup::Vertex vxOrigin, vxMaxX, vxMaxY, vxMaxZ;
+				vxOrigin.Position3D = QVector3D(0.f, 0.f, 0.f);
+				vxOrigin.Color4D    = QVector4D(0.f, 0.f, 0.f, 1.f);
+				vxMaxX.Position3D   = QVector3D(1.f, 0.f, 0.f);
+				vxMaxX.Color4D      = QVector4D(1.f, 0.f, 0.f, 1.f);
+				vxMaxY.Position3D   = QVector3D(0.f, 1.f, 0.f);
+				vxMaxY.Color4D      = QVector4D(0.f, 1.f, 0.f, 1.f);
+				vxMaxZ.Position3D   = QVector3D(0.f, 0.f, 1.f);
+				vxMaxZ.Color4D      = QVector4D(0.f, 0.f, 1.f, 1.f);
+
+				lg->vertices().push_back(vxOrigin);
+				lg->vertices().push_back(vxMaxX);
+				lg->vertices().push_back(vxOrigin);
+				lg->vertices().push_back(vxMaxY);
+				lg->vertices().push_back(vxOrigin);
+				lg->vertices().push_back(vxMaxZ);
+				lg->setContents(A3D::LineGroup::Position3D | A3D::LineGroup::Color4D);
+				lg->setThickness(0.05f);
+			}
+
+			g->setLineGroup(lg);
 			g->setMesh(sampleMeshB);
 			g->setMaterial(A3D::Material::standardMaterial(A3D::Material::PBRMaterial));
 			g->setMaterialProperties(FloorTiles06);

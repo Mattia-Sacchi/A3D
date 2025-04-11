@@ -1,4 +1,4 @@
-#include "A3D/resource.h"
+#include "resource.h"
 
 namespace A3D {
 

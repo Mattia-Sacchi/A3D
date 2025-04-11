@@ -1,7 +1,7 @@
 #ifndef A3DMATERIALCACHE_H
 #define A3DMATERIALCACHE_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QObject>
 #include <QPointer>
 

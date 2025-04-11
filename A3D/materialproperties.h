@@ -1,11 +1,11 @@
 #ifndef A3DMATERIALPROPERTIES_H
 #define A3DMATERIALPROPERTIES_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QObject>
-#include "A3D/material.h"
-#include "A3D/resource.h"
-#include "A3D/materialpropertiescache.h"
+#include "material.h"
+#include "resource.h"
+#include "materialpropertiescache.h"
 
 namespace A3D {
 

@@ -1,7 +1,7 @@
-#include "A3D/materialcacheogl.h"
-#include "A3D/materialpropertiescacheogl.h"
-#include "A3D/material.h"
-#include "A3D/rendererogl.h"
+#include "materialcacheogl.h"
+#include "materialpropertiescacheogl.h"
+#include "material.h"
+#include "rendererogl.h"
 #include <QColor>
 #include <QTransform>
 
@@ -11,7 +11,8 @@ MaterialCacheOGL::MaterialCacheOGL(Material* parent)
 	: MaterialCache{ parent },
 	  m_meshUBO_index(GL_INVALID_INDEX),
 	  m_matpropUBO_index(GL_INVALID_INDEX),
-	  m_sceneUBO_index(GL_INVALID_INDEX) {
+	  m_sceneUBO_index(GL_INVALID_INDEX),
+	  m_lineUBO_index(GL_INVALID_INDEX) {
 	log(LC_Debug, "Constructor: MaterialCacheOGL");
 }
 
@@ -105,6 +106,9 @@ void MaterialCacheOGL::install(CoreGLFunctions* gl) {
 
 	if(m_sceneUBO_index != GL_INVALID_INDEX)
 		gl->glUniformBlockBinding(m_program->programId(), m_sceneUBO_index, RendererOGL::UBO_SceneBinding);
+
+	if(m_lineUBO_index != GL_INVALID_INDEX)
+		gl->glUniformBlockBinding(m_program->programId(), m_lineUBO_index, RendererOGL::UBO_LineBinding);
 }
 
 void MaterialCacheOGL::update(RendererOGL*, CoreGLFunctions* gl) {
@@ -114,6 +118,7 @@ void MaterialCacheOGL::update(RendererOGL*, CoreGLFunctions* gl) {
 		return;
 	}
 
+	QString gxShader = m->shader(Material::GLSL, Material::GeometryShader);
 	QString vxShader = m->shader(Material::GLSL, Material::VertexShader);
 	QString fxShader = m->shader(Material::GLSL, Material::FragmentShader);
 
@@ -126,10 +131,12 @@ void MaterialCacheOGL::update(RendererOGL*, CoreGLFunctions* gl) {
 
 	// TODO: Evaluate caching?
 
-	if(!vxShader.isEmpty())
-		m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vxShader);
-	if(!fxShader.isEmpty())
-		m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fxShader);
+	if(!gxShader.isEmpty())
+		m_program->addShaderFromSourceCode(QOpenGLShader::Geometry, gxShader);
+
+	m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vxShader);
+	m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fxShader);
+
 	if(!m_program->link()) {
 		log(LC_Warning, "Couldn't link QOpenGLShader: " + m_program->log());
 		m_program.reset();
@@ -163,7 +170,8 @@ void MaterialCacheOGL::update(RendererOGL*, CoreGLFunctions* gl) {
 
 	m_meshUBO_index    = gl->glGetUniformBlockIndex(m_program->programId(), "MeshUBO_Data");
 	m_matpropUBO_index = gl->glGetUniformBlockIndex(m_program->programId(), "MaterialUBO_Data");
-	m_sceneUBO_index = gl->glGetUniformBlockIndex(m_program->programId(), "SceneUBO_Data");
+	m_sceneUBO_index   = gl->glGetUniformBlockIndex(m_program->programId(), "SceneUBO_Data");
+	m_lineUBO_index    = gl->glGetUniformBlockIndex(m_program->programId(), "LineUBO_Data");
 	m_program->release();
 
 	markClean();

@@ -1,9 +1,9 @@
 #ifndef A3DRESOURCE_H
 #define A3DRESOURCE_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QObject>
-#include "A3D/resourcemanager.h"
+#include "resourcemanager.h"
 
 namespace A3D {
 

@@ -1,14 +1,14 @@
 #ifndef A3DMATERIAL_H
 #define A3DMATERIAL_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QObject>
 #include <QVariant>
 #include <map>
 #include <cstdint>
 #include <stdexcept>
-#include "A3D/materialcache.h"
-#include "A3D/resource.h"
+#include "materialcache.h"
+#include "resource.h"
 
 namespace A3D {
 
@@ -32,6 +32,7 @@ public:
 		IrradianceMaterial,
 		PrefilterMaterial,
 		BRDFMaterial,
+		LineMaterial,
 	};
 	static Material* standardMaterial(StandardMaterial);
 
@@ -40,6 +41,7 @@ public:
 	};
 
 	enum ShaderType {
+		GeometryShader,
 		VertexShader,
 		FragmentShader,
 	};

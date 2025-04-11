@@ -1,7 +1,7 @@
-#include "A3D/cubemapcacheogl.h"
-#include "A3D/cubemap.h"
-#include "A3D/material.h"
-#include "A3D/rendererogl.h"
+#include "cubemapcacheogl.h"
+#include "cubemap.h"
+#include "material.h"
+#include "rendererogl.h"
 #include <QOpenGLFunctions>
 
 namespace A3D {

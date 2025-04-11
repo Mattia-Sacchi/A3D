@@ -1,7 +1,7 @@
 #ifndef A3DIMAGE_H
 #define A3DIMAGE_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QImage>
 
 namespace A3D {

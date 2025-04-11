@@ -1,8 +1,8 @@
 #ifndef A3DCUBEMAPCACHEOGL_H
 #define A3DCUBEMAPCACHEOGL_H
 
-#include "A3D/common.h"
-#include "A3D/cubemapcache.h"
+#include "common.h"
+#include "cubemapcache.h"
 #include <QOpenGLTexture>
 
 namespace A3D {

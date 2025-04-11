@@ -1,9 +1,9 @@
 #ifndef A3DMESH_H
 #define A3DMESH_H
 
-#include "A3D/common.h"
-#include "A3D/meshcache.h"
-#include "A3D/resource.h"
+#include "common.h"
+#include "meshcache.h"
+#include "resource.h"
 
 namespace A3D {
 
@@ -67,11 +67,11 @@ public:
 
 	Mesh* clone() const;
 
-	RenderOptions renderOptions() const;
 	void setRenderOptions(RenderOptions);
+	RenderOptions renderOptions() const;
 
-	Contents contents() const;
 	void setContents(Contents);
+	Contents contents() const;
 
 	void setDrawMode(DrawMode mode);
 	DrawMode drawMode() const;

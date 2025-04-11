@@ -1,11 +1,12 @@
 #ifndef A3DGROUP_H
 #define A3DGROUP_H
 
-#include "A3D/common.h"
-#include "A3D/mesh.h"
-#include "A3D/material.h"
-#include "A3D/materialproperties.h"
-#include "A3D/texture.h"
+#include "common.h"
+#include "mesh.h"
+#include "material.h"
+#include "materialproperties.h"
+#include "texture.h"
+#include "linegroup.h"
 
 namespace A3D {
 
@@ -42,10 +43,12 @@ public:
 
 	QMatrix4x4 const& groupMatrix() const;
 
+	LineGroup* lineGroup() const;
 	Mesh* mesh() const;
 	Material* material() const;
 	MaterialProperties* materialProperties() const;
 
+	void setLineGroup(LineGroup*);
 	void setMesh(Mesh*);
 	void setMaterial(Material*);
 	void setMaterialProperties(MaterialProperties*);
@@ -61,6 +64,7 @@ private:
 	QQuaternion m_rotation;
 	QVector3D m_scale;
 
+	QPointer<LineGroup> m_lineGroup;
 	QPointer<Mesh> m_mesh;
 	QPointer<Material> m_material;
 	QPointer<MaterialProperties> m_materialProperties;

@@ -1,11 +1,11 @@
 #ifndef A3DTEXTURE_H
 #define A3DTEXTURE_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QObject>
-#include "A3D/texturecache.h"
-#include "A3D/resource.h"
-#include "A3D/image.h"
+#include "texturecache.h"
+#include "resource.h"
+#include "image.h"
 
 namespace A3D {
 

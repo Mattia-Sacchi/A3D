@@ -1,5 +1,5 @@
-#include "A3D/keyboardcameracontroller.h"
-#include "A3D/view.h"
+#include "keyboardcameracontroller.h"
+#include "view.h"
 #include <QKeyEvent>
 #include <QFocusEvent>
 

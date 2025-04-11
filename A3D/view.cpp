@@ -1,6 +1,5 @@
-#include "A3D/view.h"
-#include "A3D/scene.h"
-#include <QDebug>
+#include "view.h"
+#include "scene.h"
 #include <QTimer>
 #include <QKeyEvent>
 

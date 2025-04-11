@@ -1,4 +1,4 @@
-#include "A3D/scene.h"
+#include "scene.h"
 
 namespace A3D {
 

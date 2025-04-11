@@ -1,5 +1,5 @@
-#include "A3D/materialcache.h"
-#include "A3D/material.h"
+#include "materialcache.h"
+#include "material.h"
 
 namespace A3D {
 
