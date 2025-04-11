@@ -157,7 +157,7 @@ int main(int argc, char* argv[]) {
 	keyCamController->setBaseMovementSpeed(QVector3D(9.f, 9.f, 9.f));
 	keyCamController->setKeyBinding(Qt::Key_Space, A3D::KeyboardCameraController::ACT_MOVE_UPWARD);
 	keyCamController->setKeyBinding(Qt::Key_Shift, A3D::KeyboardCameraController::ACT_MOVE_DOWNWARD);
-
+	keyCamController->setButtonBinding(Qt::LeftButton, A3D::KeyboardCameraController::ACT_PRINT_DEBUG);
 	v->setController(keyCamController);
 
 	QTimer t;
