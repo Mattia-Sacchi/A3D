@@ -1,13 +1,13 @@
 #ifndef A3DENTITY_H
 #define A3DENTITY_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QObject>
 #include <QPointer>
 #include <QMatrix4x4>
 #include <vector>
-#include "A3D/model.h"
-#include "A3D/entitycontroller.h"
+#include "model.h"
+#include "entitycontroller.h"
 
 namespace A3D {
 

@@ -1,9 +1,9 @@
 #ifndef A3DMATERIALPROPERTIESCACHEOGL_H
 #define A3DMATERIALPROPERTIESCACHEOGL_H
 
-#include "A3D/common.h"
-#include "A3D/materialproperties.h"
-#include "A3D/materialpropertiescache.h"
+#include "common.h"
+#include "materialproperties.h"
+#include "materialpropertiescache.h"
 #include <QOpenGLBuffer>
 
 namespace A3D {

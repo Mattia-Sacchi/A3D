@@ -1,5 +1,5 @@
-#include "A3D/meshcache.h"
-#include "A3D/mesh.h"
+#include "meshcache.h"
+#include "mesh.h"
 
 namespace A3D {
 

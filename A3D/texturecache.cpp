@@ -1,5 +1,5 @@
-#include "A3D/texturecache.h"
-#include "A3D/texture.h"
+#include "texturecache.h"
+#include "texture.h"
 
 namespace A3D {
 

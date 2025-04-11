@@ -1,5 +1,5 @@
-#include "A3D/texture.h"
-#include "A3D/renderer.h"
+#include "texture.h"
+#include "renderer.h"
 #include <QFile>
 namespace A3D {
 

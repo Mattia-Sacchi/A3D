@@ -1,5 +1,5 @@
-#include "A3D/texturecacheogl.h"
-#include "A3D/texture.h"
+#include "texturecacheogl.h"
+#include "texture.h"
 #include <QOpenGLPixelTransferOptions>
 
 namespace A3D {

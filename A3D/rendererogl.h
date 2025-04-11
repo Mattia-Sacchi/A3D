@@ -1,13 +1,14 @@
 #ifndef A3DRENDEREROGL_H
 #define A3DRENDEREROGL_H
 
-#include "A3D/common.h"
-#include "A3D/renderer.h"
-#include "A3D/meshcacheogl.h"
-#include "A3D/materialcacheogl.h"
-#include "A3D/materialpropertiescacheogl.h"
-#include "A3D/texturecacheogl.h"
-#include "A3D/cubemapcacheogl.h"
+#include "common.h"
+#include "renderer.h"
+#include "meshcacheogl.h"
+#include "materialcacheogl.h"
+#include "materialpropertiescacheogl.h"
+#include "texturecacheogl.h"
+#include "cubemapcacheogl.h"
+#include "linegroupcacheogl.h"
 #include <queue>
 #include <stack>
 
@@ -19,6 +20,7 @@ public:
 		UBO_MeshBinding               = 0,
 		UBO_MaterialPropertiesBinding = 1,
 		UBO_SceneBinding              = 2,
+		UBO_LineBinding               = 3,
 	};
 
 	RendererOGL(QOpenGLContext*, CoreGLFunctions*);
@@ -31,6 +33,7 @@ public:
 	virtual void Delete(MaterialPropertiesCache*) override;
 	virtual void Delete(TextureCache*) override;
 	virtual void Delete(CubemapCache*) override;
+	virtual void Delete(LineGroupCache*) override;
 	virtual void DeleteAllResources() override;
 
 protected:
@@ -48,6 +51,7 @@ private:
 	friend class MaterialPropertiesCacheOGL;
 	friend class TextureCacheOGL;
 	friend class CubemapCacheOGL;
+	friend class LineGroupCacheOGL;
 
 	void pushState(bool withFramebuffer);
 	void popState();
@@ -67,9 +71,7 @@ private:
 
 	std::stack<StateStorage> m_stateStorage;
 
-	enum {
-		LightCount = 4
-	};
+	enum { LightCount = 4 };
 
 	void RefreshSceneUBO();
 	void DrawOpaque(Entity* root, QMatrix4x4 const& parentMatrix, QMatrix4x4 const& projMatrix, QMatrix4x4 const& viewMatrix, std::deque<Entity*>* translucentList);
@@ -80,6 +82,7 @@ private:
 	MaterialPropertiesCacheOGL* buildMaterialPropertiesCache(MaterialProperties*);
 	TextureCacheOGL* buildTextureCache(Texture*);
 	CubemapCacheOGL* buildCubemapCache(Cubemap*);
+	LineGroupCacheOGL* buildLineGroupCache(LineGroup*);
 
 	// Will draw on screen for one frame!
 	// Should be called when a framebuffer is active, and you have to assume that the framebuffer
@@ -94,6 +97,8 @@ private:
 	std::vector<Entity*> m_translucentEntityBuffer;
 	std::vector<std::pair<std::size_t, PointLightInfo>> m_closestSceneLightsBuffer;
 
+	// Line data
+	A3D::Material* m_lineMaterial;
 
 	// Skybox data
 	A3D::Material* m_skyboxMaterial;

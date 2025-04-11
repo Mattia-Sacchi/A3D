@@ -1,5 +1,5 @@
-#include "A3D/entitycontroller.h"
-#include "A3D/entity.h"
+#include "entitycontroller.h"
+#include "entity.h"
 
 namespace A3D {
 

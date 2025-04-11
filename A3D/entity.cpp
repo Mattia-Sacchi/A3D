@@ -1,4 +1,4 @@
-#include "A3D/entity.h"
+#include "entity.h"
 
 namespace A3D {
 

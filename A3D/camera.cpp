@@ -1,4 +1,4 @@
-#include "A3D/camera.h"
+#include "camera.h"
 
 namespace A3D {
 

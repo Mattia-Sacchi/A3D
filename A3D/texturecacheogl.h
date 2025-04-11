@@ -1,8 +1,8 @@
 #ifndef A3DTEXTURECACHEOGL_H
 #define A3DTEXTURECACHEOGL_H
 
-#include "A3D/common.h"
-#include "A3D/texturecache.h"
+#include "common.h"
+#include "texturecache.h"
 #include <QOpenGLTexture>
 
 namespace A3D {

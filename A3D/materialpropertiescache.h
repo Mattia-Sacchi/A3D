@@ -1,7 +1,7 @@
 #ifndef A3DMATERIALPROPERTIESCACHE_H
 #define A3DMATERIALPROPERTIESCACHE_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QObject>
 #include <QPointer>
 

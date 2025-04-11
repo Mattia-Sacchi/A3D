@@ -1,12 +1,12 @@
 #ifndef A3DSCENE_H
 #define A3DSCENE_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QObject>
-#include "A3D/entity.h"
-#include "A3D/resourcemanager.h"
-#include "A3D/cubemap.h"
-#include "A3D/scenecontroller.h"
+#include "entity.h"
+#include "resourcemanager.h"
+#include "cubemap.h"
+#include "scenecontroller.h"
 
 namespace A3D {
 

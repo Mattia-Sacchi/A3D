@@ -1,5 +1,5 @@
-#include "A3D/group.h"
-#include "A3D/model.h"
+#include "group.h"
+#include "model.h"
 
 namespace A3D {
 
@@ -34,11 +34,14 @@ Group* Group::clone(Model* m, bool deepClone) const {
 			newGroup->m_material = m_material->clone();
 		if(m_materialProperties)
 			newGroup->m_materialProperties = m_materialProperties->clone();
+		if(m_lineGroup)
+			newGroup->m_lineGroup = m_lineGroup->clone();
 	}
 	else {
 		newGroup->m_mesh               = m_mesh;
 		newGroup->m_material           = m_material;
 		newGroup->m_materialProperties = m_materialProperties;
+		newGroup->m_lineGroup          = m_lineGroup;
 	}
 
 	return newGroup;
@@ -105,6 +108,9 @@ Material* Group::material() const {
 MaterialProperties* Group::materialProperties() const {
 	return m_materialProperties;
 }
+LineGroup* Group::lineGroup() const {
+	return m_lineGroup;
+}
 
 void Group::setMesh(Mesh* mesh) {
 	if(mesh == m_mesh)
@@ -128,6 +134,14 @@ void Group::setMaterialProperties(MaterialProperties* materialProperties) {
 	if(m_materialProperties && m_materialProperties->parent() == this)
 		delete m_materialProperties;
 	m_materialProperties = materialProperties;
+}
+
+void Group::setLineGroup(LineGroup* lineGroup) {
+	if(lineGroup == m_lineGroup)
+		return;
+	if(m_lineGroup && m_lineGroup->parent() == this)
+		delete m_lineGroup;
+	m_lineGroup = lineGroup;
 }
 
 }

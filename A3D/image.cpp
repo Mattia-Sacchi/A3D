@@ -1,4 +1,4 @@
-#include "A3D/image.h"
+#include "image.h"
 #include <QFile>
 #include <QIODevice>
 
