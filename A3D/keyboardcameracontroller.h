@@ -5,6 +5,8 @@
 #include "A3D/viewcontroller.h"
 #include <QObject>
 #include <set>
+#include <QKeyEvent>
+#include <QFocusEvent>
 
 namespace A3D {
 
@@ -32,6 +34,10 @@ public:
 
 		ACT_LOOK_HOME,
 
+		ACT_SHOOT_RAY,
+		ACT_LOOK_MOUSE_POS,
+		ACT_PRINT_DEBUG,
+
 		//!
 		ACT_COUNT
 	};
@@ -40,6 +46,9 @@ public:
 
 	void setKeyBinding(Qt::Key, Action);
 	void setKeyBindings(std::map<Qt::Key, Action> actions);
+
+	void setButtonBinding(Qt::MouseButton, Action);
+	void setButtonBindings(std::map<Qt::MouseButton, Action> actions);
 
 	// When ACT_MOVE_PRECISE is pressed, any movement is multiplied by this factor
 	void setPreciseMovementFactor(float = 0.50f);
@@ -64,6 +73,10 @@ private:
 	bool m_actions[ACT_COUNT];
 	std::map<Qt::Key, Action> m_keyBindings;
 	std::map<Qt::Key, bool> m_keyStatus;
+
+	std::map<Qt::MouseButton, Action> m_btnBindings;
+	std::map<Qt::MouseButton, bool> m_btnStatus;
+	std::map<Qt::MouseButton, QEvent::Type> m_btnLastEvent;
 
 	QVector3D m_movementBaseSpeed;
 	float m_movementPreciseFactor;

@@ -1,7 +1,5 @@
 #include "A3D/keyboardcameracontroller.h"
 #include "A3D/view.h"
-#include <QKeyEvent>
-#include <QFocusEvent>
 
 namespace A3D {
 
@@ -40,6 +38,16 @@ void KeyboardCameraController::setKeyBinding(Qt::Key k, Action a) {
 
 void KeyboardCameraController::setKeyBindings(std::map<Qt::Key, Action> actions) {
 	m_keyBindings = std::move(actions);
+	updateActions();
+}
+
+void KeyboardCameraController::setButtonBinding(Qt::MouseButton b, Action a) {
+	m_btnBindings[b] = a;
+	updateActions();
+}
+
+void KeyboardCameraController::setButtonBindings(std::map<Qt::MouseButton, Action> actions) {
+	m_btnBindings = std::move(actions);
 	updateActions();
 }
 
@@ -101,6 +109,20 @@ bool KeyboardCameraController::update(std::chrono::milliseconds deltaT) {
 	if(m_actions[ACT_LOOK_TILTRIGHT])
 		rotation.setZ(rotation.z() + 1.f);
 
+	if(m_actions[ACT_SHOOT_RAY]) {
+		// Work in progress
+	}
+	if(m_actions[ACT_LOOK_MOUSE_POS]) {
+		// Work in progress
+	}
+
+	if(m_actions[ACT_PRINT_DEBUG]) {
+		QPoint pos = QCursor::pos();
+
+		qDebug() << pos.x();
+		qDebug() << pos.y();
+	}
+
 	movement *= m_movementBaseSpeed;
 	rotation *= m_rotationBaseSpeed;
 
@@ -128,14 +150,46 @@ bool KeyboardCameraController::update(std::chrono::milliseconds deltaT) {
 }
 
 bool KeyboardCameraController::eventFilter(QObject* o, QEvent* e) {
-	if(e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) {
+	QEvent::Type eType = e->type();
+	if(eType == QEvent::KeyPress || eType == QEvent::KeyRelease) {
 		QKeyEvent* ke                                = static_cast<QKeyEvent*>(e);
-		m_keyStatus[static_cast<Qt::Key>(ke->key())] = e->type() == QEvent::KeyPress;
+		m_keyStatus[static_cast<Qt::Key>(ke->key())] = eType == QEvent::KeyPress;
 		updateActions();
 		if(view())
 			view()->updateView();
 	}
+	else if(eType == QEvent::MouseButtonPress || eType == QEvent::MouseButtonRelease) {
+		QMouseEvent* me             = static_cast<QMouseEvent*>(e);
+		Qt::MouseButton mouseButton = me->button();
+
+		if(m_btnBindings.find(mouseButton) == m_btnBindings.end())
+			return QObject::eventFilter(o, e);
+
+		//if(view() && !view()->hasFocus())
+		//return QObject::eventFilter(o, e);
+
+		// Single Shot Click evaluation
+		bool currentIsRelease = eType == QEvent::MouseButtonRelease;
+		bool lastIsPress      = m_btnLastEvent[mouseButton] == QEvent::MouseButtonPress;
+		if(lastIsPress)
+			qDebug() << "Press";
+		if(currentIsRelease)
+			qDebug() << "Release";
+
+		if(lastIsPress && currentIsRelease) {
+			m_btnStatus[mouseButton] = true;
+			updateActions();
+			if(view())
+				view()->updateView();
+			m_btnStatus[mouseButton] = false;
+			updateActions();
+		}
+
+		// Set the last event
+		m_btnLastEvent[mouseButton] = eType;
+	}
 	else if(e->type() == QEvent::FocusOut) {
+		m_btnStatus.clear();
 		m_keyStatus.clear();
 		std::memset(m_actions, 0, sizeof(m_actions));
 	}
@@ -149,6 +203,14 @@ void KeyboardCameraController::updateActions() {
 	for(auto it = m_keyBindings.begin(); it != m_keyBindings.end(); ++it) {
 		auto keyStatus = m_keyStatus.find(it->first);
 		if(keyStatus == m_keyStatus.end() || !keyStatus->second)
+			continue;
+
+		m_actions[it->second] = true;
+	}
+
+	for(auto it = m_btnBindings.begin(); it != m_btnBindings.end(); ++it) {
+		auto btnStatus = m_btnStatus.find(it->first);
+		if(btnStatus == m_btnStatus.end() || !btnStatus->second)
 			continue;
 
 		m_actions[it->second] = true;
