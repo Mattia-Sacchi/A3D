@@ -24,21 +24,29 @@ MeshCacheOGL::~MeshCacheOGL() {
 	}
 }
 
-void MeshCacheOGL::render(CoreGLFunctions* gl, QMatrix4x4 const& modelMatrix, QMatrix4x4 const& viewMatrix, QMatrix4x4 const& projMatrix) {
+void MeshCacheOGL::render(RendererOGL* r, CoreGLFunctions* gl, QMatrix4x4 const& modelMatrix, QMatrix4x4 const& viewMatrix, QMatrix4x4 const& projMatrix) {
+	auto glErrorCheck = r->checkGlErrors("MeshCacheOGL::render");
+	Q_UNUSED(glErrorCheck)
+
 	if(!m_elementCount || !m_meshUBO)
 		return;
 
 	m_vao.bind();
 
 	if(m_meshUBO_data.mMatrix != modelMatrix || m_meshUBO_data.vMatrix != viewMatrix || m_meshUBO_data.pMatrix != projMatrix) {
-		m_meshUBO_data.mMatrix         = modelMatrix;
-		m_meshUBO_data.vMatrix         = viewMatrix;
-		m_meshUBO_data.pMatrix         = projMatrix;
-		m_meshUBO_data.mvMatrix        = (viewMatrix * modelMatrix);
-		m_meshUBO_data.mvpMatrix       = (projMatrix * viewMatrix * modelMatrix);
+		QMatrix4x4 const mvMatrix  = (viewMatrix * modelMatrix);
+		QMatrix4x4 const mvpMatrix = (projMatrix * mvMatrix);
+
+		m_meshUBO_data.mMatrix = modelMatrix;
+		m_meshUBO_data.vMatrix = viewMatrix;
+		m_meshUBO_data.pMatrix = projMatrix;
+
+		m_meshUBO_data.mvMatrix  = mvMatrix;
+		m_meshUBO_data.mvpMatrix = mvpMatrix;
+
 		m_meshUBO_data.mNormalMatrix   = modelMatrix.inverted().transposed();
-		m_meshUBO_data.mvNormalMatrix  = (viewMatrix * modelMatrix).inverted().transposed();
-		m_meshUBO_data.mvpNormalMatrix = (projMatrix * viewMatrix * modelMatrix).inverted().transposed();
+		m_meshUBO_data.mvNormalMatrix  = mvMatrix.inverted().transposed();
+		m_meshUBO_data.mvpNormalMatrix = mvpMatrix.inverted().transposed();
 
 		gl->glBindBuffer(GL_UNIFORM_BUFFER, m_meshUBO);
 		gl->glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(MeshUBO_Data), &m_meshUBO_data);
@@ -65,7 +73,10 @@ void MeshCacheOGL::render(CoreGLFunctions* gl, QMatrix4x4 const& modelMatrix, QM
 	m_vao.release();
 }
 
-void MeshCacheOGL::update(RendererOGL*, CoreGLFunctions* gl) {
+void MeshCacheOGL::update(RendererOGL* r, CoreGLFunctions* gl) {
+	auto glErrorCheck = r->checkGlErrors("MeshCacheOGL::render");
+	Q_UNUSED(glErrorCheck)
+
 	Mesh* m = mesh();
 	if(!m) {
 		m_elementCount = 0;

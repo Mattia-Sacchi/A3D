@@ -25,6 +25,7 @@ public:
 	Q_DECLARE_FLAGS(RenderOptions, RenderOption)
 
 	enum StandardMaterial {
+		OITMaterial,
 		UnshadedMaterial,
 		BillboardMaterial,
 		PBRMaterial,

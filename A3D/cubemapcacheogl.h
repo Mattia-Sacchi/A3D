@@ -15,7 +15,7 @@ public:
 	~CubemapCacheOGL();
 
 	void update(RendererOGL*, CoreGLFunctions*);
-	void applyToSlot(CoreGLFunctions*, GLint environmentSlot, GLint irradianceSlot, GLint prefilterSlot);
+	void applyToSlot(RendererOGL*, CoreGLFunctions*, GLint environmentSlot, GLint irradianceSlot, GLint prefilterSlot);
 
 private:
 	void calcIrradiance(GLenum format, RendererOGL*, CoreGLFunctions*);

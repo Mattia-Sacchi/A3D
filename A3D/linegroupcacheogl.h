@@ -24,7 +24,7 @@ public:
 	~LineGroupCacheOGL();
 
 	void update(RendererOGL*, CoreGLFunctions*);
-	void render(CoreGLFunctions*, QMatrix4x4 const& modelMatrix, QMatrix4x4 const& viewMatrix, QMatrix4x4 const& projMatrix);
+	void render(RendererOGL*, CoreGLFunctions*, QMatrix4x4 const& modelMatrix, QMatrix4x4 const& viewMatrix, QMatrix4x4 const& projMatrix);
 
 private:
 	LineGroup::DrawMode m_drawMode;

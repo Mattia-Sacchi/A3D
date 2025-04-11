@@ -18,19 +18,25 @@ MaterialPropertiesCacheOGL::~MaterialPropertiesCacheOGL() {
 	}
 }
 
-void MaterialPropertiesCacheOGL::install(CoreGLFunctions* gl, MaterialCacheOGL* materialCache) {
+void MaterialPropertiesCacheOGL::install(RendererOGL* r, CoreGLFunctions* gl, MaterialCacheOGL* materialCache) {
+	auto glErrorCheck = r->checkGlErrors("MaterialPropertiesCacheOGL::install");
+	Q_UNUSED(glErrorCheck)
+
 	if(!m_materialUBO)
 		return;
 
 	MaterialProperties* matProp = materialProperties();
 	if(matProp && materialCache) {
-		materialCache->applyUniforms(matProp->rawValues());
+		materialCache->applyUniforms(r, matProp->rawValues());
 	}
 
 	gl->glBindBufferBase(GL_UNIFORM_BUFFER, RendererOGL::UBO_MaterialPropertiesBinding, m_materialUBO);
 }
 
-void MaterialPropertiesCacheOGL::update(RendererOGL*, CoreGLFunctions* gl) {
+void MaterialPropertiesCacheOGL::update(RendererOGL* r, CoreGLFunctions* gl) {
+	auto glErrorCheck = r->checkGlErrors("MaterialPropertiesCacheOGL::update");
+	Q_UNUSED(glErrorCheck)
+
 	MaterialProperties* p = materialProperties();
 	if(!p)
 		return;

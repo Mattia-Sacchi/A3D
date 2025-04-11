@@ -15,7 +15,7 @@ public:
 	~TextureCacheOGL();
 
 	void update(RendererOGL*, CoreGLFunctions*);
-	void applyToSlot(CoreGLFunctions*, GLuint slot);
+	void applyToSlot(RendererOGL*, CoreGLFunctions*, GLuint slot);
 
 private:
 	std::unique_ptr<QOpenGLTexture> m_texture;

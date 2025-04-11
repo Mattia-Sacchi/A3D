@@ -23,6 +23,9 @@ RendererOGL::~RendererOGL() {
 }
 
 void RendererOGL::pushState(bool withFramebuffer) {
+	auto glErrorCheck = checkGlErrors("RendererOGL::pushState");
+	Q_UNUSED(glErrorCheck)
+
 	if(m_stateStorage.size() > 24) {
 		log(LC_Critical, "RendererOGL::pushState: GL State stack is too big.");
 		return;
@@ -75,6 +78,9 @@ void RendererOGL::pushState(bool withFramebuffer) {
 }
 
 void RendererOGL::popState() {
+	auto glErrorCheck = checkGlErrors("RendererOGL::popState");
+	Q_UNUSED(glErrorCheck)
+
 	if(m_stateStorage.empty()) {
 		log(LC_Critical, "RendererOGL::popState: GL State stack is empty.");
 		return;
@@ -107,6 +113,9 @@ void RendererOGL::popState() {
 }
 
 void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
+	auto glErrorCheck = checkGlErrors("RendererOGL::Draw");
+	Q_UNUSED(glErrorCheck)
+
 	if(!g || g->renderOptions() & Group::Hidden)
 		return;
 
@@ -118,6 +127,9 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 	bool wasFaceCullingDisabled = false;
 
 	if(mesh && mat && matProp) {
+		auto glErrorCheck = checkGlErrors("Mesh Rendering");
+		Q_UNUSED(glErrorCheck)
+
 		{
 			SceneUBO_Data newSceneData = m_sceneData;
 			if(m_closestSceneLightsBuffer.capacity() < LightCount)
@@ -154,13 +166,13 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 			m_gl->glDisable(GL_CULL_FACE);
 		}
 
-		matCache->install(m_gl);
-		matPropCache->install(m_gl, matCache);
+		matCache->install(this, m_gl);
+		matPropCache->install(this, m_gl, matCache);
 		for(std::size_t i = 0; i < MaterialProperties::MaxTextures; ++i) {
 			Texture* t = matProp->texture(static_cast<MaterialProperties::TextureSlot>(i));
 			if(t) {
 				TextureCacheOGL* tCache = buildTextureCache(t);
-				tCache->applyToSlot(m_gl, static_cast<GLuint>(i));
+				tCache->applyToSlot(this, m_gl, static_cast<GLuint>(i));
 			}
 			else if(i == MaterialProperties::BrdfTextureSlot) {
 				m_gl->glActiveTexture(GL_TEXTURE0 + MaterialProperties::BrdfTextureSlot);
@@ -168,10 +180,13 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 			}
 		}
 
-		meshCache->render(m_gl, drawInfo.m_modelMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
+		meshCache->render(this, m_gl, drawInfo.m_modelMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
 	}
 
 	if(lineGroup) {
+		auto glErrorCheck = checkGlErrors("LineGroup Rendering");
+		Q_UNUSED(glErrorCheck)
+
 		LineGroupCacheOGL* lineGroupCache                       = buildLineGroupCache(lineGroup);
 		MaterialCacheOGL* lineMaterialCache                     = nullptr;
 		MaterialPropertiesCacheOGL* lineMaterialPropertiesCache = nullptr;
@@ -189,10 +204,10 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 			m_gl->glDisable(GL_CULL_FACE);
 		}
 
-		lineMaterialCache->install(m_gl);
+		lineMaterialCache->install(this, m_gl);
 		if(lineMaterialPropertiesCache)
-			lineMaterialPropertiesCache->install(m_gl, lineMaterialCache);
-		lineGroupCache->render(m_gl, drawInfo.m_modelMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
+			lineMaterialPropertiesCache->install(this, m_gl, lineMaterialCache);
+		lineGroupCache->render(this, m_gl, drawInfo.m_modelMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
 	}
 
 	if(wasFaceCullingDisabled)
@@ -200,6 +215,9 @@ void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
 }
 
 void RendererOGL::RefreshSceneUBO() {
+	auto glErrorCheck = checkGlErrors("RendererOGL::RefreshSceneUBO");
+	Q_UNUSED(glErrorCheck)
+
 	if(!m_sceneUBO)
 		return;
 	m_gl->glBindBuffer(GL_UNIFORM_BUFFER, m_sceneUBO);
@@ -208,6 +226,9 @@ void RendererOGL::RefreshSceneUBO() {
 }
 
 void RendererOGL::BeginDrawing(Camera const& cam, Scene const* scene) {
+	auto glErrorCheck = checkGlErrors("RendererOGL::BeginDrawing");
+	Q_UNUSED(glErrorCheck)
+
 	Renderer::BeginDrawing(cam, scene);
 
 	genBrdfLUT();
@@ -223,6 +244,8 @@ void RendererOGL::BeginDrawing(Camera const& cam, Scene const* scene) {
 	m_skyboxProj = cam.getProjection();
 
 	if(!m_sceneUBO) {
+		auto glErrorCheck = checkGlErrors("RendererOGL SceneUBO Creation");
+		Q_UNUSED(glErrorCheck)
 		m_gl->glGenBuffers(1, &m_sceneUBO);
 
 		if(!m_sceneUBO)
@@ -253,6 +276,15 @@ void RendererOGL::EndDrawing(Scene const* scene) {
 	Renderer::EndDrawing(scene);
 }
 
+std::shared_ptr<RendererOGL::DeferredCaller> RendererOGL::checkGlErrors(QString const& context) {
+	return std::make_shared<RendererOGL::DeferredCaller>([this, context]() {
+		GLenum err = GL_NO_ERROR;
+		while((err = m_gl->glGetError()) != GL_NO_ERROR) {
+			log(LC_Warning, QLatin1String("OpenGL Error in context %1: 0x%2").arg(context, QString::number(err, 16)));
+		}
+	});
+}
+
 void RendererOGL::BeginOpaque() {
 
 	if(currentScene() && currentScene()->skybox()) {
@@ -270,13 +302,13 @@ void RendererOGL::BeginOpaque() {
 
 		m_gl->glDepthMask(GL_FALSE);
 		m_gl->glDisable(GL_CULL_FACE);
-		matCache->install(m_gl);
-		ccCache->applyToSlot(m_gl, static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot), -1, -1);
-		meshCache->render(m_gl, QMatrix4x4(), m_skyboxView, m_skyboxProj);
+		matCache->install(this, m_gl);
+		ccCache->applyToSlot(this, m_gl, static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot), -1, -1);
+		meshCache->render(this, m_gl, QMatrix4x4(), m_skyboxView, m_skyboxProj);
 		m_gl->glEnable(GL_CULL_FACE);
 		m_gl->glDepthMask(GL_TRUE);
 
-		ccCache->applyToSlot(m_gl, -1, static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot), static_cast<GLuint>(MaterialProperties::PrefilterTextureSlot));
+		ccCache->applyToSlot(this, m_gl, -1, static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot), static_cast<GLuint>(MaterialProperties::PrefilterTextureSlot));
 	}
 
 	m_gl->glEnable(GL_DEPTH_TEST);
@@ -482,8 +514,8 @@ void RendererOGL::genBrdfLUT() {
 	m_gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_brdfLUT, 0);
 	m_gl->glClear(GL_COLOR_BUFFER_BIT);
 
-	matCache->install(m_gl);
-	meshCache->render(m_gl, QMatrix4x4(), QMatrix4x4(), QMatrix4x4());
+	matCache->install(this, m_gl);
+	meshCache->render(this, m_gl, QMatrix4x4(), QMatrix4x4(), QMatrix4x4());
 	popState();
 
 	m_brdfCalculated = true;
