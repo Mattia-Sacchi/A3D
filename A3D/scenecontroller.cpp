@@ -1,5 +1,5 @@
-#include "A3D/scenecontroller.h"
-#include "A3D/scene.h"
+#include "scenecontroller.h"
+#include "scene.h"
 
 namespace A3D {
 

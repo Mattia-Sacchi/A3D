@@ -1,9 +1,9 @@
 #ifndef A3DMODEL_H
 #define A3DMODEL_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QObject>
-#include "A3D/group.h"
+#include "group.h"
 
 namespace A3D {
 

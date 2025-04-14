@@ -1,5 +1,5 @@
-#include "A3D/viewcontroller.h"
-#include "A3D/view.h"
+#include "viewcontroller.h"
+#include "view.h"
 
 namespace A3D {
 

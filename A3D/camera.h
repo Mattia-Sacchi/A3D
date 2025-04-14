@@ -1,7 +1,7 @@
 #ifndef A3DCAMERAVIEW_H
 #define A3DCAMERAVIEW_H
 
-#include "A3D/common.h"
+#include "common.h"
 
 namespace A3D {
 

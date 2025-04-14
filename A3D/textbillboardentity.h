@@ -1,8 +1,8 @@
-#ifndef TEXTBILLBOARDENTITY_H
-#define TEXTBILLBOARDENTITY_H
-#include "A3D/common.h"
-#include "A3D/entity.h"
-#include "A3D/texture.h"
+#ifndef A3DTEXTBILLBOARDENTITY_H
+#define A3DTEXTBILLBOARDENTITY_H
+#include "common.h"
+#include "entity.h"
+#include "texture.h"
 #include <QPainter>
 #include <QFont>
 #include <QColor>
@@ -41,4 +41,4 @@ private:
 };
 }
 
-#endif // TEXTBILLBOARDENTITY_H
+#endif // A3DTEXTBILLBOARDENTITY_H

@@ -1,12 +1,12 @@
 #ifndef A3DVIEW_H
 #define A3DVIEW_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QOpenGLWidget>
-#include "A3D/camera.h"
-#include "A3D/rendererogl.h"
-#include "A3D/scene.h"
-#include "A3D/viewcontroller.h"
+#include "camera.h"
+#include "rendererogl.h"
+#include "scene.h"
+#include "viewcontroller.h"
 
 namespace A3D {
 

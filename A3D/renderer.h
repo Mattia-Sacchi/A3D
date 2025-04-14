@@ -1,10 +1,10 @@
 #ifndef A3DRENDERER_H
 #define A3DRENDERER_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <cstdint>
-#include "A3D/scene.h"
-#include "A3D/camera.h"
+#include "scene.h"
+#include "camera.h"
 
 namespace A3D {
 
@@ -32,6 +32,7 @@ public:
 	virtual void Delete(MaterialPropertiesCache*) = 0;
 	virtual void Delete(TextureCache*)            = 0;
 	virtual void Delete(CubemapCache*)            = 0;
+	virtual void Delete(LineGroupCache*)          = 0;
 	virtual void DeleteAllResources()             = 0;
 
 	void PreLoadEntityTree(Entity*);
@@ -52,9 +53,10 @@ protected:
 	void addToMaterialPropertiesCaches(QPointer<MaterialPropertiesCache>);
 	void addToTextureCaches(QPointer<TextureCache>);
 	void addToCubemapCaches(QPointer<CubemapCache>);
+	void addToLineGroupCaches(QPointer<LineGroupCache>);
 	void runDeleteOnAllResources();
 	void invalidateCache();
-	void getClosestSceneLights(QVector3D const& pos, std::size_t desiredLightCount, std::vector<std::pair<std::size_t, PointLightInfo>>& result, Scene const* =nullptr);
+	void getClosestSceneLights(QVector3D const& pos, std::size_t desiredLightCount, std::vector<std::pair<std::size_t, PointLightInfo>>& result, Scene const* = nullptr);
 	Scene const* currentScene() const;
 
 private:
@@ -76,6 +78,7 @@ private:
 	std::vector<QPointer<MaterialPropertiesCache>> m_materialPropertiesCaches;
 	std::vector<QPointer<TextureCache>> m_textureCaches;
 	std::vector<QPointer<CubemapCache>> m_cubemapCaches;
+	std::vector<QPointer<LineGroupCache>> m_lineGroupCaches;
 
 	std::vector<GroupBufferData> m_opaqueGroupBuffer;
 	std::vector<GroupBufferData> m_translucentGroupBuffer;

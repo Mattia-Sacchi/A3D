@@ -1,12 +1,12 @@
 #ifndef A3DCUBEMAP_H
 #define A3DCUBEMAP_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QObject>
-#include "A3D/texture.h"
-#include "A3D/cubemapcache.h"
-#include "A3D/resource.h"
-#include "A3D/image.h"
+#include "texture.h"
+#include "cubemapcache.h"
+#include "resource.h"
+#include "image.h"
 
 namespace A3D {
 

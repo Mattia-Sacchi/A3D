@@ -1,8 +1,8 @@
 #ifndef A3DTEXTURECACHEOGL_H
 #define A3DTEXTURECACHEOGL_H
 
-#include "A3D/common.h"
-#include "A3D/texturecache.h"
+#include "common.h"
+#include "texturecache.h"
 #include <QOpenGLTexture>
 
 namespace A3D {
@@ -15,7 +15,7 @@ public:
 	~TextureCacheOGL();
 
 	void update(RendererOGL*, CoreGLFunctions*);
-	void applyToSlot(CoreGLFunctions*, GLuint slot);
+	void applyToSlot(RendererOGL*, CoreGLFunctions*, GLuint slot);
 
 private:
 	std::unique_ptr<QOpenGLTexture> m_texture;

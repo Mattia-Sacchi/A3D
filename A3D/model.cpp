@@ -1,4 +1,4 @@
-#include "A3D/model.h"
+#include "model.h"
 
 namespace A3D {
 

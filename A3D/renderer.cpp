@@ -1,4 +1,4 @@
-#include "A3D/renderer.h"
+#include "renderer.h"
 
 namespace A3D {
 
@@ -48,6 +48,7 @@ void Renderer::CleanupRenderCache() {
 	cleanupQPointers(m_materialCaches);
 	cleanupQPointers(m_textureCaches);
 	cleanupQPointers(m_cubemapCaches);
+	cleanupQPointers(m_lineGroupCaches);
 }
 
 bool Renderer::OpaqueSorter(GroupBufferData const& a, GroupBufferData const& b) {
@@ -87,7 +88,7 @@ void Renderer::DrawAll(Scene* root, Camera const& camera) {
 
 	this->BeginOpaque();
 	for(auto it = m_opaqueGroupBuffer.begin(); it != m_opaqueGroupBuffer.end(); ++it) {
-		drawInfo.m_modelMatrix = it->m_transform;
+		drawInfo.m_modelMatrix   = it->m_transform;
 		drawInfo.m_groupPosition = it->m_position;
 		this->Draw(it->m_group, drawInfo);
 	}
@@ -95,7 +96,7 @@ void Renderer::DrawAll(Scene* root, Camera const& camera) {
 
 	this->BeginTranslucent();
 	for(auto it = m_translucentGroupBuffer.begin(); it != m_translucentGroupBuffer.end(); ++it) {
-		drawInfo.m_modelMatrix = it->m_transform;
+		drawInfo.m_modelMatrix   = it->m_transform;
 		drawInfo.m_groupPosition = it->m_position;
 		this->Draw(it->m_group, drawInfo);
 	}
@@ -120,10 +121,11 @@ void Renderer::BuildDrawLists(Camera const& camera, Entity* e, QMatrix4x4 const&
 			Mesh* mesh                  = g->mesh();
 			Material* mat               = g->material();
 			MaterialProperties* matProp = g->materialProperties();
+			LineGroup* lg               = g->lineGroup();
 
 			if(mesh && mat && matProp) {
 				GroupBufferData* gbd = nullptr;
-				if(mat->renderOptions() & Material::Translucent || matProp->isTranslucent()) {
+				if(mat->renderOptions() & Material::Translucent || matProp->isTranslucent() || lg != nullptr) {
 					m_translucentGroupBuffer.emplace_back();
 					gbd = &m_translucentGroupBuffer.back();
 				}
@@ -134,7 +136,16 @@ void Renderer::BuildDrawLists(Camera const& camera, Entity* e, QMatrix4x4 const&
 
 				gbd->m_group              = g;
 				gbd->m_transform          = baseMatrix * g->groupMatrix();
-				gbd->m_position = gbd->m_transform.map(g->position());
+				gbd->m_position           = gbd->m_transform.map(g->position());
+				gbd->m_distanceFromCamera = QVector3D::dotProduct(gbd->m_position - camera.position(), camera.forward());
+			}
+			else if(lg) {
+				m_translucentGroupBuffer.emplace_back();
+				GroupBufferData* gbd = &m_translucentGroupBuffer.back();
+
+				gbd->m_group              = g;
+				gbd->m_transform          = baseMatrix * g->groupMatrix();
+				gbd->m_position           = gbd->m_transform.map(g->position());
 				gbd->m_distanceFromCamera = QVector3D::dotProduct(gbd->m_position - camera.position(), camera.forward());
 			}
 		}
@@ -148,8 +159,12 @@ void Renderer::BuildDrawLists(Camera const& camera, Entity* e, QMatrix4x4 const&
 	}
 }
 
-void Renderer::BeginDrawing(Camera const&, Scene const* scene) { m_currentScene = scene; }
-void Renderer::EndDrawing(Scene const*) { m_currentScene = nullptr; }
+void Renderer::BeginDrawing(Camera const&, Scene const* scene) {
+	m_currentScene = scene;
+}
+void Renderer::EndDrawing(Scene const*) {
+	m_currentScene = nullptr;
+}
 void Renderer::BeginOpaque() {}
 void Renderer::EndOpaque() {}
 void Renderer::BeginTranslucent() {}
@@ -195,6 +210,14 @@ void Renderer::runDeleteOnAllResources() {
 		delete cc;
 	}
 	m_cubemapCaches.clear();
+
+	for(auto it = m_lineGroupCaches.begin(); it != m_lineGroupCaches.end(); ++it) {
+		QPointer<LineGroupCache>& lgc = *it;
+		if(lgc.isNull())
+			continue;
+		delete lgc;
+	}
+	m_lineGroupCaches.clear();
 }
 
 void Renderer::invalidateCache() {
@@ -232,6 +255,13 @@ void Renderer::invalidateCache() {
 			continue;
 		cc->markDirty();
 	}
+
+	for(auto it = m_lineGroupCaches.begin(); it != m_lineGroupCaches.end(); ++it) {
+		QPointer<LineGroupCache>& lgc = *it;
+		if(lgc.isNull())
+			continue;
+		lgc->markDirty();
+	}
 }
 
 void Renderer::getClosestSceneLights(QVector3D const& pos, size_t desiredLightCount, std::vector<std::pair<std::size_t, PointLightInfo>>& result, Scene const* sceneOverride) {
@@ -247,13 +277,8 @@ void Renderer::getClosestSceneLights(QVector3D const& pos, size_t desiredLightCo
 	result.resize(std::min<std::size_t>(desiredLightCount, l.size()));
 
 	std::partial_sort_copy(
-		l.begin(),
-		l.end(),
-		result.begin(),
-		result.end(),
-		[&](std::pair<std::size_t, PointLightInfo> const& l,
-	       std::pair<std::size_t, PointLightInfo> const& r) -> bool
-		{
+		l.begin(), l.end(), result.begin(), result.end(),
+		[&](std::pair<std::size_t, PointLightInfo> const& l, std::pair<std::size_t, PointLightInfo> const& r) -> bool {
 			return l.second.position.distanceToPoint(pos) < r.second.position.distanceToPoint(pos);
 		}
 	);
@@ -281,6 +306,10 @@ void Renderer::addToTextureCaches(QPointer<TextureCache> texture) {
 
 void Renderer::addToCubemapCaches(QPointer<CubemapCache> cubemap) {
 	m_cubemapCaches.push_back(std::move(cubemap));
+}
+
+void Renderer::addToLineGroupCaches(QPointer<LineGroupCache> lineGroup) {
+	m_lineGroupCaches.push_back(std::move(lineGroup));
 }
 
 }
