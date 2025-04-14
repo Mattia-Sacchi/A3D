@@ -29,6 +29,27 @@
 
 namespace A3D {
 
+inline void normalizeMinMax(std::vector<float>& data, float min, float max) {
+	float const fInvFactor = 1.f / (max - min);
+
+	for(auto it = data.begin(); it != data.end(); ++it)
+		*it = (*it - min) * fInvFactor;
+}
+
+inline void normalize(std::vector<float>& data) {
+	auto itMin = std::min_element(data.begin(), data.end());
+	if(itMin == data.end())
+		return;
+
+	auto itMax = std::max_element(data.begin(), data.end());
+	if(itMax == data.end())
+		return;
+
+	float const min = *itMin;
+	float const max = *itMax;
+	normalizeMinMax(data, min, max);
+}
+
 enum LogChannel {
 	LC_Debug = 0,
 	LC_Info,
