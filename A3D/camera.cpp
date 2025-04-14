@@ -56,6 +56,14 @@ QMatrix4x4 Camera::orientation() const {
 QVector3D const& Camera::angle() const {
 	return m_angle;
 }
+void Camera::setAngle(QVector3D angle) {
+	normalizeAngleVector(angle);
+
+	if(m_angle == angle)
+		return;
+	m_angle             = angle;
+	m_viewMatrixIsDirty = true;
+}
 void Camera::setOrientationTarget(QVector3D const& target) {
 	if(target == m_position)
 		return;

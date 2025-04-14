@@ -35,12 +35,14 @@ public:
 		ACT_LOOK_HOME,
 
 		ACT_SHOOT_RAY,
-		ACT_LOOK_MOUSE_POS,
+		ACT_LOOK_MOUSE_POSITION,
 		ACT_PRINT_DEBUG,
 
 		//!
 		ACT_COUNT
 	};
+
+	void lookAtMousePosition();
 
 	explicit KeyboardCameraController(View* view);
 
@@ -76,7 +78,9 @@ private:
 
 	std::map<Qt::MouseButton, Action> m_btnBindings;
 	std::map<Qt::MouseButton, bool> m_btnStatus;
-	std::map<Qt::MouseButton, QEvent::Type> m_btnLastEvent;
+	QPointF m_mousePos;
+	QPointF m_mouseClickPos;
+	QMatrix4x4 m_cameraClickView;
 
 	QVector3D m_movementBaseSpeed;
 	float m_movementPreciseFactor;
