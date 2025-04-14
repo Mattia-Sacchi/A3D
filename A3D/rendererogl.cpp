@@ -1,4 +1,4 @@
-#include "A3D/rendererogl.h"
+#include "rendererogl.h"
 #include <cstddef>
 
 namespace A3D {
@@ -7,6 +7,7 @@ RendererOGL::RendererOGL(QOpenGLContext* ctx, CoreGLFunctions* gl)
 	: Renderer(),
 	  m_context(ctx),
 	  m_gl(gl),
+	  m_lineMaterial(nullptr),
 	  m_skyboxMaterial(nullptr),
 	  m_skyboxMesh(nullptr),
 	  m_sceneUBO(0),
@@ -22,6 +23,9 @@ RendererOGL::~RendererOGL() {
 }
 
 void RendererOGL::pushState(bool withFramebuffer) {
+	auto glErrorCheck = checkGlErrors("RendererOGL::pushState");
+	Q_UNUSED(glErrorCheck)
+
 	if(m_stateStorage.size() > 24) {
 		log(LC_Critical, "RendererOGL::pushState: GL State stack is too big.");
 		return;
@@ -74,6 +78,9 @@ void RendererOGL::pushState(bool withFramebuffer) {
 }
 
 void RendererOGL::popState() {
+	auto glErrorCheck = checkGlErrors("RendererOGL::popState");
+	Q_UNUSED(glErrorCheck)
+
 	if(m_stateStorage.empty()) {
 		log(LC_Critical, "RendererOGL::popState: GL State stack is empty.");
 		return;
@@ -106,70 +113,111 @@ void RendererOGL::popState() {
 }
 
 void RendererOGL::Draw(Group* g, DrawInfo const& drawInfo) {
+	auto glErrorCheck = checkGlErrors("RendererOGL::Draw");
+	Q_UNUSED(glErrorCheck)
+
 	if(!g || g->renderOptions() & Group::Hidden)
 		return;
 
 	Mesh* mesh                  = g->mesh();
 	Material* mat               = g->material();
 	MaterialProperties* matProp = g->materialProperties();
-	if(!mesh || !mat || !matProp)
-		return;
+	LineGroup* lineGroup        = g->lineGroup();
 
-	{
-		SceneUBO_Data newSceneData = m_sceneData;
-		if(m_closestSceneLightsBuffer.capacity() < LightCount)
-			m_closestSceneLightsBuffer.reserve(LightCount);
+	bool wasFaceCullingDisabled = false;
 
-		getClosestSceneLights(drawInfo.m_groupPosition, LightCount, m_closestSceneLightsBuffer);
+	if(mesh && mat && matProp) {
+		auto glErrorCheck = checkGlErrors("Mesh Rendering");
+		Q_UNUSED(glErrorCheck)
 
-		std::size_t lightCount = std::min<std::size_t>(LightCount, m_closestSceneLightsBuffer.size());
+		{
+			SceneUBO_Data newSceneData = m_sceneData;
+			if(m_closestSceneLightsBuffer.capacity() < LightCount)
+				m_closestSceneLightsBuffer.reserve(LightCount);
 
-		for(std::size_t i = 0; i < lightCount; ++i) {
-			newSceneData.m_lightPos[i]   = QVector4D(m_closestSceneLightsBuffer[i].second.position, 0.f);
-			newSceneData.m_lightColor[i] = m_closestSceneLightsBuffer[i].second.color;
+			getClosestSceneLights(drawInfo.m_groupPosition, LightCount, m_closestSceneLightsBuffer);
+
+			std::size_t lightCount = std::min<std::size_t>(LightCount, m_closestSceneLightsBuffer.size());
+
+			for(std::size_t i = 0; i < lightCount; ++i) {
+				newSceneData.m_lightPos[i]   = QVector4D(m_closestSceneLightsBuffer[i].second.position, 0.f);
+				newSceneData.m_lightColor[i] = m_closestSceneLightsBuffer[i].second.color;
+			}
+			for(std::size_t i = lightCount; i < LightCount; ++i) {
+				newSceneData.m_lightColor[i] = QVector4D(0.f, 0.f, 0.f, 0.f);
+				newSceneData.m_lightPos[i]   = QVector4D(0.f, 0.f, 0.f, -1.f);
+			}
+
+			if(std::memcmp(&m_sceneData, &newSceneData, sizeof(m_sceneData))) {
+				std::memcpy(&m_sceneData, &newSceneData, sizeof(m_sceneData));
+				RefreshSceneUBO();
+			}
 		}
-		for(std::size_t i = lightCount; i < LightCount; ++i) {
-			newSceneData.m_lightColor[i] = QVector4D(0.f, 0.f, 0.f, 0.f);
-			newSceneData.m_lightPos[i]   = QVector4D(0.f, 0.f, 0.f, -1.f);
+
+		MeshCacheOGL* meshCache                  = buildMeshCache(mesh);
+		MaterialCacheOGL* matCache               = buildMaterialCache(mat);
+		MaterialPropertiesCacheOGL* matPropCache = buildMaterialPropertiesCache(matProp);
+
+		Mesh::RenderOptions meshRenderOptions    = mesh->renderOptions();
+		Material::RenderOptions matRenderOptions = mat->renderOptions();
+
+		if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent || matProp->isTranslucent()) {
+			wasFaceCullingDisabled = true;
+			m_gl->glDisable(GL_CULL_FACE);
 		}
 
-		if(std::memcmp(&m_sceneData, &newSceneData, sizeof(m_sceneData))) {
-			std::memcpy(&m_sceneData, &newSceneData, sizeof(m_sceneData));
-			RefreshSceneUBO();
+		matCache->install(this, m_gl);
+		matPropCache->install(this, m_gl, matCache);
+		for(std::size_t i = 0; i < MaterialProperties::MaxTextures; ++i) {
+			Texture* t = matProp->texture(static_cast<MaterialProperties::TextureSlot>(i));
+			if(t) {
+				TextureCacheOGL* tCache = buildTextureCache(t);
+				tCache->applyToSlot(this, m_gl, static_cast<GLuint>(i));
+			}
+			else if(i == MaterialProperties::BrdfTextureSlot) {
+				m_gl->glActiveTexture(GL_TEXTURE0 + MaterialProperties::BrdfTextureSlot);
+				m_gl->glBindTexture(GL_TEXTURE_2D, getBrdfLUT());
+			}
 		}
+
+		meshCache->render(this, m_gl, drawInfo.m_modelMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
 	}
 
-	MeshCacheOGL* meshCache                  = buildMeshCache(mesh);
-	MaterialCacheOGL* matCache               = buildMaterialCache(mat);
-	MaterialPropertiesCacheOGL* matPropCache = buildMaterialPropertiesCache(matProp);
+	if(lineGroup) {
+		auto glErrorCheck = checkGlErrors("LineGroup Rendering");
+		Q_UNUSED(glErrorCheck)
 
-	Mesh::RenderOptions meshRenderOptions    = mesh->renderOptions();
-	Material::RenderOptions matRenderOptions = mat->renderOptions();
+		LineGroupCacheOGL* lineGroupCache                       = buildLineGroupCache(lineGroup);
+		MaterialCacheOGL* lineMaterialCache                     = nullptr;
+		MaterialPropertiesCacheOGL* lineMaterialPropertiesCache = nullptr;
 
-	if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent || matProp->isTranslucent())
-		m_gl->glDisable(GL_CULL_FACE);
+		if(!mesh && mat)
+			lineMaterialCache = buildMaterialCache(mat);
+		else
+			lineMaterialCache = buildMaterialCache(m_lineMaterial);
 
-	matCache->install(m_gl);
-	matPropCache->install(m_gl, matCache);
-	for(std::size_t i = 0; i < MaterialProperties::MaxTextures; ++i) {
-		Texture* t = matProp->texture(static_cast<MaterialProperties::TextureSlot>(i));
-		if(t) {
-			TextureCacheOGL* tCache = buildTextureCache(t);
-			tCache->applyToSlot(m_gl, static_cast<GLuint>(i));
+		if(matProp)
+			lineMaterialPropertiesCache = buildMaterialPropertiesCache(matProp);
+
+		if(!wasFaceCullingDisabled) {
+			wasFaceCullingDisabled = true;
+			m_gl->glDisable(GL_CULL_FACE);
 		}
-		else if(i == MaterialProperties::BrdfTextureSlot) {
-			m_gl->glActiveTexture(GL_TEXTURE0 + MaterialProperties::BrdfTextureSlot);
-			m_gl->glBindTexture(GL_TEXTURE_2D, getBrdfLUT());
-		}
+
+		lineMaterialCache->install(this, m_gl);
+		if(lineMaterialPropertiesCache)
+			lineMaterialPropertiesCache->install(this, m_gl, lineMaterialCache);
+		lineGroupCache->render(this, m_gl, drawInfo.m_modelMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
 	}
 
-	meshCache->render(m_gl, drawInfo.m_modelMatrix, drawInfo.m_viewMatrix, drawInfo.m_projMatrix);
-
-	if(meshRenderOptions & Mesh::DisableCulling || matRenderOptions & Material::Translucent || matProp->isTranslucent())
+	if(wasFaceCullingDisabled)
 		m_gl->glEnable(GL_CULL_FACE);
 }
 
 void RendererOGL::RefreshSceneUBO() {
+	auto glErrorCheck = checkGlErrors("RendererOGL::RefreshSceneUBO");
+	Q_UNUSED(glErrorCheck)
+
 	if(!m_sceneUBO)
 		return;
 	m_gl->glBindBuffer(GL_UNIFORM_BUFFER, m_sceneUBO);
@@ -178,6 +226,9 @@ void RendererOGL::RefreshSceneUBO() {
 }
 
 void RendererOGL::BeginDrawing(Camera const& cam, Scene const* scene) {
+	auto glErrorCheck = checkGlErrors("RendererOGL::BeginDrawing");
+	Q_UNUSED(glErrorCheck)
+
 	Renderer::BeginDrawing(cam, scene);
 
 	genBrdfLUT();
@@ -193,6 +244,8 @@ void RendererOGL::BeginDrawing(Camera const& cam, Scene const* scene) {
 	m_skyboxProj = cam.getProjection();
 
 	if(!m_sceneUBO) {
+		auto glErrorCheck = checkGlErrors("RendererOGL SceneUBO Creation");
+		Q_UNUSED(glErrorCheck)
 		m_gl->glGenBuffers(1, &m_sceneUBO);
 
 		if(!m_sceneUBO)
@@ -201,6 +254,11 @@ void RendererOGL::BeginDrawing(Camera const& cam, Scene const* scene) {
 		m_gl->glBindBuffer(GL_UNIFORM_BUFFER, m_sceneUBO);
 		m_gl->glBufferData(GL_UNIFORM_BUFFER, sizeof(m_sceneData), nullptr, GL_DYNAMIC_DRAW);
 		m_gl->glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
+
+	if(!m_lineMaterial) {
+		m_lineMaterial = Material::standardMaterial(Material::LineMaterial);
+		buildMaterialCache(m_lineMaterial);
 	}
 
 	QVector4D const newCamPos = QVector4D(cam.position());
@@ -216,6 +274,15 @@ void RendererOGL::BeginDrawing(Camera const& cam, Scene const* scene) {
 
 void RendererOGL::EndDrawing(Scene const* scene) {
 	Renderer::EndDrawing(scene);
+}
+
+std::shared_ptr<RendererOGL::DeferredCaller> RendererOGL::checkGlErrors(QString const& context) {
+	return std::make_shared<RendererOGL::DeferredCaller>([this, context]() {
+		GLenum err = GL_NO_ERROR;
+		while((err = m_gl->glGetError()) != GL_NO_ERROR) {
+			log(LC_Warning, QLatin1String("OpenGL Error in context %1: 0x%2").arg(context, QString::number(err, 16)));
+		}
+	});
 }
 
 void RendererOGL::BeginOpaque() {
@@ -235,13 +302,13 @@ void RendererOGL::BeginOpaque() {
 
 		m_gl->glDepthMask(GL_FALSE);
 		m_gl->glDisable(GL_CULL_FACE);
-		matCache->install(m_gl);
-		ccCache->applyToSlot(m_gl, static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot), -1, -1);
-		meshCache->render(m_gl, QMatrix4x4(), m_skyboxView, m_skyboxProj);
+		matCache->install(this, m_gl);
+		ccCache->applyToSlot(this, m_gl, static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot), -1, -1);
+		meshCache->render(this, m_gl, QMatrix4x4(), m_skyboxView, m_skyboxProj);
 		m_gl->glEnable(GL_CULL_FACE);
 		m_gl->glDepthMask(GL_TRUE);
 
-		ccCache->applyToSlot(m_gl, -1, static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot), static_cast<GLuint>(MaterialProperties::PrefilterTextureSlot));
+		ccCache->applyToSlot(this, m_gl, -1, static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot), static_cast<GLuint>(MaterialProperties::PrefilterTextureSlot));
 	}
 
 	m_gl->glEnable(GL_DEPTH_TEST);
@@ -342,6 +409,18 @@ void RendererOGL::Delete(CubemapCache* cubemapCache) {
 	delete cubemapCache;
 }
 
+void RendererOGL::Delete(LineGroupCache* lineGroupCache) {
+	if(m_context.isNull()) {
+		log(LC_Debug, "Couldn't delete LineGroupCache: OpenGL context is unavailable. A memory leak might have happened.");
+		return;
+	}
+
+	ContextSwitcher switcher(m_context);
+	Q_UNUSED(switcher);
+
+	delete lineGroupCache;
+}
+
 void RendererOGL::DeleteAllResources() {
 	if(m_context.isNull()) {
 		log(LC_Debug, "Couldn't delete resources: OpenGL context is unavailable. A memory leak might have happened.");
@@ -380,9 +459,13 @@ void RendererOGL::PreLoadEntity(Entity* e) {
 		if(!g)
 			continue;
 
+		LineGroup* lineGroup        = g->lineGroup();
 		Mesh* mesh                  = g->mesh();
 		Material* mat               = g->material();
 		MaterialProperties* matProp = g->materialProperties();
+
+		if(lineGroup)
+			buildLineGroupCache(lineGroup);
 
 		if(mesh)
 			buildMeshCache(mesh);
@@ -431,8 +514,8 @@ void RendererOGL::genBrdfLUT() {
 	m_gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_brdfLUT, 0);
 	m_gl->glClear(GL_COLOR_BUFFER_BIT);
 
-	matCache->install(m_gl);
-	meshCache->render(m_gl, QMatrix4x4(), QMatrix4x4(), QMatrix4x4());
+	matCache->install(this, m_gl);
+	meshCache->render(this, m_gl, QMatrix4x4(), QMatrix4x4(), QMatrix4x4());
 	popState();
 
 	m_brdfCalculated = true;
@@ -500,6 +583,18 @@ CubemapCacheOGL* RendererOGL::buildCubemapCache(Cubemap* cubemap) {
 
 	if(cc.second)
 		addToCubemapCaches(cc.first);
+
+	return cc.first;
+}
+
+LineGroupCacheOGL* RendererOGL::buildLineGroupCache(LineGroup* cubemap) {
+	std::pair<LineGroupCacheOGL*, bool> cc = cubemap->getOrEmplaceLineGroupCache<LineGroupCacheOGL>(rendererID());
+
+	if(cc.first->isDirty())
+		cc.first->update(this, m_gl);
+
+	if(cc.second)
+		addToLineGroupCaches(cc.first);
 
 	return cc.first;
 }

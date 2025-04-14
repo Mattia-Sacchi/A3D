@@ -1,5 +1,5 @@
-#include "A3D/resourcemanager.h"
-#include "A3D/model.h"
+#include "resourcemanager.h"
+#include "model.h"
 
 #include <QIODevice>
 

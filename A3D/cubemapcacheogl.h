@@ -1,8 +1,8 @@
 #ifndef A3DCUBEMAPCACHEOGL_H
 #define A3DCUBEMAPCACHEOGL_H
 
-#include "A3D/common.h"
-#include "A3D/cubemapcache.h"
+#include "common.h"
+#include "cubemapcache.h"
 #include <QOpenGLTexture>
 
 namespace A3D {
@@ -15,7 +15,7 @@ public:
 	~CubemapCacheOGL();
 
 	void update(RendererOGL*, CoreGLFunctions*);
-	void applyToSlot(CoreGLFunctions*, GLint environmentSlot, GLint irradianceSlot, GLint prefilterSlot);
+	void applyToSlot(RendererOGL*, CoreGLFunctions*, GLint environmentSlot, GLint irradianceSlot, GLint prefilterSlot);
 
 private:
 	void calcIrradiance(GLenum format, RendererOGL*, CoreGLFunctions*);

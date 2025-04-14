@@ -1,9 +1,9 @@
 #ifndef A3DMATERIALPROPERTIESCACHEOGL_H
 #define A3DMATERIALPROPERTIESCACHEOGL_H
 
-#include "A3D/common.h"
-#include "A3D/materialproperties.h"
-#include "A3D/materialpropertiescache.h"
+#include "common.h"
+#include "materialproperties.h"
+#include "materialpropertiescache.h"
 #include <QOpenGLBuffer>
 
 namespace A3D {
@@ -17,7 +17,7 @@ public:
 	~MaterialPropertiesCacheOGL();
 
 	void update(RendererOGL*, CoreGLFunctions*);
-	void install(CoreGLFunctions*, MaterialCacheOGL*);
+	void install(RendererOGL*, CoreGLFunctions*, MaterialCacheOGL*);
 
 private:
 	struct MaterialUBO_Data {

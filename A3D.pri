@@ -12,6 +12,9 @@ CONFIG += c++17
 SOURCES += \
     $$PWD/A3D/entitycontroller.cpp \
     $$PWD/A3D/keyboardcameracontroller.cpp \
+    $$PWD/A3D/linegroup.cpp \
+    $$PWD/A3D/linegroupcache.cpp \
+    $$PWD/A3D/linegroupcacheogl.cpp \
     $$PWD/A3D/meshgenerator.cpp \
     $$PWD/A3D/scenecontroller.cpp \
     $$PWD/A3D/textbillboardentity.cpp \
@@ -48,6 +51,9 @@ SOURCES += \
 HEADERS += \
 	$$PWD/A3D/entitycontroller.h \
 	$$PWD/A3D/keyboardcameracontroller.h \
+    $$PWD/A3D/linegroup.h \
+    $$PWD/A3D/linegroupcache.h \
+    $$PWD/A3D/linegroupcacheogl.h \
 	$$PWD/A3D/scenecontroller.h \
     $$PWD/A3D/textbillboardentity.h \
 	$$PWD/A3D/viewcontroller.h \

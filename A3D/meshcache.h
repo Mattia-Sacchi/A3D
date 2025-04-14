@@ -1,7 +1,7 @@
 #ifndef A3DMESHCACHE_H
 #define A3DMESHCACHE_H
 
-#include "A3D/common.h"
+#include "common.h"
 #include <QObject>
 
 namespace A3D {

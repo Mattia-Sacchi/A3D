@@ -1,8 +1,8 @@
 #ifndef A3DKEYBOARDCAMERACONTROLLER_H
 #define A3DKEYBOARDCAMERACONTROLLER_H
 
-#include "A3D/common.h"
-#include "A3D/viewcontroller.h"
+#include "common.h"
+#include "viewcontroller.h"
 #include <QObject>
 #include <set>
 #include <QKeyEvent>

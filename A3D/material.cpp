@@ -1,5 +1,5 @@
-#include "A3D/material.h"
-#include "A3D/renderer.h"
+#include "material.h"
+#include "renderer.h"
 #include <QFile>
 #include <utility>
 
@@ -14,6 +14,10 @@ Material* Material::standardMaterial(StandardMaterial stdMat) {
 
 	Material& newMat = standardMaterials[stdMat];
 	switch(stdMat) {
+	case OITMaterial:
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/OITMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/OITMaterial.frag");
+		break;
 	case UnshadedMaterial:
 		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/UnshadedMaterial.vert");
 		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/UnshadedMaterial.frag");
@@ -41,6 +45,12 @@ Material* Material::standardMaterial(StandardMaterial stdMat) {
 	case BRDFMaterial:
 		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/BRDFMaterial.vert");
 		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/BRDFMaterial.frag");
+		break;
+	case LineMaterial:
+		newMat.setShaderFile(GLSL, GeometryShader, ":/A3D/LineMaterial.geom");
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/LineMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/LineMaterial.frag");
+		newMat.setRenderOptions(Material::Translucent);
 		break;
 	}
 	newMat.invalidateCache();

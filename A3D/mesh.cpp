@@ -1,6 +1,5 @@
-#include "A3D/mesh.h"
-#include "A3D/renderer.h"
-#include <QDebug>
+#include "mesh.h"
+#include "renderer.h"
 
 namespace A3D {
 
@@ -168,16 +167,14 @@ Mesh* Mesh::clone() const {
 	return newMesh;
 }
 
-Mesh::RenderOptions Mesh::renderOptions() const {
-	return m_renderOptions;
-}
 void Mesh::setRenderOptions(RenderOptions renderOptions) {
 	m_renderOptions = renderOptions;
 }
 
-Mesh::Contents Mesh::contents() const {
-	return m_contents;
+Mesh::RenderOptions Mesh::renderOptions() const {
+	return m_renderOptions;
 }
+
 void Mesh::setContents(Contents contents) {
 	if(m_contents == contents)
 		return;
@@ -185,6 +182,10 @@ void Mesh::setContents(Contents contents) {
 	m_contents = contents;
 	m_packedData.clear();
 	invalidateCache();
+}
+
+Mesh::Contents Mesh::contents() const {
+	return m_contents;
 }
 
 std::size_t Mesh::packedVertexSize(Contents contents) {
@@ -256,6 +257,7 @@ std::vector<std::uint8_t> const& Mesh::packedData() const {
 				std::memcpy(pDst, &v.SmoothingGroup, sizeof(v.SmoothingGroup));
 				pDst += sizeof(v.SmoothingGroup);
 			}
+			Q_UNUSED(pDst)
 		}
 	}
 	return m_packedData;

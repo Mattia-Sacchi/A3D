@@ -1,9 +1,9 @@
 #ifndef A3DMATERIALCACHEOGL_H
 #define A3DMATERIALCACHEOGL_H
 
-#include "A3D/common.h"
-#include "A3D/materialcache.h"
-#include "A3D/materialproperties.h"
+#include "common.h"
+#include "materialcache.h"
+#include "materialproperties.h"
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
 
@@ -18,11 +18,11 @@ public:
 	~MaterialCacheOGL();
 
 	void update(RendererOGL*, CoreGLFunctions*);
-	void install(CoreGLFunctions*);
+	void install(RendererOGL*, CoreGLFunctions*);
 
-	int searchUniform(QString const& name);
-	void applyUniform(QString const& name, QVariant const& value);
-	void applyUniforms(std::map<QString, QVariant> const& uniforms);
+	int searchUniform(RendererOGL*, QString const& name);
+	void applyUniform(RendererOGL* r, QString const& name, QVariant const& value);
+	void applyUniforms(RendererOGL* r, std::map<QString, QVariant> const& uniforms);
 
 private:
 	std::unique_ptr<QOpenGLShaderProgram> m_program;
@@ -40,6 +40,7 @@ private:
 	GLuint m_meshUBO_index;
 	GLuint m_matpropUBO_index;
 	GLuint m_sceneUBO_index;
+	GLuint m_lineUBO_index;
 };
 
 }

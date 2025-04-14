@@ -1,8 +1,8 @@
-#include "A3D/resourcemanager.h"
-#include "A3D/mesh.h"
-#include "A3D/material.h"
-#include "A3D/texture.h"
-#include "A3D/model.h"
+#include "resourcemanager.h"
+#include "mesh.h"
+#include "material.h"
+#include "texture.h"
+#include "model.h"
 
 #include <QFile>
 #include <QFileInfo>

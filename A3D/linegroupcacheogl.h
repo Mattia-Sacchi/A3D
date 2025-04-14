@@ -1,37 +1,33 @@
-#ifndef A3DMESHCACHEOGL_H
-#define A3DMESHCACHEOGL_H
+#ifndef A3DLINEGROUPCACHEOGL_H
+#define A3DLINEGROUPCACHEOGL_H
 
 #include "common.h"
-#include "meshcache.h"
-#include "mesh.h"
+#include "linegroupcache.h"
+#include "linegroup.h"
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 
 namespace A3D {
+
 class RendererOGL;
-class MeshCacheOGL : public MeshCache {
+class LineGroupCacheOGL : public LineGroupCache {
 	Q_OBJECT
 public:
 	enum {
-		Position3DAttribute     = 0,
-		Position2DAttribute     = 1,
-		TextureCoord2DAttribute = 2,
-		Normal3DAttribute       = 3,
-		Color3DAttribute        = 4,
-		Color4DAttribute        = 5,
-		BoneIDAttribute         = 6,
-		BoneWeightsAttribute    = 7,
-		SmoothingGroupAttribute = 8,
+		Position3DAttribute = 0,
+		Position2DAttribute = 1,
+		Color3DAttribute    = 2,
+		Color4DAttribute    = 3,
 	};
 
-	explicit MeshCacheOGL(Mesh*);
-	~MeshCacheOGL();
+	explicit LineGroupCacheOGL(LineGroup*);
+	~LineGroupCacheOGL();
 
 	void update(RendererOGL*, CoreGLFunctions*);
 	void render(RendererOGL*, CoreGLFunctions*, QMatrix4x4 const& modelMatrix, QMatrix4x4 const& viewMatrix, QMatrix4x4 const& projMatrix);
 
 private:
-	Mesh::DrawMode m_drawMode;
+	LineGroup::DrawMode m_drawMode;
 	QOpenGLVertexArrayObject m_vao;
 	QOpenGLBuffer m_vbo;
 	QOpenGLBuffer m_ibo;
@@ -62,9 +58,15 @@ private:
 		RawMatrix4x4 mvNormalMatrix;
 		RawMatrix4x4 mvpNormalMatrix;
 	} m_meshUBO_data;
+	struct LineUBO_Data {
+		float LineThickness;
+		float FeatherSize;
+	} m_lineUBO_data;
+
 	GLuint m_meshUBO;
+	GLuint m_lineUBO;
 };
 
 }
 
-#endif // A3DMESHCACHEOGL_H
+#endif // A3DLINEGROUPCACHEOGL_H

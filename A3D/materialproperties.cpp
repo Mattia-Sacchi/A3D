@@ -1,5 +1,5 @@
-#include "A3D/materialproperties.h"
-#include "A3D/renderer.h"
+#include "materialproperties.h"
+#include "renderer.h"
 
 namespace A3D {
 

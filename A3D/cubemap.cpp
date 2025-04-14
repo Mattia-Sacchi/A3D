@@ -1,5 +1,5 @@
-#include "A3D/cubemap.h"
-#include "A3D/renderer.h"
+#include "cubemap.h"
+#include "renderer.h"
 
 namespace A3D {
 
