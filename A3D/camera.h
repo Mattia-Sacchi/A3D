@@ -28,6 +28,8 @@ public:
 	QMatrix4x4 orientation() const;
 	// Returns the XYZ rotation angle
 	QVector3D const& angle() const;
+	// Changes the XYZ rotation angle
+	void setAngle(QVector3D angle);
 
 	// Changes the orientation so that the camera is pointing to a target point
 	// Assumes that the upVector is (0,1,0) (thus will cancel the Z component)
