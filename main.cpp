@@ -7,6 +7,7 @@
 #include "A3D/view.h"
 #include "A3D/keyboardcameracontroller.h"
 #include "A3D/textbillboardentity.h"
+#include "A3D/surfacechartentity.h"
 
 int main(int argc, char* argv[]) {
 
@@ -27,11 +28,11 @@ int main(int argc, char* argv[]) {
 		auto loadPBRMaterial = [s](QString path, QString baseName, QString fileExtension) -> A3D::MaterialProperties* {
 			A3D::MaterialProperties* matProperties                                  = new A3D::MaterialProperties(s->resourceManager());
 			static std::map<A3D::MaterialProperties::TextureSlot, QString> suffixes = {
-				{   A3D::MaterialProperties::AlbedoTextureSlot,     "Color"},
-				{   A3D::MaterialProperties::NormalTextureSlot,  "NormalGL"},
-				{ A3D::MaterialProperties::MetallicTextureSlot,  "Metallic"},
-				{A3D::MaterialProperties::RoughnessTextureSlot, "Roughness"},
-				{       A3D::MaterialProperties::AOTextureSlot,        "AO"},
+				{    A3D::MaterialProperties::AlbedoTextureSlot,     "Color" },
+				{    A3D::MaterialProperties::NormalTextureSlot,  "NormalGL" },
+				{  A3D::MaterialProperties::MetallicTextureSlot,  "Metallic" },
+				{ A3D::MaterialProperties::RoughnessTextureSlot, "Roughness" },
+				{        A3D::MaterialProperties::AOTextureSlot,        "AO" },
 			};
 
 			for(auto it = suffixes.begin(); it != suffixes.end(); ++it) {
@@ -124,14 +125,14 @@ int main(int argc, char* argv[]) {
 
 			{
 				A3D::LineGroup::Vertex vxOrigin, vxMaxX, vxMaxY, vxMaxZ;
-				vxOrigin.Position3D = QVector3D(0.f, 0.f, 0.f);
+				vxOrigin.Position3D = QVector3D(1.f, 0.f, 1.f);
 				vxOrigin.Color4D    = QVector4D(0.f, 0.f, 0.f, 1.f);
 				vxMaxX.Position3D   = QVector3D(1.f, 0.f, 0.f);
-				vxMaxX.Color4D      = QVector4D(1.f, 0.f, 0.f, 1.f);
-				vxMaxY.Position3D   = QVector3D(0.f, 1.f, 0.f);
-				vxMaxY.Color4D      = QVector4D(0.f, 1.f, 0.f, 1.f);
+				vxMaxX.Color4D      = QVector4D(0.f, 0.f, 0.f, 1.f);
+				vxMaxY.Position3D   = QVector3D(1.f, 1.f, 1.f);
+				vxMaxY.Color4D      = QVector4D(0.f, 0.f, 0.f, 1.f);
 				vxMaxZ.Position3D   = QVector3D(0.f, 0.f, 1.f);
-				vxMaxZ.Color4D      = QVector4D(0.f, 0.f, 1.f, 1.f);
+				vxMaxZ.Color4D      = QVector4D(0.f, 0.f, 0.f, 1.f);
 
 				lg->vertices().push_back(vxOrigin);
 				lg->vertices().push_back(vxMaxX);
@@ -140,7 +141,7 @@ int main(int argc, char* argv[]) {
 				lg->vertices().push_back(vxOrigin);
 				lg->vertices().push_back(vxMaxZ);
 				lg->setContents(A3D::LineGroup::Position3D | A3D::LineGroup::Color4D);
-				lg->setThickness(0.05f);
+				lg->setThickness(0.01f);
 			}
 
 			g->setLineGroup(lg);
@@ -152,6 +153,42 @@ int main(int argc, char* argv[]) {
 		A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
 		e->setModel(model);
 		model->setPosition(QVector3D(2, 0, 0));
+	}
+
+	{
+		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
+
+		std::vector<float> xAxisData = { 0, 10, 15, 20, 30, 40, 50, 75, 100 };
+		std::vector<float> zAxisData = { 0, 1, 2, 3, 4, 5 };
+		float yMax                   = 7000;
+		float yMin                   = 1800;
+
+		A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(
+			s->resourceManager(), xAxisData, zAxisData,
+
+			{ 1800, 2000, 2600, 3000, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100,
+			  1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100 }
+		);
+
+		A3D::SurfaceChartEntity::Axis xAxis, yAxis, zAxis;
+		xAxis.m_data = xAxisData;
+		xAxis.m_type = A3D::SurfaceChartEntity::Axis_normalized;
+		yAxis.m_max  = yMax;
+		yAxis.m_min  = yMin;
+		yAxis.m_type = A3D::SurfaceChartEntity::Axis_linear;
+		zAxis.m_data = zAxisData;
+		zAxis.m_type = A3D::SurfaceChartEntity::Axis_normalized;
+
+		xAxis.m_direction = QVector3D(1.f, 0.f, 0.f);
+		yAxis.m_direction = QVector3D(0.f, 1.f, 0.f);
+		zAxis.m_direction = QVector3D(0.f, 0.f, 1.f);
+
+		chart->loadSurface(sampleMeshC);
+		chart->addAxis(xAxis);
+		chart->addAxis(yAxis);
+		chart->addAxis(zAxis);
+
+		chart->setPosition(QVector3D(0, 0, 3));
 	}
 
 	{

@@ -17,6 +17,7 @@ SOURCES += \
     $$PWD/A3D/linegroupcacheogl.cpp \
     $$PWD/A3D/meshgenerator.cpp \
     $$PWD/A3D/scenecontroller.cpp \
+    $$PWD/A3D/surfacechartentity.cpp \
     $$PWD/A3D/textbillboardentity.cpp \
     $$PWD/A3D/viewcontroller.cpp \
     $$PWD/A3D/camera.cpp \
@@ -55,6 +56,7 @@ HEADERS += \
     $$PWD/A3D/linegroupcache.h \
     $$PWD/A3D/linegroupcacheogl.h \
 	$$PWD/A3D/scenecontroller.h \
+    $$PWD/A3D/surfacechartentity.h \
     $$PWD/A3D/textbillboardentity.h \
 	$$PWD/A3D/viewcontroller.h \
 	$$PWD/Dependencies/stb/stb_image_write.h \
