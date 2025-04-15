@@ -11,7 +11,8 @@ SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
 
 	{
 		A3D::Group* meshGroup = m->getOrAddGroup("Mesh");
-		meshGroup->setMaterial(A3D::Material::standardMaterial(A3D::Material::PBRMaterial));
+		meshGroup->setMaterial(A3D::Material::standardMaterial(A3D::Material::ColoredSurfaceMaterial));
+		meshGroup->setMaterialProperties(new MaterialProperties);
 	}
 
 	{
@@ -36,19 +37,21 @@ SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
 }
 
 void SurfaceChartEntity::loadSurface(Mesh* mesh) {
-	model()->getOrAddGroup("Mesh")->setMesh(mesh);
+	Group* g = model()->getOrAddGroup("Mesh");
+	g->setMesh(mesh);
 }
 
 void SurfaceChartEntity::addAxis(Axis axis) {
 	switch(axis.m_type) {
 	default:
 	case Axis_linear:
+
 		if(!axis.m_ticksCount)
 			axis.m_ticksCount = 10;
 		axis.m_data.clear();
 		axis.m_data.reserve(axis.m_ticksCount);
 
-		static float const multiplier = 1 / axis.m_ticksCount;
+		static float const multiplier = 1 / static_cast<float>(axis.m_ticksCount);
 
 		for(size_t i = 0; i < axis.m_ticksCount; i++)
 			axis.m_data.push_back(multiplier * i);
@@ -87,26 +90,42 @@ void SurfaceChartEntity::addAxis(Axis axis) {
 
 	for(float axisValue: std::as_const(axis.m_data)) {
 		LineGroup::Vertex base = m_origin;
-		base.Position3D += axis.m_direction * axisValue;
-		m_smallerLineGroup->vertices().push_back(base);
-
-		LineGroup::Vertex vxUp = base;
-		vxUp.Position3D += QVector3D(0, 0.05f, 0);
-		m_smallerLineGroup->vertices().push_back(vxUp);
+		base.Position3D += axis.m_direction * (1.f - axisValue);
 
 		{
-			LineGroup::Vertex vxBaseB = base;
-			vxBaseB.Position3D -= QVector3D(0.025f, 0, 0);
+			LineGroup::Vertex vxUp = base;
+			vxUp.Position3D += QVector3D(0, 0.025f, 0);
 			m_smallerLineGroup->vertices().push_back(base);
-			m_smallerLineGroup->vertices().push_back(base);
+			m_smallerLineGroup->vertices().push_back(vxUp);
 		}
 
-		m_smallerLineGroup->vertices().push_back(base);
+		{
+			LineGroup::Vertex vxDirection = base;
+			vxDirection.Position3D -= QVector3D(-0.025f, 0, 0);
+			m_smallerLineGroup->vertices().push_back(base);
+			m_smallerLineGroup->vertices().push_back(vxDirection);
+		}
 
-		LineGroup::Vertex vxCenter = base;
-		vxCenter.Position3D += QVector3D(0.025f, 0, 0);
+		{
+			LineGroup::Vertex vxDirection = base;
+			vxDirection.Position3D += QVector3D(0.025f, 0, 0);
+			m_smallerLineGroup->vertices().push_back(base);
+			m_smallerLineGroup->vertices().push_back(vxDirection);
+		}
 
-		m_smallerLineGroup->vertices().push_back(vxCenter);
+		{
+			LineGroup::Vertex vxDirection = base;
+			vxDirection.Position3D -= QVector3D(0, 0, -0.025f);
+			m_smallerLineGroup->vertices().push_back(base);
+			m_smallerLineGroup->vertices().push_back(vxDirection);
+		}
+
+		{
+			LineGroup::Vertex vxDirection = base;
+			vxDirection.Position3D += QVector3D(0, 0, 0.025f);
+			m_smallerLineGroup->vertices().push_back(base);
+			m_smallerLineGroup->vertices().push_back(vxDirection);
+		}
 	}
 
 	m_axes.push_back(axis);

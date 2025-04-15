@@ -26,7 +26,8 @@ int main(int argc, char* argv[]) {
 
 	{
 		auto loadPBRMaterial = [s](QString path, QString baseName, QString fileExtension) -> A3D::MaterialProperties* {
-			A3D::MaterialProperties* matProperties                                  = new A3D::MaterialProperties(s->resourceManager());
+			A3D::MaterialProperties* matProperties = new A3D::MaterialProperties(s->resourceManager());
+			return matProperties;
 			static std::map<A3D::MaterialProperties::TextureSlot, QString> suffixes = {
 				{    A3D::MaterialProperties::AlbedoTextureSlot,     "Color" },
 				{    A3D::MaterialProperties::NormalTextureSlot,  "NormalGL" },
@@ -179,9 +180,9 @@ int main(int argc, char* argv[]) {
 		zAxis.m_data = zAxisData;
 		zAxis.m_type = A3D::SurfaceChartEntity::Axis_normalized;
 
-		xAxis.m_direction = QVector3D(1.f, 0.f, 0.f);
+		xAxis.m_direction = QVector3D(-1.f, 0.f, 0.f);
 		yAxis.m_direction = QVector3D(0.f, 1.f, 0.f);
-		zAxis.m_direction = QVector3D(0.f, 0.f, 1.f);
+		zAxis.m_direction = QVector3D(0.f, 0.f, -1.f);
 
 		chart->loadSurface(sampleMeshC);
 		chart->addAxis(xAxis);
