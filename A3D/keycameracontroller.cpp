@@ -1,9 +1,9 @@
-#include "A3D/keyboardcameracontroller.h"
-#include "A3D/view.h"
+#include "keycameracontroller.h"
+#include "view.h"
 
 namespace A3D {
 
-KeyboardCameraController::KeyboardCameraController(View* view)
+KeyCameraController::KeyCameraController(View* view)
 	: ViewController{ view },
 	  m_keyBindings{
 		{Qt::Key_W, ACT_MOVE_FORWARD},
@@ -31,46 +31,45 @@ KeyboardCameraController::KeyboardCameraController(View* view)
 	std::memset(m_actions, 0, sizeof(m_actions));
 }
 
-void KeyboardCameraController::setKeyBinding(Qt::Key k, Action a) {
+void KeyCameraController::setKeyBinding(Qt::Key k, Action a) {
 	m_keyBindings[k] = a;
 	updateActions();
 }
 
-void KeyboardCameraController::setKeyBindings(std::map<Qt::Key, Action> actions) {
+void KeyCameraController::setKeyBindings(std::map<Qt::Key, Action> actions) {
 	m_keyBindings = std::move(actions);
 	updateActions();
 }
 
-void KeyboardCameraController::setButtonBinding(Qt::MouseButton b, Action a) {
+void KeyCameraController::setButtonBinding(Qt::MouseButton b, Action a) {
 	m_btnBindings[b] = a;
 	updateActions();
 }
 
-void KeyboardCameraController::setButtonBindings(std::map<Qt::MouseButton, Action> actions) {
+void KeyCameraController::setButtonBindings(std::map<Qt::MouseButton, Action> actions) {
 	m_btnBindings = std::move(actions);
 	updateActions();
 }
 
-void KeyboardCameraController::setPreciseMovementFactor(float factor) {
+void KeyCameraController::setPreciseMovementFactor(float factor) {
 	m_movementPreciseFactor = factor;
 }
 
-void KeyboardCameraController::setQuickMovementFactor(float factor) {
+void KeyCameraController::setQuickMovementFactor(float factor) {
 	m_movementQuickFactor = factor;
 }
 
-void KeyboardCameraController::setBaseMovementSpeed(QVector3D speed) {
+void KeyCameraController::setBaseMovementSpeed(QVector3D speed) {
 	m_movementBaseSpeed = speed;
 }
 
-void KeyboardCameraController::setBaseRotationSpeed(QVector3D speed) {
+void KeyCameraController::setBaseRotationSpeed(QVector3D speed) {
 	m_rotationBaseSpeed = speed;
 }
 
-void KeyboardCameraController::lookAtMousePosition() {
-}
+void KeyCameraController::lookAtMousePosition() {}
 
-bool KeyboardCameraController::update(std::chrono::milliseconds deltaT) {
+bool KeyCameraController::update(std::chrono::milliseconds deltaT) {
 	if(!view())
 		return false;
 
@@ -152,7 +151,7 @@ bool KeyboardCameraController::update(std::chrono::milliseconds deltaT) {
 	return true;
 }
 
-bool KeyboardCameraController::eventFilter(QObject* o, QEvent* e) {
+bool KeyCameraController::eventFilter(QObject* o, QEvent* e) {
 	QEvent::Type eType = e->type();
 	if(eType == QEvent::KeyPress || eType == QEvent::KeyRelease) {
 		QKeyEvent* ke                                = static_cast<QKeyEvent*>(e);
@@ -199,7 +198,7 @@ bool KeyboardCameraController::eventFilter(QObject* o, QEvent* e) {
 	return QObject::eventFilter(o, e);
 }
 
-void KeyboardCameraController::updateActions() {
+void KeyCameraController::updateActions() {
 	std::memset(m_actions, 0, sizeof(m_actions));
 
 	for(auto it = m_keyBindings.begin(); it != m_keyBindings.end(); ++it) {

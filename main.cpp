@@ -5,7 +5,7 @@
 #include <QTimer>
 
 #include "A3D/view.h"
-#include "A3D/keyboardcameracontroller.h"
+#include "A3D/keycameracontroller.h"
 #include "A3D/textbillboardentity.h"
 #include "A3D/surfacechartentity.h"
 
@@ -173,11 +173,32 @@ int main(int argc, char* argv[]) {
 		chart->setTickLength(1);
 
 		chart->loadSurface(sampleMeshC);
-		chart->addNormalizedAxis(QVector3D(1.f, 0.f, 0.f), xAxisData);
-		chart->addLinearAxis(QVector3D(0.f, 1.f, 0.f), yMin, yMax);
-		chart->addNormalizedAxis(QVector3D(0.f, 0.f, 1.f), zAxisData);
+		chart->addNormalizedAxis(A3D::SurfaceChartEntity::X_Axis, xAxisData);
+		chart->addLinearAxis(A3D::SurfaceChartEntity::Y_Axis, yMin, yMax);
+		chart->addNormalizedAxis(A3D::SurfaceChartEntity::Z_Axis, zAxisData);
 
 		chart->setPosition(QVector3D(0, 0, 3));
+	}
+
+	{
+		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
+		float yMax                     = 200;
+		float yMin                     = 0;
+
+		A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(
+			s->resourceManager(), { 0, 1, 2, 3, 4, 5, 6 }, { 0, 1, 2, 3, 4, 5, 6 },
+
+			{ 15, 3,  1, 2, 1,  3,  15, 1,  3,  13, 22, 13, 3,  1,  1,  13, 59, 97, 59, 13, 1, 2, 22, 97, 120,
+			  97, 22, 2, 1, 13, 59, 97, 59, 13, 1,  1,  3,  13, 22, 13, 3,  1,  15, 3,  1,  2, 1, 3,  15 }
+		);
+		chart->setTickLength(1);
+
+		chart->loadSurface(sampleMeshC);
+		chart->addLinearAxis(A3D::SurfaceChartEntity::X_Axis, 0, 6);
+		chart->addLinearAxis(A3D::SurfaceChartEntity::Y_Axis, yMin, yMax);
+		chart->addLinearAxis(A3D::SurfaceChartEntity::Z_Axis, 0, 6);
+
+		chart->setPosition(QVector3D(0, 0, 1));
 	}
 
 	/*{
@@ -204,11 +225,11 @@ int main(int argc, char* argv[]) {
 	v->camera().setOrientationTarget(QVector3D(0.f, 0.f, 0.f));
 	v->setScene(s);
 
-	A3D::KeyboardCameraController* keyCamController = new A3D::KeyboardCameraController(v);
+	A3D::KeyCameraController* keyCamController = new A3D::KeyCameraController(v);
 	keyCamController->setBaseMovementSpeed(QVector3D(9.f, 9.f, 9.f));
-	keyCamController->setKeyBinding(Qt::Key_Space, A3D::KeyboardCameraController::ACT_MOVE_UPWARD);
-	keyCamController->setKeyBinding(Qt::Key_Shift, A3D::KeyboardCameraController::ACT_MOVE_DOWNWARD);
-	keyCamController->setButtonBinding(Qt::LeftButton, A3D::KeyboardCameraController::ACT_LOOK_MOUSE_POSITION);
+	keyCamController->setKeyBinding(Qt::Key_Space, A3D::KeyCameraController::ACT_MOVE_UPWARD);
+	keyCamController->setKeyBinding(Qt::Key_Shift, A3D::KeyCameraController::ACT_MOVE_DOWNWARD);
+	keyCamController->setButtonBinding(Qt::LeftButton, A3D::KeyCameraController::ACT_LOOK_MOUSE_POSITION);
 	v->setController(keyCamController);
 
 	QTimer t;
@@ -220,6 +241,11 @@ int main(int argc, char* argv[]) {
 
 	QObject::connect(&t, &QTimer::timeout, v, &A3D::View::updateView);
 	QObject::connect(&t, &QTimer::timeout, s, &A3D::Scene::updateScene);
+
+	//! TODO:
+	//! Look at mouse position
+	//! Change the axis camera
+	//! Key Event manager
 
 	v->run();
 	s->run();

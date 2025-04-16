@@ -11,7 +11,7 @@ CONFIG += c++17
 
 SOURCES += \
     $$PWD/A3D/entitycontroller.cpp \
-    $$PWD/A3D/keyboardcameracontroller.cpp \
+    $$PWD/A3D/keycameracontroller.cpp \
     $$PWD/A3D/linegroup.cpp \
     $$PWD/A3D/linegroupcache.cpp \
     $$PWD/A3D/linegroupcacheogl.cpp \
@@ -51,7 +51,7 @@ SOURCES += \
 
 HEADERS += \
 	$$PWD/A3D/entitycontroller.h \
-	$$PWD/A3D/keyboardcameracontroller.h \
+    $$PWD/A3D/keycameracontroller.h \
     $$PWD/A3D/linegroup.h \
     $$PWD/A3D/linegroupcache.h \
     $$PWD/A3D/linegroupcacheogl.h \
@@ -98,3 +98,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += A3D/A3D.qrc
+
+DISTFILES += \
+    $$PWD/CMakeLists.txt
