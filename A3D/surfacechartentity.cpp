@@ -81,7 +81,7 @@ bool SurfaceChartEntity::addLinearAxis(Direction3D direction, float min, float m
 	float const multiplier       = 1 / static_cast<float>(ticks);
 	float const strokeMultiplier = (max - min) / ticks;
 
-	for(size_t i = 0; i < ticks; i++) {
+	for(size_t i = 0; i <= ticks; i++) {
 
 		normalizedData.push_back(multiplier * i);
 		data.push_back((strokeMultiplier * i) + min);
@@ -123,7 +123,7 @@ bool SurfaceChartEntity::addAxis(Axis axis) {
 		// Text
 		{
 			TextBillboardEntity* text = emplaceChildEntity<TextBillboardEntity>();
-			text->setText(QString::number(axis.m_data.at(axis.m_data.size() - 1 - i)));
+			text->setText(QString::number(axis.m_data.at(axis.m_data.size() -1 - i)));
 			text->setColor(Qt::white);
 			text->setFont(QFont("Arial", 64));
 			text->setScale(QVector3D(0.05, 0.05, 0.05));
