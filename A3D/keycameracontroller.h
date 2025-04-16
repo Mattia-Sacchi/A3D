@@ -10,7 +10,7 @@
 
 namespace A3D {
 
-class KeyboardCameraController : public ViewController {
+class KeyCameraController : public ViewController {
 	Q_OBJECT
 
 public:
@@ -44,7 +44,7 @@ public:
 
 	void lookAtMousePosition();
 
-	explicit KeyboardCameraController(View* view);
+	explicit KeyCameraController(View* view);
 
 	void setKeyBinding(Qt::Key, Action);
 	void setKeyBindings(std::map<Qt::Key, Action> actions);

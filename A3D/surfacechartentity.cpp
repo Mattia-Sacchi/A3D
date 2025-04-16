@@ -5,7 +5,7 @@ namespace A3D {
 
 SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
 	: Entity(parent),
-	  m_tickLength(0.025) {
+	  m_tickLength(0.025f) {
 
 	A3D::Model* m = new A3D::Model(this);
 
@@ -50,24 +50,27 @@ void SurfaceChartEntity::loadSurface(Mesh* mesh) {
 	g->setPosition(QVector3D(-1.f, 0.f, -1.f));
 }
 
-void SurfaceChartEntity::addNormalizedAxis(QVector3D direction, std::vector<float> data) {
+bool SurfaceChartEntity::addNormalizedAxis(Direction3D direction, std::vector<float> data) {
 
 	auto itMin = std::min_element(data.begin(), data.end());
 	if(itMin == data.end())
-		return;
+		return false;
 
 	auto itMax = std::max_element(data.begin(), data.end());
 	if(itMax == data.end())
-		return;
+		return false;
 
 	std::vector normalizedData = data;
 
 	normalizeMinMax(normalizedData, *itMin, *itMax);
 
-	addAxis(Axis(direction, data, normalizedData));
+	if(direction >= Negative_X)
+		return false;
+
+	return addAxis(Axis(m_commonDirections[direction], data, normalizedData));
 }
 
-void SurfaceChartEntity::addLinearAxis(QVector3D direction, float min, float max, unsigned int ticks) {
+bool SurfaceChartEntity::addLinearAxis(Direction3D direction, float min, float max, unsigned int ticks) {
 	std::vector<float> normalizedData;
 	normalizedData.clear();
 	normalizedData.reserve(ticks);
@@ -83,7 +86,10 @@ void SurfaceChartEntity::addLinearAxis(QVector3D direction, float min, float max
 		normalizedData.push_back(multiplier * i);
 		data.push_back((strokeMultiplier * i) + min);
 	}
-	addAxis(Axis(direction, data, normalizedData));
+
+	if(direction >= Negative_X)
+		return false;
+	return addAxis(Axis(m_commonDirections[direction], data, normalizedData));
 }
 
 bool isSameDirection(const QVector3D& a, const QVector3D& b, float tolerance = 1e-5f) {
@@ -95,9 +101,12 @@ bool isSameDirection(const QVector3D& a, const QVector3D& b, float tolerance = 1
 	return std::abs(dot - 1.0f) <= tolerance;
 }
 
-void SurfaceChartEntity::addAxis(Axis axis) {
+bool areOrthogonal(const QVector3D& a, const QVector3D& b, float tolerance = 1e-5f) {
+	float dot = QVector3D::dotProduct(a, b);
+	return std::abs(dot) <= tolerance;
+}
 
-	QVector3D oppositeToOrigin = m_origin.Position3D + QVector3D(1, 1, 1);
+bool SurfaceChartEntity::addAxis(Axis axis) {
 
 	// Draw the main axis
 	m_lineGroup->vertices().push_back(m_origin);
@@ -113,11 +122,12 @@ void SurfaceChartEntity::addAxis(Axis axis) {
 
 		// Text
 		{
-			//TextBillboardEntity* text = emplaceChildEntity<TextBillboardEntity>();
-			//text->setText(QString::number(axis.m_data.at(i)));
-			//text->setColor(Qt::white);
-			//text->setFont(QFont("Arial", 64));
-			//text->setPosition(base.Position3D);
+			TextBillboardEntity* text = emplaceChildEntity<TextBillboardEntity>();
+			text->setText(QString::number(axis.m_data.at(axis.m_data.size() - 1 - i)));
+			text->setColor(Qt::white);
+			text->setFont(QFont("Arial", 64));
+			text->setScale(QVector3D(0.05, 0.05, 0.05));
+			text->setPosition(base.Position3D);
 		}
 
 		{
@@ -167,6 +177,7 @@ void SurfaceChartEntity::addAxis(Axis axis) {
 	}
 
 	m_axes.push_back(axis);
+	return true;
 }
 
 }

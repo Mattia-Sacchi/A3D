@@ -77,8 +77,8 @@ QMatrix4x4 const& Entity::entityMatrix() const {
 		m_matrixDirty = false;
 		m_matrix.setToIdentity();
 		m_matrix.rotate(m_rotation);
-		m_matrix.scale(m_scale);
 		m_matrix.translate(m_position);
+		m_matrix.scale(m_scale);
 	}
 	return m_matrix;
 }
