@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 		FloorTiles06->setParent(s->resourceManager()); // Just to get the clang static analyzer to piss off...
 	}
 
-	{
+	/*{
 		A3D::Model* model = new A3D::Model();
 
 		{
@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
 		A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
 		e->setModel(model);
 		model->setPosition(QVector3D(2, 0, 0));
-	}
+	}*/
 
 	{
 		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
@@ -170,29 +170,17 @@ int main(int argc, char* argv[]) {
 			{ 1800, 2000, 2600, 3000, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100,
 			  1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100 }
 		);
-
-		A3D::SurfaceChartEntity::Axis xAxis, yAxis, zAxis;
-		xAxis.m_data = xAxisData;
-		xAxis.m_type = A3D::SurfaceChartEntity::Axis_normalized;
-		yAxis.m_max  = yMax;
-		yAxis.m_min  = yMin;
-		yAxis.m_type = A3D::SurfaceChartEntity::Axis_linear;
-		zAxis.m_data = zAxisData;
-		zAxis.m_type = A3D::SurfaceChartEntity::Axis_normalized;
-
-		xAxis.m_direction = QVector3D(-1.f, 0.f, 0.f);
-		yAxis.m_direction = QVector3D(0.f, 1.f, 0.f);
-		zAxis.m_direction = QVector3D(0.f, 0.f, -1.f);
+		chart->setTickLength(1);
 
 		chart->loadSurface(sampleMeshC);
-		chart->addAxis(xAxis);
-		chart->addAxis(yAxis);
-		chart->addAxis(zAxis);
+		chart->addNormalizedAxis(QVector3D(1.f, 0.f, 0.f), xAxisData);
+		chart->addLinearAxis(QVector3D(0.f, 1.f, 0.f), yMin, yMax);
+		chart->addNormalizedAxis(QVector3D(0.f, 0.f, 1.f), zAxisData);
 
 		chart->setPosition(QVector3D(0, 0, 3));
 	}
 
-	{
+	/*{
 		auto text = s->emplaceChildEntity<A3D::TextBillboardEntity>();
 
 		text->setFont(QFont("Arial", 64));
@@ -209,7 +197,7 @@ int main(int argc, char* argv[]) {
 
 			text->setText(QString("Hello, world! %1").arg(val));
 		});
-	}
+	}*/
 
 	A3D::View* v = new A3D::View(&w);
 	v->camera().setPosition(QVector3D(10.f, 0.f, 2.f));

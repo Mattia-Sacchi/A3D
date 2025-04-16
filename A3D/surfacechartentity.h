@@ -13,21 +13,26 @@ class SurfaceChartEntity : public Entity {
 public:
 	SurfaceChartEntity(Entity* parent = nullptr);
 
-	enum AxisType { Axis_linear, Axis_normalized };
 	struct Axis {
+		Axis(QVector3D dir, std::vector<float> data, std::vector<float> normalizedData)
+			: m_direction(dir),
+			  m_data(data),
+			  m_normalizedData(normalizedData) {}
 		QVector3D m_direction;
 		std::vector<float> m_data;
-		uint8_t m_ticksCount;
-		float m_min;
-		float m_max;
-		AxisType m_type;
+		std::vector<float> m_normalizedData;
 	};
+
+	void setTickLength(float);
+
+	void addNormalizedAxis(QVector3D direction, std::vector<float> data);
+	void addLinearAxis(QVector3D direction, float min, float max, unsigned int ticks = 10);
 
 	void loadSurface(Mesh* mesh);
 
-	void addAxis(Axis axis);
-
 private:
+	void addAxis(Axis axis);
+	float m_tickLength;
 	LineGroup* m_lineGroup;
 
 	LineGroup* m_smallerLineGroup;

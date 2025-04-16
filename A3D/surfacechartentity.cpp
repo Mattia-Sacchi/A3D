@@ -1,12 +1,15 @@
 #include "surfacechartentity.h"
+#include "textbillboardentity.h"
+
 namespace A3D {
 
 SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
-	: Entity(parent) {
+	: Entity(parent),
+	  m_tickLength(0.025) {
 
 	A3D::Model* m = new A3D::Model(this);
 
-	m_origin.Position3D = QVector3D(1.f, 0.f, 1.f);
+	m_origin.Position3D = QVector3D(0.f, 0.f, 0.f);
 	m_origin.Color4D    = QVector4D(0.f, 0.f, 0.f, 1.f);
 
 	{
@@ -36,122 +39,134 @@ SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
 	setModel(m);
 }
 
+void SurfaceChartEntity::setTickLength(float length) {
+	m_tickLength = length;
+}
+
 void SurfaceChartEntity::loadSurface(Mesh* mesh) {
 	Group* g = model()->getOrAddGroup("Mesh");
 	g->setMesh(mesh);
+	g->setRotation(QQuaternion::fromAxisAndAngle(0, 1, 0, 180));
+	g->setPosition(QVector3D(-1.f, 0.f, -1.f));
+}
+
+void SurfaceChartEntity::addNormalizedAxis(QVector3D direction, std::vector<float> data) {
+
+	auto itMin = std::min_element(data.begin(), data.end());
+	if(itMin == data.end())
+		return;
+
+	auto itMax = std::max_element(data.begin(), data.end());
+	if(itMax == data.end())
+		return;
+
+	std::vector normalizedData = data;
+
+	normalizeMinMax(normalizedData, *itMin, *itMax);
+
+	addAxis(Axis(direction, data, normalizedData));
+}
+
+void SurfaceChartEntity::addLinearAxis(QVector3D direction, float min, float max, unsigned int ticks) {
+	std::vector<float> normalizedData;
+	normalizedData.clear();
+	normalizedData.reserve(ticks);
+	std::vector<float> data;
+	data.clear();
+	data.reserve(ticks);
+
+	float const multiplier       = 1 / static_cast<float>(ticks);
+	float const strokeMultiplier = (max - min) / ticks;
+
+	for(size_t i = 0; i < ticks; i++) {
+
+		normalizedData.push_back(multiplier * i);
+		data.push_back((strokeMultiplier * i) + min);
+	}
+	addAxis(Axis(direction, data, normalizedData));
+}
+
+bool isSameDirection(const QVector3D& a, const QVector3D& b, float tolerance = 1e-5f) {
+	QVector3D aNorm = a.normalized();
+	QVector3D bNorm = b.normalized();
+
+	float dot = QVector3D::dotProduct(aNorm, bNorm);
+
+	return std::abs(dot - 1.0f) <= tolerance;
 }
 
 void SurfaceChartEntity::addAxis(Axis axis) {
-	switch(axis.m_type) {
-	default:
-	case Axis_linear:
 
-		if(!axis.m_ticksCount)
-			axis.m_ticksCount = 10;
-		axis.m_data.clear();
-		axis.m_data.reserve(axis.m_ticksCount);
+	QVector3D oppositeToOrigin = m_origin.Position3D + QVector3D(1, 1, 1);
 
-		static float const multiplier = 1 / static_cast<float>(axis.m_ticksCount);
+	// Draw the main axis
+	m_lineGroup->vertices().push_back(m_origin);
+	LineGroup::Vertex axisTarget = m_origin;
+	axisTarget.Position3D += axis.m_direction;
+	m_lineGroup->vertices().push_back(axisTarget);
 
-		for(size_t i = 0; i < axis.m_ticksCount; i++)
-			axis.m_data.push_back(multiplier * i);
+	// Draw the ticks
+	for(size_t i = 0; i < axis.m_data.size(); ++i) {
 
-		{
-			m_lineGroup->vertices().push_back(m_origin);
-
-			LineGroup::Vertex axisTarget = m_origin;
-			axisTarget.Position3D += axis.m_direction;
-			m_lineGroup->vertices().push_back(axisTarget);
-		}
-
-		break;
-	case Axis_normalized:
-		std::vector<float>& data = axis.m_data;
-		auto itMin               = std::min_element(data.begin(), data.end());
-		if(itMin == data.end())
-			return;
-
-		auto itMax = std::max_element(data.begin(), data.end());
-		if(itMax == data.end())
-			return;
-
-		{
-			m_lineGroup->vertices().push_back(m_origin);
-
-			LineGroup::Vertex axisTarget = m_origin;
-			axisTarget.Position3D += axis.m_direction;
-			m_lineGroup->vertices().push_back(axisTarget);
-		}
-
-		normalizeMinMax(axis.m_data, *itMin, *itMax);
-
-		break;
-	}
-
-	for(float axisValue: std::as_const(axis.m_data)) {
 		LineGroup::Vertex base = m_origin;
-		base.Position3D += axis.m_direction * (1.f - axisValue);
+		base.Position3D += axis.m_direction * (1.f - axis.m_normalizedData.at(i));
+
+		// Text
+		{
+			//TextBillboardEntity* text = emplaceChildEntity<TextBillboardEntity>();
+			//text->setText(QString::number(axis.m_data.at(i)));
+			//text->setColor(Qt::white);
+			//text->setFont(QFont("Arial", 64));
+			//text->setPosition(base.Position3D);
+		}
 
 		{
 			LineGroup::Vertex vxUp = base;
-			vxUp.Position3D += QVector3D(0, 0.025f, 0);
-			m_smallerLineGroup->vertices().push_back(base);
-			m_smallerLineGroup->vertices().push_back(vxUp);
+			vxUp.Position3D += QVector3D(0, m_tickLength, 0);
+			if(!isSameDirection(vxUp.Position3D, axisTarget.Position3D)) {
+				m_smallerLineGroup->vertices().push_back(base);
+				m_smallerLineGroup->vertices().push_back(vxUp);
+			}
 		}
 
 		{
 			LineGroup::Vertex vxDirection = base;
-			vxDirection.Position3D -= QVector3D(-0.025f, 0, 0);
-			m_smallerLineGroup->vertices().push_back(base);
-			m_smallerLineGroup->vertices().push_back(vxDirection);
+			vxDirection.Position3D -= QVector3D(-m_tickLength, 0, 0);
+			if(!isSameDirection(vxDirection.Position3D, axisTarget.Position3D)) {
+				m_smallerLineGroup->vertices().push_back(base);
+				m_smallerLineGroup->vertices().push_back(vxDirection);
+			}
 		}
 
 		{
 			LineGroup::Vertex vxDirection = base;
-			vxDirection.Position3D += QVector3D(0.025f, 0, 0);
-			m_smallerLineGroup->vertices().push_back(base);
-			m_smallerLineGroup->vertices().push_back(vxDirection);
+			vxDirection.Position3D += QVector3D(m_tickLength, 0, 0);
+			if(!isSameDirection(vxDirection.Position3D, axisTarget.Position3D)) {
+				m_smallerLineGroup->vertices().push_back(base);
+				m_smallerLineGroup->vertices().push_back(vxDirection);
+			}
 		}
 
 		{
 			LineGroup::Vertex vxDirection = base;
-			vxDirection.Position3D -= QVector3D(0, 0, -0.025f);
-			m_smallerLineGroup->vertices().push_back(base);
-			m_smallerLineGroup->vertices().push_back(vxDirection);
+			vxDirection.Position3D -= QVector3D(0, 0, -m_tickLength);
+			if(!isSameDirection(vxDirection.Position3D, axisTarget.Position3D)) {
+				m_smallerLineGroup->vertices().push_back(base);
+				m_smallerLineGroup->vertices().push_back(vxDirection);
+			}
 		}
 
 		{
 			LineGroup::Vertex vxDirection = base;
-			vxDirection.Position3D += QVector3D(0, 0, 0.025f);
-			m_smallerLineGroup->vertices().push_back(base);
-			m_smallerLineGroup->vertices().push_back(vxDirection);
+			vxDirection.Position3D += QVector3D(0, 0, m_tickLength);
+			if(!isSameDirection(vxDirection.Position3D, axisTarget.Position3D)) {
+				m_smallerLineGroup->vertices().push_back(base);
+				m_smallerLineGroup->vertices().push_back(vxDirection);
+			}
 		}
 	}
 
 	m_axes.push_back(axis);
-
-	/*if(horizontalAxis.size() * verticalAxis.size() != data.size())
-		return nullptr;
-
-	A3D::Mesh* mesh = new A3D::Mesh(parent);
-	mesh->setDrawMode(A3D::Mesh::IndexedTriangles);
-
-	normalize(horizontalAxis);
-	normalize(verticalAxis);
-	normalize(data);
-
-	std::size_t const height = verticalAxis.size();
-	std::size_t const width  = horizontalAxis.size();
-
-	mesh->setContents(A3D::Mesh::Position3D | A3D::Mesh::TextureCoord2D | A3D::Mesh::Normal3D);
-	mesh->indices().reserve(mesh->vertices().size());
-
-	for(size_t i = 0; i < mesh->vertices().size(); i++)
-		mesh->indices().push_back(i);
-
-	mesh->optimizeIndices();
-	mesh->invalidateCache();
-	return mesh;*/
 }
 
 }
