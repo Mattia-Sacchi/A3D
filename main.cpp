@@ -87,88 +87,19 @@ int main(int argc, char* argv[]) {
 		FloorTiles06->setParent(s->resourceManager()); // Just to get the clang static analyzer to piss off...
 	}
 
-	/*{
-		A3D::Model* model = new A3D::Model();
-
-		{
-			A3D::Mesh* sampleMeshA = A3D::Mesh::generateSurfaceMesh(
-				s->resourceManager(), { 100, 200, 300, 400, 500, 600, 800, 1200 }, { 1000, 2000, 3000, 3500, 4000, 5000, 6000, 7000 },
-				{ 290, 290, 290, 270, 300, 400, 500, 500, 290, 290, 290, 250, 250, 400, 500, 500, 250, 250, 220, 220, 200, 300, 400, 400, 220, 200, 180, 180, 200, 250, 300, 100,
-			      220, 200, 180, 160, 100, 100, 100, 100, 180, 160, 160, 120, 50,  50,  50,  40,  170, 150, 150, 100, 50,  40,  40,  40,  150, 120, 120, 100, 50,  40,  40,  40 }
-			);
-
-			A3D::Group* g = model->getOrAddGroup("Default");
-			g->setMesh(sampleMeshA);
-			g->setMaterial(A3D::Material::standardMaterial(A3D::Material::PBRMaterial));
-			g->setMaterialProperties(FloorTiles06);
-		}
-
-		A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
-		e->setModel(model);
-	}
-
-	{
-
-		A3D::Model* model = new A3D::Model();
-
-		{
-
-			A3D::Mesh* sampleMeshB = A3D::Mesh::generateSurfaceMesh(
-				s->resourceManager(), { 0, 10, 15, 20, 30, 40, 50, 75, 100 }, { 0, 1, 2, 3, 4, 5 },
-
-				{ 1800, 2000, 2600, 3000, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100,
-			      1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100 }
-			);
-
-			A3D::Group* g = model->getOrAddGroup("Default");
-
-			A3D::LineGroup* lg = new A3D::LineGroup(s->resourceManager());
-
-			{
-				A3D::LineGroup::Vertex vxOrigin, vxMaxX, vxMaxY, vxMaxZ;
-				vxOrigin.Position3D = QVector3D(1.f, 0.f, 1.f);
-				vxOrigin.Color4D    = QVector4D(0.f, 0.f, 0.f, 1.f);
-				vxMaxX.Position3D   = QVector3D(1.f, 0.f, 0.f);
-				vxMaxX.Color4D      = QVector4D(0.f, 0.f, 0.f, 1.f);
-				vxMaxY.Position3D   = QVector3D(1.f, 1.f, 1.f);
-				vxMaxY.Color4D      = QVector4D(0.f, 0.f, 0.f, 1.f);
-				vxMaxZ.Position3D   = QVector3D(0.f, 0.f, 1.f);
-				vxMaxZ.Color4D      = QVector4D(0.f, 0.f, 0.f, 1.f);
-
-				lg->vertices().push_back(vxOrigin);
-				lg->vertices().push_back(vxMaxX);
-				lg->vertices().push_back(vxOrigin);
-				lg->vertices().push_back(vxMaxY);
-				lg->vertices().push_back(vxOrigin);
-				lg->vertices().push_back(vxMaxZ);
-				lg->setContents(A3D::LineGroup::Position3D | A3D::LineGroup::Color4D);
-				lg->setThickness(0.01f);
-			}
-
-			g->setLineGroup(lg);
-			g->setMesh(sampleMeshB);
-			g->setMaterial(A3D::Material::standardMaterial(A3D::Material::PBRMaterial));
-			g->setMaterialProperties(FloorTiles06);
-		}
-
-		A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
-		e->setModel(model);
-		model->setPosition(QVector3D(2, 0, 0));
-	}*/
-
 	{
 		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
 
 		std::vector<float> xAxisData = { 0, 10, 15, 20, 30, 40, 50, 75, 100 };
 		std::vector<float> zAxisData = { 0, 1, 2, 3, 4, 5 };
-		float yMax                   = 7000;
+		float yMax                   = 6100;
 		float yMin                   = 1800;
 
 		A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(
 			s->resourceManager(), xAxisData, zAxisData,
 
 			{ 1800, 2000, 2600, 3000, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100,
-			  1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100 }
+		      1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100 }
 		);
 		chart->setTickLength(1);
 
@@ -189,7 +120,7 @@ int main(int argc, char* argv[]) {
 			s->resourceManager(), { 0, 1, 2, 3, 4, 5, 6 }, { 0, 1, 2, 3, 4, 5, 6 },
 
 			{ 15, 3,  1, 2, 1,  3,  15, 1,  3,  13, 22, 13, 3,  1,  1,  13, 59, 97, 59, 13, 1, 2, 22, 97, 120,
-			  97, 22, 2, 1, 13, 59, 97, 59, 13, 1,  1,  3,  13, 22, 13, 3,  1,  15, 3,  1,  2, 1, 3,  15 }
+		      97, 22, 2, 1, 13, 59, 97, 59, 13, 1,  1,  3,  13, 22, 13, 3,  1,  15, 3,  1,  2, 1, 3,  15 }
 		);
 		chart->setTickLength(1);
 
@@ -200,25 +131,6 @@ int main(int argc, char* argv[]) {
 
 		chart->setPosition(QVector3D(0, 0, 1));
 	}
-
-	/*{
-		auto text = s->emplaceChildEntity<A3D::TextBillboardEntity>();
-
-		text->setFont(QFont("Arial", 64));
-		text->setColor(Qt::red);
-		text->setText("Hello, world!");
-		text->setProperty("Value", 0);
-
-		QTimer* t = new QTimer();
-		t->start(100);
-		QObject::connect(t, &QTimer::timeout, t, [=]() {
-			int val = text->property("Value").toInt();
-			val++;
-			text->setProperty("Value", val);
-
-			text->setText(QString("Hello, world! %1").arg(val));
-		});
-	}*/
 
 	A3D::View* v = new A3D::View(&w);
 	v->camera().setPosition(QVector3D(10.f, 0.f, 2.f));
