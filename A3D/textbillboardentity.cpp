@@ -100,12 +100,9 @@ void TextBillboardEntity::refresh() {
 	m_painter.end();
 
 	m_texture->setImage(std::move(m_image));
-	if(pixelsWide > pixelsTall)
-		m_group->setScale(QVector3D(1.f, pixelsTall / pixelsWide, 1.f));
-	else if(pixelsWide < pixelsTall)
-		m_group->setScale(QVector3D(pixelsWide / pixelsTall, 1.f, 1.f));
-	else
-		m_group->setScale(QVector3D(1.f, 1.f, 1.f));
+
+	m_group->setScale(QVector3D(pixelsWide / pixelsTall, 1.f, 1.f));
+
 	m_texture->invalidateCache();
 }
 }

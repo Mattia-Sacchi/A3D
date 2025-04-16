@@ -48,11 +48,12 @@ SortIncludes: false
 SortUsingDeclarations: true
 
 IndentCaseLabels: false
-IndentCaseBlocks: false
+IndentCaseBlocks: true
 IndentGotoLabels: false
 IndentExternBlock: false
 IndentPPDirectives: AfterHash
 NamespaceIndentation: None
+
 
 AlwaysBreakTemplateDeclarations: Yes
 AlignAfterOpenBracket: BlockIndent
@@ -61,6 +62,7 @@ AllowShortLoopsOnASingleLine: false
 AlwaysBreakBeforeMultilineStrings: false
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortBlocksOnASingleLine: Empty
+
 
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
