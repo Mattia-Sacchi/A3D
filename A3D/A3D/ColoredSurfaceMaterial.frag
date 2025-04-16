@@ -7,5 +7,6 @@ in vec3 LocalPos;
 out vec4 fragColor;
 
 void main() {
-        fragColor = vec4((LocalPos.y + 0.15)* 0.9 ,LocalPos.y *LocalPos.z *0.25 * LocalPos.x,LocalPos.y * 0.1,1);
+        vec3 color = mix(vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0), clamp(LocalPos.y, 0.0, 1.0));
+        fragColor = vec4(color, 1.0);
 }

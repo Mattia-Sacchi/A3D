@@ -45,6 +45,7 @@ void SurfaceChartEntity::setTickLength(float length) {
 
 void SurfaceChartEntity::loadSurface(Mesh* mesh) {
 	Group* g = model()->getOrAddGroup("Mesh");
+	mesh->setRenderOptions(Mesh::DisableCulling);
 	g->setMesh(mesh);
 	g->setRotation(QQuaternion::fromAxisAndAngle(0, 1, 0, 180));
 	g->setPosition(QVector3D(-1.f, 0.f, -1.f));

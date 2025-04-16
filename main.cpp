@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
 	l.position             = QVector3D(0.f, 2.2f, 5.f);
 	l.color                = QVector4D(1.f, 1.f, 1.f, 500.f);
 
-	A3D::MaterialProperties* Concrete002  = nullptr;
+	/*A3D::MaterialProperties* Concrete002  = nullptr;
 	A3D::MaterialProperties* Metal035     = nullptr;
 	A3D::MaterialProperties* FloorTiles06 = nullptr;
 	A3D::Cubemap* Cubemap001              = nullptr;
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
 
 		FloorTiles06 = loadPBRMaterial(":/A3D/SampleResources/Materials/FloorTiles06", "floor_tiles_06", "png");
 		FloorTiles06->setParent(s->resourceManager()); // Just to get the clang static analyzer to piss off...
-	}
+	}*/
 
 	{
 		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
