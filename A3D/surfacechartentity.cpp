@@ -67,7 +67,7 @@ bool SurfaceChartEntity::addNormalizedAxis(Direction3D direction, std::vector<fl
 	if(direction >= Negative_X)
 		return false;
 
-	return addAxis(Axis(m_commonDirections[direction], data, normalizedData));
+	return addAxis(direction, data, normalizedData);
 }
 
 bool SurfaceChartEntity::addLinearAxis(Direction3D direction, float min, float max, unsigned int ticks) {
@@ -89,7 +89,7 @@ bool SurfaceChartEntity::addLinearAxis(Direction3D direction, float min, float m
 
 	if(direction >= Negative_X)
 		return false;
-	return addAxis(Axis(m_commonDirections[direction], data, normalizedData));
+	return addAxis(direction, data, normalizedData);
 }
 
 bool isSameDirection(const QVector3D& a, const QVector3D& b, float tolerance = 1e-5f) {
@@ -106,28 +106,86 @@ bool areOrthogonal(const QVector3D& a, const QVector3D& b, float tolerance = 1e-
 	return std::abs(dot) <= tolerance;
 }
 
-bool SurfaceChartEntity::addAxis(Axis axis) {
+void setupTextInfo(TextBillboardEntity* text, float value) {
+	text->setText(QString::number(value));
+	text->setColor(Qt::white);
+	text->setFont(QFont("Arial", 64));
+	text->setScale(QVector3D(0.05, 0.05, 0.05));
+}
 
+bool SurfaceChartEntity::addAxis(Direction3D direction, std::vector<float> data, std::vector<float> normalizedData) {
+
+	QVector3D directionVector = m_commonDirections[direction];
 	// Draw the main axis
 	m_lineGroup->vertices().push_back(m_origin);
 	LineGroup::Vertex axisTarget = m_origin;
-	axisTarget.Position3D += axis.m_direction;
+	axisTarget.Position3D += directionVector;
+	axisTarget.Color4D = QVector4D(direction == X_Axis, direction == Y_Axis, direction == Z_Axis, 1);
 	m_lineGroup->vertices().push_back(axisTarget);
+	float const minimunTextOffset = -0.1;
 
 	// Draw the ticks
-	for(size_t i = 0; i < axis.m_data.size(); ++i) {
+	for(size_t i = 0; i < data.size(); ++i) {
 
 		LineGroup::Vertex base = m_origin;
-		base.Position3D += axis.m_direction * (1.f - axis.m_normalizedData.at(i));
+		base.Position3D += directionVector * (1.f - normalizedData.at(i));
 
 		// Text
 		{
-			TextBillboardEntity* text = emplaceChildEntity<TextBillboardEntity>();
-			text->setText(QString::number(axis.m_data.at(axis.m_data.size() -1 - i)));
-			text->setColor(Qt::white);
-			text->setFont(QFont("Arial", 64));
-			text->setScale(QVector3D(0.05, 0.05, 0.05));
-			text->setPosition(base.Position3D);
+			TextBillboardEntity* textA = emplaceChildEntity<TextBillboardEntity>();
+			TextBillboardEntity* textB = emplaceChildEntity<TextBillboardEntity>();
+			if(direction == Y_Axis) {
+				float value = data.at(data.size() - 1 - i);
+				setupTextInfo(textA, value);
+				setupTextInfo(textB, value);
+			}
+			else {
+				float value = data.at(i);
+				setupTextInfo(textA, value);
+				setupTextInfo(textB, value);
+			}
+			QVector3D textBasePosition = base.Position3D;
+
+			switch(direction) {
+			case Y_Axis:
+				{
+					QVector3D textPositionA = textBasePosition;
+					QVector3D textPositionB = textBasePosition;
+					textPositionA.setX(1.1f);
+					textPositionA.setZ(minimunTextOffset);
+
+					textPositionB.setX(minimunTextOffset);
+					textPositionB.setZ(1.1f);
+
+					textA->setPosition(textPositionA);
+					textB->setPosition(textPositionB);
+				}
+				break;
+			case X_Axis:
+				{
+					QVector3D textPositionA = textBasePosition;
+					QVector3D textPositionB = textBasePosition;
+					textPositionA.setZ(minimunTextOffset);
+					textPositionB.setZ(minimunTextOffset);
+
+					textPositionB.setY(1.1f);
+					textA->setPosition(textPositionA);
+					textB->setPosition(textPositionB);
+				}
+				break;
+			case Z_Axis:
+				{
+					QVector3D textPositionA = textBasePosition;
+					QVector3D textPositionB = textBasePosition;
+					textPositionA.setX(minimunTextOffset);
+					textPositionB.setX(minimunTextOffset);
+
+					textPositionB.setY(1.1f);
+					textA->setPosition(textPositionA);
+					textB->setPosition(textPositionB);
+				}
+				break;
+			}
 		}
 
 		{
@@ -176,7 +234,7 @@ bool SurfaceChartEntity::addAxis(Axis axis) {
 		}
 	}
 
-	m_axes.push_back(axis);
+	m_axes.emplace(direction, Axis(data, normalizedData));
 	return true;
 }
 

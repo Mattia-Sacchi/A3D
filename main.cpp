@@ -90,11 +90,12 @@ int main(int argc, char* argv[]) {
 	{
 		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
 
-		std::vector<float> xAxisData = { 0, 10, 15, 20, 30, 40, 50, 75, 100 };
-		std::vector<float> zAxisData = { 0, 1, 2, 3, 4, 5 };
+		std::vector<float> xAxisData = { 0, 10, 15, 20, 30, 40, 50, 75, 100 }; // Gas
+		std::vector<float> zAxisData = { 2, 3, 4, 5, 6, 7 }; // Marcia Target
 		float yMax                   = 6100;
 		float yMin                   = 1800;
-
+		
+		// Giri
 		A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(
 			s->resourceManager(), xAxisData, zAxisData,
 

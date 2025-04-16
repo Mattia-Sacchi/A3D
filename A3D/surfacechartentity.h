@@ -24,11 +24,10 @@ public:
 	};
 
 	struct Axis {
-		Axis(QVector3D dir, std::vector<float> data, std::vector<float> normalizedData)
-			: m_direction(dir),
+		Axis(std::vector<float> data, std::vector<float> normalizedData)
+			: 
 			  m_data(data),
 			  m_normalizedData(normalizedData) {}
-		QVector3D m_direction;
 		std::vector<float> m_data;
 		std::vector<float> m_normalizedData;
 	};
@@ -44,14 +43,14 @@ private:
 	const std::array<QVector3D, D_Count> m_commonDirections = {
 		QVector3D(1, 0, 0), QVector3D(0, 1, 0), QVector3D(0, 0, 1), QVector3D(-1, 0, 0), QVector3D(0, -1, 0), QVector3D(0, 0, -1),
 	};
-	bool addAxis(Axis axis);
+	bool addAxis(Direction3D direction,std::vector<float> data, std::vector<float> normalizedData);
 	float m_tickLength;
 	LineGroup* m_lineGroup;
 
 	LineGroup* m_smallerLineGroup;
 
 	LineGroup::Vertex m_origin;
-	std::vector<Axis> m_axes;
+	std::map<Direction3D,Axis> m_axes;
 };
 
 }
