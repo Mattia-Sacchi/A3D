@@ -47,7 +47,8 @@ SOURCES += \
     $$PWD/A3D/texture.cpp \
     $$PWD/A3D/texturecache.cpp \
     $$PWD/A3D/texturecacheogl.cpp \
-    $$PWD/A3D/view.cpp
+    $$PWD/A3D/view.cpp \
+    $$PWD/keyeventmanager.cpp
 
 HEADERS += \
 	$$PWD/A3D/entitycontroller.h \
@@ -87,7 +88,8 @@ HEADERS += \
         $$PWD/A3D/texturecache.h \
         $$PWD/A3D/texturecacheogl.h \
         $$PWD/A3D/view.h \
-        $$PWD/Dependencies/stb/stb_image.h
+        $$PWD/Dependencies/stb/stb_image.h \
+    $$PWD/keyeventmanager.h
 
 DEFINES += STBI_NO_STDIO=1 STBI_NO_ZLIB=1 STBI_ONLY_HDR=1
 INCLUDEPATH += Dependencies/stb/
