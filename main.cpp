@@ -8,6 +8,7 @@
 #include "A3D/keycameracontroller.h"
 #include "A3D/textbillboardentity.h"
 #include "A3D/surfacechartentity.h"
+#include "keyeventmanager.h"
 
 int main(int argc, char* argv[]) {
 
@@ -91,10 +92,10 @@ int main(int argc, char* argv[]) {
 		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
 
 		std::vector<float> xAxisData = { 0, 10, 15, 20, 30, 40, 50, 75, 100 }; // Gas
-		std::vector<float> zAxisData = { 2, 3, 4, 5, 6, 7 }; // Marcia Target
+		std::vector<float> zAxisData = { 2, 3, 4, 5, 6, 7 };                   // Marcia Target
 		float yMax                   = 6100;
 		float yMin                   = 1800;
-		
+
 		// Giri
 		A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(
 			s->resourceManager(), xAxisData, zAxisData,
@@ -155,9 +156,84 @@ int main(int argc, char* argv[]) {
 	QObject::connect(&t, &QTimer::timeout, v, &A3D::View::updateView);
 	QObject::connect(&t, &QTimer::timeout, s, &A3D::Scene::updateScene);
 
+	KeyEventManager* kem = new KeyEventManager(v);
+	{
+		A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
+		e->setModel(new A3D::Model());
+		kem->setMouseBinding(
+			Qt::LeftButton,
+			[=]() {
+				{
+					QPointF cursorPos = v->mapFromGlobal(QCursor::pos());
+					QSize size        = v->window()->size();
+					QPointF point     = QPointF(cursorPos.x() / size.width(), cursorPos.y() / size.height());
+					qDebug() << "Pos " << cursorPos.x() << " " << cursorPos.y();
+					qDebug() << "Size " << size.width() << " " << size.height();
+					qDebug() << "Point " << point.x() << " " << point.y();
+					QVector3D cameraPos   = v->camera().position();
+					QVector3D forward     = v->camera().forward();
+					QVector3D farPlanePos = forward * v->camera().farPlane();
+
+					A3D::LineGroup::Vertex start;
+					start.Position3D = cameraPos;
+					start.Color4D    = QVector4D(1, 0, 0, 1);
+
+					A3D::LineGroup::Vertex end;
+					end.Position3D = farPlanePos;
+					end.Color4D    = QVector4D(1, 0, 0, 1);
+
+					A3D::Group* group = e->model()->getOrAddGroup("test");
+
+					A3D::LineGroup* lg = group->lineGroup();
+
+					if(!lg) {
+						lg = new A3D::LineGroup();
+						group->setLineGroup(lg);
+						lg->setContents(A3D::LineGroup::Position3D | A3D::LineGroup::Color4D);
+						lg->setThickness(0.05f);
+					}
+
+					lg->vertices().clear();
+
+					lg->vertices().push_back(start);
+					lg->vertices().push_back(end);
+					lg->invalidateCache();
+				}
+			} // Shooot a ray from the actual position
+			/*{
+			QVector3D cameraPos   = v->camera().position();
+			QVector3D forward     = v->camera().forward();
+			QVector3D farPlanePos = forward * v->camera().farPlane();
+
+			A3D::LineGroup::Vertex start;
+			start.Position3D = cameraPos;
+			start.Color4D    = QVector4D(1, 0, 0, 1);
+
+			A3D::LineGroup::Vertex end;
+			end.Position3D = farPlanePos;
+			end.Color4D    = QVector4D(1, 0, 0, 1);
+
+			A3D::Group* group = e->model()->getOrAddGroup("test");
+
+			A3D::LineGroup* lg = group->lineGroup();
+
+			if(!lg) {
+				lg = new A3D::LineGroup();
+				group->setLineGroup(lg);
+				lg->setContents(A3D::LineGroup::Position3D | A3D::LineGroup::Color4D);
+				lg->setThickness(0.05f);
+			}
+
+			lg->vertices().clear();
+
+			lg->vertices().push_back(start);
+			lg->vertices().push_back(end);
+			lg->invalidateCache();
+		}*/
+		);
+	}
+
 	//! TODO:
-	//! Look at mouse position
-	//! Change the axis camera
 	//! Key Event manager
 
 	v->run();

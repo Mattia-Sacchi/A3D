@@ -145,6 +145,8 @@ std::vector<std::uint8_t> const& LineGroup::packedData() const {
 }
 
 void LineGroup::invalidateCache(std::uintptr_t rendererID) {
+	m_packedData.clear();
+
 	if(rendererID == std::numeric_limits<std::uintptr_t>::max()) {
 		for(auto it = m_lineGroupCache.begin(); it != m_lineGroupCache.end();) {
 			if(it->second.isNull()) {
