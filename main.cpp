@@ -160,6 +160,34 @@ int main(int argc, char* argv[]) {
 	{
 		A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
 		e->setModel(new A3D::Model());
+		auto ray = [=](QVector3D endPos) {
+			QVector3D cameraPos = v->camera().position();
+			A3D::LineGroup::Vertex start;
+			start.Position3D = cameraPos;
+			start.Color4D    = QVector4D(0, 0, 1, 1);
+
+			A3D::LineGroup::Vertex end;
+			end.Position3D = endPos;
+			end.Color4D    = QVector4D(0, 0, 1, 1);
+
+			A3D::Group* group = e->model()->getOrAddGroup("test");
+
+			A3D::LineGroup* lg = group->lineGroup();
+
+			if(!lg) {
+				lg = new A3D::LineGroup();
+				group->setLineGroup(lg);
+				lg->setContents(A3D::LineGroup::Position3D | A3D::LineGroup::Color4D);
+				lg->setThickness(0.015f);
+			}
+
+			lg->vertices().clear();
+
+			lg->vertices().push_back(start);
+			lg->vertices().push_back(end);
+			lg->invalidateCache();
+		};
+
 		kem->setMouseBinding(
 			Qt::LeftButton,
 			[=]() {
@@ -170,65 +198,34 @@ int main(int argc, char* argv[]) {
 					qDebug() << "Pos " << cursorPos.x() << " " << cursorPos.y();
 					qDebug() << "Size " << size.width() << " " << size.height();
 					qDebug() << "Point " << point.x() << " " << point.y();
-					QVector3D cameraPos   = v->camera().position();
-					QVector3D forward     = v->camera().forward();
-					QVector3D farPlanePos = forward * v->camera().farPlane();
 
-					A3D::LineGroup::Vertex start;
-					start.Position3D = cameraPos;
-					start.Color4D    = QVector4D(1, 0, 0, 1);
+					QMatrix4x4 invProj = v->camera().getProjection().inverted();
+					QMatrix4x4 invView = v->camera().getView().inverted();
+					float newX         = 2.f * point.x() - 1.f;
+					float newY         = -2.f * point.y() + 1.f;
+					float newZ         = 10.f;
 
-					A3D::LineGroup::Vertex end;
-					end.Position3D = farPlanePos;
-					end.Color4D    = QVector4D(1, 0, 0, 1);
+					QVector4D clip(newX, newY, newZ, 1.f);
 
-					A3D::Group* group = e->model()->getOrAddGroup("test");
+					qDebug() << clip;
 
-					A3D::LineGroup* lg = group->lineGroup();
+					QVector4D eye = invProj * clip;
+					eye.setW(1.f);
 
-					if(!lg) {
-						lg = new A3D::LineGroup();
-						group->setLineGroup(lg);
-						lg->setContents(A3D::LineGroup::Position3D | A3D::LineGroup::Color4D);
-						lg->setThickness(0.05f);
-					}
-
-					lg->vertices().clear();
-
-					lg->vertices().push_back(start);
-					lg->vertices().push_back(end);
-					lg->invalidateCache();
+					QVector4D world = invView * eye;
+					QVector3D end   = (world.toVector3D() / world.w());
+					ray(end * 10.f);
 				}
 			} // Shooot a ray from the actual position
 			/*{
-			QVector3D cameraPos   = v->camera().position();
 			QVector3D forward     = v->camera().forward();
 			QVector3D farPlanePos = forward * v->camera().farPlane();
-
-			A3D::LineGroup::Vertex start;
-			start.Position3D = cameraPos;
-			start.Color4D    = QVector4D(1, 0, 0, 1);
 
 			A3D::LineGroup::Vertex end;
 			end.Position3D = farPlanePos;
 			end.Color4D    = QVector4D(1, 0, 0, 1);
 
-			A3D::Group* group = e->model()->getOrAddGroup("test");
-
-			A3D::LineGroup* lg = group->lineGroup();
-
-			if(!lg) {
-				lg = new A3D::LineGroup();
-				group->setLineGroup(lg);
-				lg->setContents(A3D::LineGroup::Position3D | A3D::LineGroup::Color4D);
-				lg->setThickness(0.05f);
-			}
-
-			lg->vertices().clear();
-
-			lg->vertices().push_back(start);
-			lg->vertices().push_back(end);
-			lg->invalidateCache();
+			ray(farPlanePos);
 		}*/
 		);
 	}
