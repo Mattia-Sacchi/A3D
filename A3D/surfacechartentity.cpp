@@ -50,6 +50,23 @@ void SurfaceChartEntity::loadSurface(Mesh* mesh) {
 	g->setRotation(QQuaternion::fromAxisAndAngle(0, 1, 0, 180));
 	g->setPosition(QVector3D(-1.f, 0.f, -1.f));
 }
+void SurfaceChartEntity::debug(QVector3D d) {
+	for(size_t i = 0; i < Negative_X; i++) {
+		Axis& a                 = m_axes.at(static_cast<Direction3D>(i));
+		std::vector<float> data = a.m_data;
+		auto itMin              = std::min_element(data.begin(), data.end());
+		if(itMin == data.end())
+			return;
+
+		auto itMax = std::max_element(data.begin(), data.end());
+		if(itMax == data.end())
+			return;
+		if(i == Z_Axis)
+			qDebug() << a.name() << ": " << static_cast<size_t>(((*itMax - *itMin) * d[i]) + *itMin);
+		else
+			qDebug() << a.name() << ": " << ((*itMax - *itMin) * d[i]) + *itMin;
+	}
+}
 
 bool SurfaceChartEntity::addNormalizedAxis(Direction3D direction, std::vector<float> data) {
 

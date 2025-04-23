@@ -88,52 +88,52 @@ int main(int argc, char* argv[]) {
 		FloorTiles06->setParent(s->resourceManager()); // Just to get the clang static analyzer to piss off...
 	}*/
 
-	{
-		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
-
-		std::vector<float> xAxisData = { 0, 10, 15, 20, 30, 40, 50, 75, 100 }; // Gas
-		std::vector<float> zAxisData = { 2, 3, 4, 5, 6, 7 };                   // Marcia Target
-		float yMax                   = 6100;
-		float yMin                   = 1800;
-
-		// Giri
-		A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(
-			s->resourceManager(), xAxisData, zAxisData,
-
-			{ 1800, 2000, 2600, 3000, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100,
-		      1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100 }
-		);
-		chart->setTickLength(1);
-
-		chart->loadSurface(sampleMeshC);
-		chart->addNormalizedAxis(A3D::SurfaceChartEntity::X_Axis, xAxisData);
-		chart->setAxisName(A3D::SurfaceChartEntity::X_Axis, "Gas");
-		chart->addLinearAxis(A3D::SurfaceChartEntity::Y_Axis, yMin, yMax);
-		chart->setAxisName(A3D::SurfaceChartEntity::X_Axis, "RPM");
-		chart->addNormalizedAxis(A3D::SurfaceChartEntity::Z_Axis, zAxisData);
-		chart->setAxisName(A3D::SurfaceChartEntity::X_Axis, "Target Gear");
-
-		chart->setPosition(QVector3D(0, 0, 3));
-	}
-
 	A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
-	float yMax                     = 200;
-	float yMin                     = 0;
 
+	std::vector<float> xAxisData = { 0, 10, 15, 20, 30, 40, 50, 75, 100 }; // Gas
+	std::vector<float> zAxisData = { 2, 3, 4, 5, 6, 7 };                   // Marcia Target
+	float yMax                   = 6100;
+	float yMin                   = 1800;
+
+	// Giri
 	A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(
-		s->resourceManager(), { 0, 1, 2, 3, 4, 5, 6 }, { 0, 1, 2, 3, 4, 5, 6 },
+		s->resourceManager(), xAxisData, zAxisData,
 
-		{ 15, 3,  1, 2, 1,  3,  15, 1,  3,  13, 22, 13, 3,  1,  1,  13, 59, 97, 59, 13, 1, 2, 22, 97, 120,
-	      97, 22, 2, 1, 13, 59, 97, 59, 13, 1,  1,  3,  13, 22, 13, 3,  1,  15, 3,  1,  2, 1, 3,  15 }
+		{ 1800, 2000, 2600, 3000, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100,
+	      1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100, 1800, 2300, 2900, 3300, 3500, 4300, 4600, 6000, 6100 }
 	);
 	chart->setTickLength(1);
 
 	chart->loadSurface(sampleMeshC);
-	chart->addLinearAxis(A3D::SurfaceChartEntity::X_Axis, 0, 6);
+	chart->addNormalizedAxis(A3D::SurfaceChartEntity::X_Axis, xAxisData);
+	chart->setAxisName(A3D::SurfaceChartEntity::X_Axis, "Gas");
 	chart->addLinearAxis(A3D::SurfaceChartEntity::Y_Axis, yMin, yMax);
-	chart->addLinearAxis(A3D::SurfaceChartEntity::Z_Axis, 0, 6);
+	chart->setAxisName(A3D::SurfaceChartEntity::Y_Axis, "RPM");
+	chart->addNormalizedAxis(A3D::SurfaceChartEntity::Z_Axis, zAxisData);
+	chart->setAxisName(A3D::SurfaceChartEntity::Z_Axis, "Target Gear");
 
-	chart->setPosition(QVector3D(0, 0, 1));
+	chart->setPosition(QVector3D(0, 0, 3));
+
+	{
+		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
+		float yMax                     = 200;
+		float yMin                     = 0;
+
+		A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(
+			s->resourceManager(), { 0, 1, 2, 3, 4, 5, 6 }, { 0, 1, 2, 3, 4, 5, 6 },
+
+			{ 15, 3,  1, 2, 1,  3,  15, 1,  3,  13, 22, 13, 3,  1,  1,  13, 59, 97, 59, 13, 1, 2, 22, 97, 120,
+		      97, 22, 2, 1, 13, 59, 97, 59, 13, 1,  1,  3,  13, 22, 13, 3,  1,  15, 3,  1,  2, 1, 3,  15 }
+		);
+		chart->setTickLength(1);
+
+		chart->loadSurface(sampleMeshC);
+		chart->addLinearAxis(A3D::SurfaceChartEntity::X_Axis, 0, 6);
+		chart->addLinearAxis(A3D::SurfaceChartEntity::Y_Axis, yMin, yMax);
+		chart->addLinearAxis(A3D::SurfaceChartEntity::Z_Axis, 0, 6);
+
+		chart->setPosition(QVector3D(0, 0, 1));
+	}
 
 	A3D::View* v = new A3D::View(&w);
 	v->camera().setPosition(QVector3D(10.f, 0.f, 2.f));
@@ -172,8 +172,14 @@ int main(int argc, char* argv[]) {
 		if(res) {
 			qDebug() << "Intersection succeeded!";
 
-			if(res->m_resultingEntity)
+			if(res->m_resultingEntity){
 				qDebug() << "Entity:" << res->m_resultingEntity;
+
+				if(res->m_resultingEntity == chart)
+				{
+					chart->debug(res->m_groupLocalHitPoint);
+				}
+			}
 
 			if(res->m_resultingModel)
 				qDebug() << "Model:" << res->m_resultingModel;
@@ -183,6 +189,8 @@ int main(int argc, char* argv[]) {
 
 			qDebug() << "Hit:" << res->m_groupLocalHitPoint;
 			qDebug() << "Global Coordinate:" << res->m_hitPoint;
+
+			
 		}
 		else {
 			qDebug() << "No intersection!";
