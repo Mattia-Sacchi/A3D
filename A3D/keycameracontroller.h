@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "viewcontroller.h"
+#include "entity.h"
 #include <QObject>
 #include <set>
 #include <QKeyEvent>
@@ -35,6 +36,7 @@ public:
 		ACT_LOOK_HOME,
 
 		ACT_SHOOT_RAY,
+		ACT_SHOOT_RAY_MOUSE_POSITION,
 		ACT_LOOK_MOUSE_POSITION,
 		ACT_PRINT_DEBUG,
 
@@ -43,8 +45,12 @@ public:
 	};
 
 	void lookAtMousePosition();
+	void shootRay();
+	void shootRayInCursorPos();
 
 	explicit KeyCameraController(View* view);
+
+	void throwRayFromCamera(QVector3D endPosition);
 
 	void setKeyBinding(Qt::Key, Action);
 	void setKeyBindings(std::map<Qt::Key, Action> actions);
@@ -78,9 +84,6 @@ private:
 
 	std::map<Qt::MouseButton, Action> m_btnBindings;
 	std::map<Qt::MouseButton, bool> m_btnStatus;
-	QPointF m_mousePos;
-	QPointF m_mouseClickPos;
-	QMatrix4x4 m_cameraClickView;
 
 	QVector3D m_movementBaseSpeed;
 	float m_movementPreciseFactor;
@@ -88,6 +91,8 @@ private:
 
 	QVector3D m_rotationBaseSpeed;
 	QVector3D m_homePosition;
+
+	Entity* m_entity;
 };
 
 }
