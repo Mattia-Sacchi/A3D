@@ -37,14 +37,14 @@ public:
 
 		ACT_SHOOT_RAY,
 		ACT_SHOOT_RAY_MOUSE_POSITION,
-		ACT_LOOK_MOUSE_POSITION,
+		ACT_LOOK_TOWARDS_MOUSE_POSITION,
 		ACT_PRINT_DEBUG,
 
 		//!
 		ACT_COUNT
 	};
 
-	void lookAtMousePosition();
+	void lookTowardsMousePosition();
 	void shootRay();
 	void shootRayInCursorPos();
 
@@ -75,6 +75,8 @@ public:
 	virtual bool update(std::chrono::milliseconds deltaT) override;
 	virtual bool eventFilter(QObject*, QEvent*) override;
 
+	inline void setRayColor(QVector4D v) { m_rayColor = v; }
+
 private:
 	void updateActions();
 
@@ -93,6 +95,8 @@ private:
 	QVector3D m_homePosition;
 
 	Entity* m_entity;
+
+	QVector4D m_rayColor;
 };
 
 }
