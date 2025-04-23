@@ -48,6 +48,8 @@ public:
 		return true;
 	}
 
+	void debug(QVector3D);
+
 	void loadSurface(Mesh* mesh);
 
 private:
