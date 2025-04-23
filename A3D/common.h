@@ -26,6 +26,7 @@
 #include <chrono>
 #include <stdexcept>
 #include <cstdint>
+#include <QPointF>
 
 namespace A3D {
 
@@ -49,6 +50,11 @@ inline void normalize(std::vector<float>& data) {
 	float const max = *itMax;
 	normalizeMinMax(data, min, max);
 }
+class View;
+
+QVector3D unprojectPointFrom2D(View* v, QPointF point);
+
+QPointF getCurrentNormalizedPos(View* v);
 
 enum LogChannel {
 	LC_Debug = 0,

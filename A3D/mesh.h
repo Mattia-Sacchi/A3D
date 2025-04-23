@@ -116,7 +116,12 @@ public:
 
 	static std::size_t packedVertexSize(Contents);
 
+	QVector3D getHitPointFromRay(const QVector3D& orig, const QVector3D& dir);
+
 private:
+	bool
+	rayIntersectsTriangle(const QVector3D& orig, const QVector3D& dir, const QVector3D& v0, const QVector3D& v1, const QVector3D& v2, QVector3D& hitPoint, float tolerance = 1e-6);
+
 	DrawMode m_drawMode;
 	std::vector<Vertex> m_vertices;
 	std::vector<std::uint32_t> m_indices;

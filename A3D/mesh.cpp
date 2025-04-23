@@ -188,6 +188,53 @@ Mesh::Contents Mesh::contents() const {
 	return m_contents;
 }
 
+QVector3D Mesh::getHitPointFromRay(const QVector3D& orig, const QVector3D& dir) {
+
+	for(int i = 0; i + 2 < indices().size(); i += 3) {
+		QVector3D v0 = vertices()[indices()[i]].Position3D;
+		QVector3D v1 = vertices()[indices()[i + 1]].Position3D;
+		QVector3D v2 = vertices()[indices()[i + 2]].Position3D;
+
+		QVector3D tempHit;
+		if(rayIntersectsTriangle(orig, dir, v0, v1, v2, tempHit))
+			return tempHit;
+	}
+	return QVector3D(0, 0, 0);
+}
+
+bool Mesh::rayIntersectsTriangle(
+	const QVector3D& orig, const QVector3D& dir,                   /* Ray infos*/
+	const QVector3D& v0, const QVector3D& v1, const QVector3D& v2, /*Vertices*/
+	QVector3D& hitPoint, float const tolerance
+) {
+	QVector3D edge1 = v1 - v0;
+	QVector3D edge2 = v2 - v0;
+	QVector3D h     = QVector3D::crossProduct(dir, edge2);
+	float a         = QVector3D::dotProduct(edge1, h);
+	if(fabs(a) < tolerance)
+		return false; // Ray is parallel to triangle
+
+	float f     = 1.0 / a;
+	QVector3D s = orig - v0;
+	float u     = f * QVector3D::dotProduct(s, h);
+	if(u < 0.0 || u > 1.0)
+		return false;
+
+	QVector3D q = QVector3D::crossProduct(s, edge1);
+	float v     = f * QVector3D::dotProduct(dir, q);
+	if(v < 0.0 || u + v > 1.0)
+		return false;
+
+	float t = f * QVector3D::dotProduct(edge2, q);
+	if(t > tolerance) {
+		hitPoint = orig + dir * t;
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 std::size_t Mesh::packedVertexSize(Contents contents) {
 	std::size_t vCount = 0;
 	if(contents & Position2D)

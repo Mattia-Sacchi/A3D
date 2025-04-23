@@ -40,32 +40,6 @@ KeyCameraController::KeyCameraController(View* view)
 	m_entity->setModel(new Model);
 }
 
-static QVector3D unprojectPointFrom2D(View* v, QPointF point) {
-	QMatrix4x4 invProj = v->camera().getProjection().inverted();
-	QMatrix4x4 invView = v->camera().getView().inverted();
-	float newX         = 2.f * point.x() - 1.f;
-	float newY         = -2.f * point.y() + 1.f;
-	float newZ         = 1.f;
-
-	QVector4D clip(newX, newY, newZ, 1.f);
-
-	QVector4D eye = invProj * clip;
-	eye.setW(1.f);
-
-	QVector4D world = invView * eye;
-	QVector3D end   = (world.toVector3D());
-	return end;
-}
-
-static QPointF getCurrentNormalizedPos(View* v) {
-	if(!v)
-		return QPointF(0, 0);
-	QPointF cursorPos = v->mapFromGlobal(QCursor::pos());
-	QSize size        = v->window()->size();
-	QPointF point     = QPointF(cursorPos.x() / size.width(), cursorPos.y() / size.height());
-	return point;
-}
-
 void KeyCameraController::setKeyBinding(Qt::Key k, Action a) {
 	m_keyBindings[k] = a;
 	updateActions();
@@ -142,7 +116,8 @@ void KeyCameraController::lookTowardsMousePosition() {
 	QVector3D unprojectedMousePos = unprojectPointFrom2D(view(), getCurrentNormalizedPos(view()));
 	unprojectedMousePos -= view()->camera().forward();
 	unprojectedMousePos *= 0.85f;
-	//unprojectedMousePos += view()->camera().forward();
+	unprojectedMousePos += view()->camera().forward();
+
 	view()->camera().setOrientationTarget(unprojectedMousePos);
 	view()->update();
 }
