@@ -143,9 +143,9 @@ int main(int argc, char* argv[]) {
 	keyCamController->setBaseMovementSpeed(QVector3D(9.f, 9.f, 9.f));
 	keyCamController->setKeyBinding(Qt::Key_Space, A3D::KeyCameraController::ACT_MOVE_UPWARD);
 	keyCamController->setKeyBinding(Qt::Key_Shift, A3D::KeyCameraController::ACT_MOVE_DOWNWARD);
-	keyCamController->setButtonBinding(Qt::LeftButton, A3D::KeyCameraController::ACT_SHOOT_RAY);
+	keyCamController->setButtonBinding(Qt::LeftButton, A3D::KeyCameraController::ACT_LOOK_TOWARDS_MOUSE_POSITION);
 	keyCamController->setButtonBinding(Qt::RightButton, A3D::KeyCameraController::ACT_SHOOT_RAY_MOUSE_POSITION);
-	keyCamController->setKeyBinding(Qt::Key_J, A3D::KeyCameraController::ACT_SHOOT_RAY_MOUSE_POSITION);
+	keyCamController->setKeyBinding(Qt::Key_J, A3D::KeyCameraController::ACT_SHOOT_RAY);
 	v->setController(keyCamController);
 
 	QTimer t;
@@ -158,20 +158,8 @@ int main(int argc, char* argv[]) {
 	QObject::connect(&t, &QTimer::timeout, v, &A3D::View::updateView);
 	QObject::connect(&t, &QTimer::timeout, s, &A3D::Scene::updateScene);
 
-	/*KeyEventManager* kem = new KeyEventManager(v);
-	{
-		A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
-		e->setModel(new A3D::Model());
-
-		/*
-		*/
-	/*
-		);
-	}
-	*/
-
-	//! TODO:
-	//! Key Event manager
+	// Used just for testing
+	//KeyEventManager* kem = new KeyEventManager(v);
 
 	v->run();
 	s->run();

@@ -26,7 +26,8 @@ KeyCameraController::KeyCameraController(View* view)
 	  m_movementBaseSpeed(1.f, 1.f, 1.f),
 	  m_movementPreciseFactor(0.2f),
 	  m_movementQuickFactor(5.f),
-	  m_rotationBaseSpeed(60.f, 60.f, 60.f)
+	  m_rotationBaseSpeed(60.f, 60.f, 60.f),
+	  m_rayColor(0.f,0.f,1.f,0.9f)
 {
 	std::memset(m_actions, 0, sizeof(m_actions));
 	if(!view)
@@ -44,7 +45,7 @@ static QVector3D unprojectPointFrom2D(View* v, QPointF point) {
 	QMatrix4x4 invView = v->camera().getView().inverted();
 	float newX         = 2.f * point.x() - 1.f;
 	float newY         = -2.f * point.y() + 1.f;
-	float newZ         = 10.f;
+	float newZ         = 1.f;
 
 	QVector4D clip(newX, newY, newZ, 1.f);
 
@@ -52,7 +53,7 @@ static QVector3D unprojectPointFrom2D(View* v, QPointF point) {
 	eye.setW(1.f);
 
 	QVector4D world = invView * eye;
-	QVector3D end   = (world.toVector3D() / world.w());
+	QVector3D end   = (world.toVector3D());
 	return end;
 }
 
@@ -109,11 +110,11 @@ void KeyCameraController::throwRayFromCamera(QVector3D endPos) {
 	cameraPos -= QVector3D(0, 0.1f, 0);
 	LineGroup::Vertex start;
 	start.Position3D = cameraPos;
-	start.Color4D    = QVector4D(0, 0, 1, 1);
+	start.Color4D    = m_rayColor;
 
 	LineGroup::Vertex end;
 	end.Position3D = endPos;
-	end.Color4D    = QVector4D(0, 0, 1, 1);
+	end.Color4D    = m_rayColor;
 
 	Group* group = m_entity->model()->getOrAddGroup("test");
 
@@ -134,11 +135,14 @@ void KeyCameraController::throwRayFromCamera(QVector3D endPos) {
 	view()->update();
 }
 
-void KeyCameraController::lookAtMousePosition() {
+void KeyCameraController::lookTowardsMousePosition() {
 	if(!view())
 		return;
 
 	QVector3D unprojectedMousePos = unprojectPointFrom2D(view(), getCurrentNormalizedPos(view()));
+	unprojectedMousePos -= view()->camera().forward();
+	unprojectedMousePos *= 0.85f;
+	//unprojectedMousePos += view()->camera().forward();
 	view()->camera().setOrientationTarget(unprojectedMousePos);
 	view()->update();
 }
@@ -212,8 +216,8 @@ bool KeyCameraController::update(std::chrono::milliseconds deltaT) {
 	if(m_actions[ACT_SHOOT_RAY_MOUSE_POSITION])
 		shootRayInCursorPos();
 
-	if(m_actions[ACT_LOOK_MOUSE_POSITION])
-		lookAtMousePosition();
+	if(m_actions[ACT_LOOK_TOWARDS_MOUSE_POSITION])
+		lookTowardsMousePosition();
 
 	if(m_actions[ACT_PRINT_DEBUG]) {
 		QPoint pos = QCursor::pos();
