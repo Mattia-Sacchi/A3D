@@ -29,6 +29,40 @@ KeyCameraController::KeyCameraController(View* view)
 	  m_rotationBaseSpeed(60.f, 60.f, 60.f)
 {
 	std::memset(m_actions, 0, sizeof(m_actions));
+	if(!view)
+		return;
+
+	if(!view->scene())
+		return;
+
+	m_entity = view->scene()->emplaceChildEntity<Entity>();
+	m_entity->setModel(new Model);
+}
+
+static QVector3D unprojectPointFrom2D(View* v, QPointF point) {
+	QMatrix4x4 invProj = v->camera().getProjection().inverted();
+	QMatrix4x4 invView = v->camera().getView().inverted();
+	float newX         = 2.f * point.x() - 1.f;
+	float newY         = -2.f * point.y() + 1.f;
+	float newZ         = 10.f;
+
+	QVector4D clip(newX, newY, newZ, 1.f);
+
+	QVector4D eye = invProj * clip;
+	eye.setW(1.f);
+
+	QVector4D world = invView * eye;
+	QVector3D end   = (world.toVector3D() / world.w());
+	return end;
+}
+
+static QPointF getCurrentNormalizedPos(View* v) {
+	if(!v)
+		return QPointF(0, 0);
+	QPointF cursorPos = v->mapFromGlobal(QCursor::pos());
+	QSize size        = v->window()->size();
+	QPointF point     = QPointF(cursorPos.x() / size.width(), cursorPos.y() / size.height());
+	return point;
 }
 
 void KeyCameraController::setKeyBinding(Qt::Key k, Action a) {
@@ -67,7 +101,68 @@ void KeyCameraController::setBaseRotationSpeed(QVector3D speed) {
 	m_rotationBaseSpeed = speed;
 }
 
-void KeyCameraController::lookAtMousePosition() {}
+void KeyCameraController::throwRayFromCamera(QVector3D endPos) {
+	if(!view() || !m_entity)
+		return;
+
+	QVector3D cameraPos = view()->camera().position();
+	cameraPos -= QVector3D(0, 0.1f, 0);
+	LineGroup::Vertex start;
+	start.Position3D = cameraPos;
+	start.Color4D    = QVector4D(0, 0, 1, 1);
+
+	LineGroup::Vertex end;
+	end.Position3D = endPos;
+	end.Color4D    = QVector4D(0, 0, 1, 1);
+
+	Group* group = m_entity->model()->getOrAddGroup("test");
+
+	LineGroup* lg = group->lineGroup();
+
+	if(!lg) {
+		lg = new LineGroup();
+		group->setLineGroup(lg);
+		lg->setContents(LineGroup::Position3D | LineGroup::Color4D);
+		lg->setThickness(0.015f);
+	}
+
+	lg->vertices().clear();
+
+	lg->vertices().push_back(start);
+	lg->vertices().push_back(end);
+	lg->invalidateCache();
+	view()->update();
+}
+
+void KeyCameraController::lookAtMousePosition() {
+	if(!view())
+		return;
+
+	QVector3D unprojectedMousePos = unprojectPointFrom2D(view(), getCurrentNormalizedPos(view()));
+	view()->camera().setOrientationTarget(unprojectedMousePos);
+	view()->update();
+}
+
+void KeyCameraController::shootRay() {
+	if(!view())
+		return;
+	QVector3D forward     = view()->camera().forward();
+	QVector3D farPlanePos = forward * view()->camera().farPlane();
+
+	throwRayFromCamera(farPlanePos);
+}
+
+void KeyCameraController::shootRayInCursorPos() {
+
+	if(!view())
+		return;
+
+	QVector3D unprojectedMousePos = unprojectPointFrom2D(view(), getCurrentNormalizedPos(view()));
+	unprojectedMousePos -= view()->camera().position();
+	unprojectedMousePos *= view()->camera().farPlane();
+	unprojectedMousePos += view()->camera().position();
+	throwRayFromCamera(unprojectedMousePos);
+}
 
 bool KeyCameraController::update(std::chrono::milliseconds deltaT) {
 	if(!view())
@@ -111,9 +206,11 @@ bool KeyCameraController::update(std::chrono::milliseconds deltaT) {
 	if(m_actions[ACT_LOOK_TILTRIGHT])
 		rotation.setZ(rotation.z() + 1.f);
 
-	if(m_actions[ACT_SHOOT_RAY]) {
-		// Work in progress
-	}
+	if(m_actions[ACT_SHOOT_RAY])
+		shootRay();
+
+	if(m_actions[ACT_SHOOT_RAY_MOUSE_POSITION])
+		shootRayInCursorPos();
 
 	if(m_actions[ACT_LOOK_MOUSE_POSITION])
 		lookAtMousePosition();
@@ -145,8 +242,10 @@ bool KeyCameraController::update(std::chrono::milliseconds deltaT) {
 
 	c.offsetPosition((forward * movement.z()) + (right * movement.x()) + (up * movement.y()));
 
-	if(m_actions[ACT_LOOK_HOME])
+	if(m_actions[ACT_LOOK_HOME]) {
 		c.setOrientationTarget(m_homePosition);
+		view()->update();
+	}
 
 	return true;
 }
@@ -160,25 +259,9 @@ bool KeyCameraController::eventFilter(QObject* o, QEvent* e) {
 		if(view())
 			view()->updateView();
 	}
-	else if(eType == QEvent::MouseButtonPress || eType == QEvent::MouseButtonRelease || eType == QEvent::MouseMove) {
+	else if(eType == QEvent::MouseButtonPress || eType == QEvent::MouseButtonRelease) {
 		QMouseEvent* me             = static_cast<QMouseEvent*>(e);
 		Qt::MouseButton mouseButton = me->button();
-
-		if(view()) {
-			QPointF point = me->position();
-
-			QSize size = view()->window()->size();
-
-			float xMouse = point.x() / size.width();
-			float yMouse = point.y() / size.height();
-
-			m_mousePos = QPointF(xMouse, yMouse);
-
-			if(eType == QEvent::MouseButtonPress && !m_btnStatus[mouseButton]) {
-				m_mouseClickPos   = m_mousePos;
-				m_cameraClickView = view()->camera().getView();
-			}
-		}
 
 		if(eType == QEvent::MouseButtonPress)
 			m_btnStatus[mouseButton] = true;

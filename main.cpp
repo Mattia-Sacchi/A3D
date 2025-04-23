@@ -143,7 +143,9 @@ int main(int argc, char* argv[]) {
 	keyCamController->setBaseMovementSpeed(QVector3D(9.f, 9.f, 9.f));
 	keyCamController->setKeyBinding(Qt::Key_Space, A3D::KeyCameraController::ACT_MOVE_UPWARD);
 	keyCamController->setKeyBinding(Qt::Key_Shift, A3D::KeyCameraController::ACT_MOVE_DOWNWARD);
-	keyCamController->setButtonBinding(Qt::LeftButton, A3D::KeyCameraController::ACT_LOOK_MOUSE_POSITION);
+	keyCamController->setButtonBinding(Qt::LeftButton, A3D::KeyCameraController::ACT_SHOOT_RAY);
+	keyCamController->setButtonBinding(Qt::RightButton, A3D::KeyCameraController::ACT_SHOOT_RAY_MOUSE_POSITION);
+	keyCamController->setKeyBinding(Qt::Key_J, A3D::KeyCameraController::ACT_SHOOT_RAY_MOUSE_POSITION);
 	v->setController(keyCamController);
 
 	QTimer t;
@@ -156,79 +158,17 @@ int main(int argc, char* argv[]) {
 	QObject::connect(&t, &QTimer::timeout, v, &A3D::View::updateView);
 	QObject::connect(&t, &QTimer::timeout, s, &A3D::Scene::updateScene);
 
-	KeyEventManager* kem = new KeyEventManager(v);
+	/*KeyEventManager* kem = new KeyEventManager(v);
 	{
 		A3D::Entity* e = s->emplaceChildEntity<A3D::Entity>();
 		e->setModel(new A3D::Model());
-		auto ray = [=](QVector3D endPos) {
-			QVector3D cameraPos = v->camera().position();
-			A3D::LineGroup::Vertex start;
-			start.Position3D = cameraPos;
-			start.Color4D    = QVector4D(0, 0, 1, 1);
 
-			A3D::LineGroup::Vertex end;
-			end.Position3D = endPos;
-			end.Color4D    = QVector4D(0, 0, 1, 1);
-
-			A3D::Group* group = e->model()->getOrAddGroup("test");
-
-			A3D::LineGroup* lg = group->lineGroup();
-
-			if(!lg) {
-				lg = new A3D::LineGroup();
-				group->setLineGroup(lg);
-				lg->setContents(A3D::LineGroup::Position3D | A3D::LineGroup::Color4D);
-				lg->setThickness(0.015f);
-			}
-
-			lg->vertices().clear();
-
-			lg->vertices().push_back(start);
-			lg->vertices().push_back(end);
-			lg->invalidateCache();
-		};
-
-		kem->setMouseBinding(
-			Qt::LeftButton,
-			[=]() {
-				{
-					QPointF cursorPos = v->mapFromGlobal(QCursor::pos());
-					QSize size        = v->window()->size();
-					QPointF point     = QPointF(cursorPos.x() / size.width(), cursorPos.y() / size.height());
-					qDebug() << "Pos " << cursorPos.x() << " " << cursorPos.y();
-					qDebug() << "Size " << size.width() << " " << size.height();
-					qDebug() << "Point " << point.x() << " " << point.y();
-
-					QMatrix4x4 invProj = v->camera().getProjection().inverted();
-					QMatrix4x4 invView = v->camera().getView().inverted();
-					float newX         = 2.f * point.x() - 1.f;
-					float newY         = -2.f * point.y() + 1.f;
-					float newZ         = 10.f;
-
-					QVector4D clip(newX, newY, newZ, 1.f);
-
-					qDebug() << clip;
-
-					QVector4D eye = invProj * clip;
-					eye.setW(1.f);
-
-					QVector4D world = invView * eye;
-					QVector3D end   = (world.toVector3D() / world.w());
-					ray(end * 10.f);
-				}
-			} // Shooot a ray from the actual position
-			/*{
-			QVector3D forward     = v->camera().forward();
-			QVector3D farPlanePos = forward * v->camera().farPlane();
-
-			A3D::LineGroup::Vertex end;
-			end.Position3D = farPlanePos;
-			end.Color4D    = QVector4D(1, 0, 0, 1);
-
-			ray(farPlanePos);
-		}*/
+		/*
+		*/
+	/*
 		);
 	}
+	*/
 
 	//! TODO:
 	//! Key Event manager
