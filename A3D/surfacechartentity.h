@@ -36,8 +36,6 @@ public:
 		std::vector<float> m_normalizedData;
 	};
 
-	void intersect(QVector3D origin, QVector3D rayDirection);
-
 	void setTickLength(float);
 
 	bool addNormalizedAxis(Direction3D direction, std::vector<float> data);

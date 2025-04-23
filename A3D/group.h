@@ -53,6 +53,8 @@ public:
 	void setMaterial(Material*);
 	void setMaterialProperties(MaterialProperties*);
 
+	std::optional<IntersectionResult> intersect(QVector3D origin, QVector3D rayDirection) const;
+
 private:
 	RenderOptions m_renderOptions;
 

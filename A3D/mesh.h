@@ -90,6 +90,8 @@ public:
 
 	void invalidateCache(std::uintptr_t rendererID = std::numeric_limits<std::uintptr_t>::max());
 
+	std::optional<QVector3D> intersect(QVector3D origin, QVector3D dir) const;
+
 	template <typename T>
 	T* getMeshCacheT(std::uintptr_t rendererID) const {
 		auto it = m_meshCache.find(rendererID);
@@ -116,11 +118,7 @@ public:
 
 	static std::size_t packedVertexSize(Contents);
 
-	QVector3D getHitPointFromRay(const QVector3D& orig, const QVector3D& dir);
-
 private:
-	bool
-	rayIntersectsTriangle(const QVector3D& orig, const QVector3D& dir, const QVector3D& v0, const QVector3D& v1, const QVector3D& v2, QVector3D& hitPoint, float tolerance = 1e-6);
 
 	DrawMode m_drawMode;
 	std::vector<Vertex> m_vertices;

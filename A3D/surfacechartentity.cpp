@@ -39,24 +39,6 @@ SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
 	setModel(m);
 }
 
-void SurfaceChartEntity::intersect(QVector3D origin, QVector3D rayDirection) {
-	Group* g = model()->getOrAddGroup("Mesh");
-	if(!g)
-		return;
-	Mesh* mesh = g->mesh();
-	if(!mesh)
-		return;
-
-	QVector3D hitPoint = mesh->getHitPointFromRay(origin, rayDirection);
-	if(hitPoint.isNull()) {
-		qDebug() << "No intersection";
-		return;
-	}
-	else {
-		qDebug() << "Intersection  in " << hitPoint;
-	}
-}
-
 void SurfaceChartEntity::setTickLength(float length) {
 	m_tickLength = length;
 }
