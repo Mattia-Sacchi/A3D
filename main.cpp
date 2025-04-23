@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
 		s->resourceManager(), { 0, 1, 2, 3, 4, 5, 6 }, { 0, 1, 2, 3, 4, 5, 6 },
 
 		{ 15, 3,  1, 2, 1,  3,  15, 1,  3,  13, 22, 13, 3,  1,  1,  13, 59, 97, 59, 13, 1, 2, 22, 97, 120,
-		  97, 22, 2, 1, 13, 59, 97, 59, 13, 1,  1,  3,  13, 22, 13, 3,  1,  15, 3,  1,  2, 1, 3,  15 }
+	      97, 22, 2, 1, 13, 59, 97, 59, 13, 1,  1,  3,  13, 22, 13, 3,  1,  15, 3,  1,  2, 1, 3,  15 }
 	);
 	chart->setTickLength(1);
 
@@ -162,11 +162,31 @@ int main(int argc, char* argv[]) {
 	// Used just for testing
 	KeyEventManager* kem = new KeyEventManager(v);
 	kem->setMouseBinding(Qt::RightButton, [=]() {
-		QVector3D cameraPos           = v->camera().position();
-		QPointF mousePos              = getCurrentNormalizedPos(v);
-		QVector3D unprojectedMousePos = unprojectPointFrom2D(v, mousePos);
-		QVector3D rayDirection        = (cameraPos - unprojectedMousePos).normalized();
-		chart->intersect(cameraPos, rayDirection);
+		A3D::View* view               = v;
+		QVector3D unprojectedMousePos = unprojectPointFrom2D(view, getCurrentNormalizedPos(view));
+		unprojectedMousePos -= view->camera().position();
+		unprojectedMousePos *= view->camera().farPlane();
+		unprojectedMousePos += view->camera().position();
+		std::optional<A3D::IntersectionResult> res = s->intersect(view->camera().position(), unprojectedMousePos);
+
+		if(res) {
+			qDebug() << "Intersection succeeded!";
+
+			if(res->m_resultingEntity)
+				qDebug() << "Entity:" << res->m_resultingEntity;
+
+			if(res->m_resultingModel)
+				qDebug() << "Model:" << res->m_resultingModel;
+
+			if(res->m_resultingGroup)
+				qDebug() << "Group:" << res->m_resultingGroup;
+
+			qDebug() << "Hit:" << res->m_groupLocalHitPoint;
+			qDebug() << "Global Coordinate:" << res->m_hitPoint;
+		}
+		else {
+			qDebug() << "No intersection!";
+		}
 	});
 	v->run();
 	s->run();

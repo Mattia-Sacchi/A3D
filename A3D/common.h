@@ -30,6 +30,18 @@
 
 namespace A3D {
 
+class Entity;
+class Model;
+class Group;
+
+struct IntersectionResult {
+	Entity* m_resultingEntity;
+	Model* m_resultingModel;
+	Group* m_resultingGroup;
+	QVector3D m_groupLocalHitPoint;
+	QVector3D m_hitPoint;
+};
+
 inline void normalizeMinMax(std::vector<float>& data, float min, float max) {
 	float const fInvFactor = 1.f / (max - min);
 
@@ -106,6 +118,8 @@ inline QImage const* imageWithFormat(QImage::Format format, QImage const& base, 
 	storage = base.convertToFormat(format);
 	return &storage;
 }
+
+bool intersectTriangle(QVector3D const& rayOrigin, QVector3D const& rayDirection, QVector3D const& triangle0, QVector3D const& triangle1, QVector3D const& triangle2, QVector3D& hitPoint, float const tolerance = 1e-6);
 
 }
 

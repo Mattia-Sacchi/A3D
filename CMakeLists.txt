@@ -27,6 +27,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 # Source files
 set(SOURCES
     main.cpp
+    keyeventmanager.cpp
     A3D/entitycontroller.cpp
     A3D/keycameracontroller.cpp
     A3D/linegroup.cpp
@@ -69,6 +70,7 @@ set(SOURCES
 
 # Header files
 set(HEADERS
+    keyeventmanager.h
     A3D/entitycontroller.h
     A3D/keycameracontroller.h
     A3D/linegroup.h
