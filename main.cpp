@@ -3,7 +3,7 @@
 #include <QFile>
 #include <QDir>
 #include <QTimer>
-
+#include "A3D/common.h"
 #include "A3D/view.h"
 #include "A3D/keycameracontroller.h"
 #include "A3D/textbillboardentity.h"
@@ -107,32 +107,33 @@ int main(int argc, char* argv[]) {
 
 		chart->loadSurface(sampleMeshC);
 		chart->addNormalizedAxis(A3D::SurfaceChartEntity::X_Axis, xAxisData);
+		chart->setAxisName(A3D::SurfaceChartEntity::X_Axis, "Gas");
 		chart->addLinearAxis(A3D::SurfaceChartEntity::Y_Axis, yMin, yMax);
+		chart->setAxisName(A3D::SurfaceChartEntity::X_Axis, "RPM");
 		chart->addNormalizedAxis(A3D::SurfaceChartEntity::Z_Axis, zAxisData);
+		chart->setAxisName(A3D::SurfaceChartEntity::X_Axis, "Target Gear");
 
 		chart->setPosition(QVector3D(0, 0, 3));
 	}
 
-	{
-		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
-		float yMax                     = 200;
-		float yMin                     = 0;
+	A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
+	float yMax                     = 200;
+	float yMin                     = 0;
 
-		A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(
-			s->resourceManager(), { 0, 1, 2, 3, 4, 5, 6 }, { 0, 1, 2, 3, 4, 5, 6 },
+	A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(
+		s->resourceManager(), { 0, 1, 2, 3, 4, 5, 6 }, { 0, 1, 2, 3, 4, 5, 6 },
 
-			{ 15, 3,  1, 2, 1,  3,  15, 1,  3,  13, 22, 13, 3,  1,  1,  13, 59, 97, 59, 13, 1, 2, 22, 97, 120,
-		      97, 22, 2, 1, 13, 59, 97, 59, 13, 1,  1,  3,  13, 22, 13, 3,  1,  15, 3,  1,  2, 1, 3,  15 }
-		);
-		chart->setTickLength(1);
+		{ 15, 3,  1, 2, 1,  3,  15, 1,  3,  13, 22, 13, 3,  1,  1,  13, 59, 97, 59, 13, 1, 2, 22, 97, 120,
+		  97, 22, 2, 1, 13, 59, 97, 59, 13, 1,  1,  3,  13, 22, 13, 3,  1,  15, 3,  1,  2, 1, 3,  15 }
+	);
+	chart->setTickLength(1);
 
-		chart->loadSurface(sampleMeshC);
-		chart->addLinearAxis(A3D::SurfaceChartEntity::X_Axis, 0, 6);
-		chart->addLinearAxis(A3D::SurfaceChartEntity::Y_Axis, yMin, yMax);
-		chart->addLinearAxis(A3D::SurfaceChartEntity::Z_Axis, 0, 6);
+	chart->loadSurface(sampleMeshC);
+	chart->addLinearAxis(A3D::SurfaceChartEntity::X_Axis, 0, 6);
+	chart->addLinearAxis(A3D::SurfaceChartEntity::Y_Axis, yMin, yMax);
+	chart->addLinearAxis(A3D::SurfaceChartEntity::Z_Axis, 0, 6);
 
-		chart->setPosition(QVector3D(0, 0, 1));
-	}
+	chart->setPosition(QVector3D(0, 0, 1));
 
 	A3D::View* v = new A3D::View(&w);
 	v->camera().setPosition(QVector3D(10.f, 0.f, 2.f));
@@ -159,8 +160,14 @@ int main(int argc, char* argv[]) {
 	QObject::connect(&t, &QTimer::timeout, s, &A3D::Scene::updateScene);
 
 	// Used just for testing
-	//KeyEventManager* kem = new KeyEventManager(v);
-
+	KeyEventManager* kem = new KeyEventManager(v);
+	kem->setMouseBinding(Qt::RightButton, [=]() {
+		QVector3D cameraPos           = v->camera().position();
+		QPointF mousePos              = getCurrentNormalizedPos(v);
+		QVector3D unprojectedMousePos = unprojectPointFrom2D(v, mousePos);
+		QVector3D rayDirection        = (cameraPos - unprojectedMousePos).normalized();
+		chart->intersect(cameraPos, rayDirection);
+	});
 	v->run();
 	s->run();
 

@@ -70,7 +70,7 @@ Mesh* Mesh::generateSurfaceMesh(A3D::ResourceManager* parent, std::vector<float>
 	mesh->setContents(A3D::Mesh::Position3D | A3D::Mesh::TextureCoord2D | A3D::Mesh::Normal3D);
 	mesh->indices().reserve(mesh->vertices().size());
 
-	for(size_t i = 0; i < mesh->vertices().size(); i++)
+	for(uint32_t i = 0; i < mesh->vertices().size(); i++)
 		mesh->indices().push_back(i);
 
 	mesh->optimizeIndices();

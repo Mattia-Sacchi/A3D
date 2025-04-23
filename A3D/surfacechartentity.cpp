@@ -39,6 +39,24 @@ SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
 	setModel(m);
 }
 
+void SurfaceChartEntity::intersect(QVector3D origin, QVector3D rayDirection) {
+	Group* g = model()->getOrAddGroup("Mesh");
+	if(!g)
+		return;
+	Mesh* mesh = g->mesh();
+	if(!mesh)
+		return;
+
+	QVector3D hitPoint = mesh->getHitPointFromRay(origin, rayDirection);
+	if(hitPoint.isNull()) {
+		qDebug() << "No intersection";
+		return;
+	}
+	else {
+		qDebug() << "Intersection  in " << hitPoint;
+	}
+}
+
 void SurfaceChartEntity::setTickLength(float length) {
 	m_tickLength = length;
 }
@@ -102,16 +120,11 @@ bool isSameDirection(const QVector3D& a, const QVector3D& b, float tolerance = 1
 	return std::abs(dot - 1.0f) <= tolerance;
 }
 
-bool areOrthogonal(const QVector3D& a, const QVector3D& b, float tolerance = 1e-5f) {
-	float dot = QVector3D::dotProduct(a, b);
-	return std::abs(dot) <= tolerance;
-}
-
 void setupTextInfo(TextBillboardEntity* text, float value) {
 	text->setText(QString::number(value));
 	text->setColor(Qt::white);
 	text->setFont(QFont("Arial", 64));
-	text->setScale(QVector3D(0.05, 0.05, 0.05));
+	text->setScale(QVector3D(0.05f, 0.05f, 0.05f));
 }
 
 bool SurfaceChartEntity::addAxis(Direction3D direction, std::vector<float> data, std::vector<float> normalizedData) {
@@ -123,7 +136,7 @@ bool SurfaceChartEntity::addAxis(Direction3D direction, std::vector<float> data,
 	axisTarget.Position3D += directionVector;
 	axisTarget.Color4D = QVector4D(direction == X_Axis, direction == Y_Axis, direction == Z_Axis, 1);
 	m_lineGroup->vertices().push_back(axisTarget);
-	float const minimunTextOffset = -0.1;
+	float const minimunTextOffset = -0.1f;
 
 	// Draw the ticks
 	for(size_t i = 0; i < data.size(); ++i) {
