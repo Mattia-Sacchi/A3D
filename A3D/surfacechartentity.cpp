@@ -36,6 +36,15 @@ SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
 		group->setLineGroup(m_smallerLineGroup);
 	}
 
+	{
+		A3D::Group* group = m->getOrAddGroup("IntersectLine");
+
+		m_intersectLineGroup = new LineGroup();
+		m_intersectLineGroup->setContents(A3D::LineGroup::Position3D | A3D::LineGroup::Color4D);
+		m_intersectLineGroup->setThickness(0.01f);
+		group->setLineGroup(m_intersectLineGroup);
+	}
+
 	setModel(m);
 }
 
@@ -50,6 +59,28 @@ void SurfaceChartEntity::loadSurface(Mesh* mesh) {
 	g->setRotation(QQuaternion::fromAxisAndAngle(0, 1, 0, 180));
 	g->setPosition(QVector3D(-1.f, 0.f, -1.f));
 }
+
+void SurfaceChartEntity::drawIntersect(QVector3D d) {
+	QVector3D startVector = QVector3D(1-d.x(), 0.f, 1-d.z());
+	QVector3D endVector   = QVector3D(1-d.x(), 1.f, 1-d.z());
+
+	m_intersectLineGroup->vertices().clear();
+	m_intersectLineGroup->indices().clear();
+
+	LineGroup::Vertex start;
+	LineGroup::Vertex end;
+	start.Position3D = startVector;
+	start.Color4D = QVector4D(0.5,0,1,1);
+	end.Position3D = endVector;
+	end.Color4D = QVector4D(0.5,0,1,1);
+	
+	
+
+	m_intersectLineGroup->vertices().push_back(start);
+	m_intersectLineGroup->vertices().push_back(end);
+	m_intersectLineGroup->invalidateCache();
+}
+
 void SurfaceChartEntity::debug(QVector3D d) {
 	for(size_t i = 0; i < Negative_X; i++) {
 		Axis& a                 = m_axes.at(static_cast<Direction3D>(i));

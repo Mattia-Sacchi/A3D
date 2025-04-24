@@ -81,7 +81,7 @@ void KeyCameraController::throwRayFromCamera(QVector3D endPos) {
 		return;
 
 	QVector3D cameraPos = view()->camera().position();
-	cameraPos -= QVector3D(0, 0.1f, 0);
+	cameraPos -= QVector3D(0, 0.001f, 0);
 	LineGroup::Vertex start;
 	start.Position3D = cameraPos;
 	start.Color4D    = m_rayColor;
@@ -90,7 +90,7 @@ void KeyCameraController::throwRayFromCamera(QVector3D endPos) {
 	end.Position3D = endPos;
 	end.Color4D    = m_rayColor;
 
-	Group* group = m_entity->model()->getOrAddGroup("test");
+	Group* group = m_entity->model()->getOrAddGroup("ray");
 
 	LineGroup* lg = group->lineGroup();
 
@@ -98,7 +98,7 @@ void KeyCameraController::throwRayFromCamera(QVector3D endPos) {
 		lg = new LineGroup();
 		group->setLineGroup(lg);
 		lg->setContents(LineGroup::Position3D | LineGroup::Color4D);
-		lg->setThickness(0.015f);
+		lg->setThickness(0.001f);
 	}
 
 	lg->vertices().clear();
