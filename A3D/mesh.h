@@ -39,7 +39,7 @@ public:
 	};
 	static Mesh* standardMesh(StandardMesh);
 
-	static Mesh* generateSurfaceMesh(ResourceManager* parent, std::vector<float> horizontalAxis, std::vector<float> verticalAxis, std::vector<float> data);
+	static Mesh* generateSurfaceMesh(ResourceManager* parent, std::vector<float> horizontalAxis, std::vector<float> verticalAxis, std::vector<float> data, bool horizontalAxisFixed = false, bool verticalAxisFixed = false);
 
 	enum DrawMode {
 		Triangles,

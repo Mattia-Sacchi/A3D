@@ -32,6 +32,7 @@ public:
 		inline void setName(QString name) { m_name = name; }
 		inline QString name() const { return m_name; }
 		QString m_name;
+		QStringList m_labels;
 		std::vector<float> m_data;
 		std::vector<float> m_normalizedData;
 	};
@@ -40,6 +41,7 @@ public:
 
 	bool addNormalizedAxis(Direction3D direction, std::vector<float> data);
 	bool addLinearAxis(Direction3D direction, float min, float max, unsigned int ticks = 10);
+	bool addLinearAxis(Direction3D direction, QStringList);
 
 	inline bool setAxisName(Direction3D dir, QString name) {
 		if(m_axes.find(dir) == m_axes.end())

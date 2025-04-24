@@ -61,8 +61,8 @@ void SurfaceChartEntity::loadSurface(Mesh* mesh) {
 }
 
 void SurfaceChartEntity::drawIntersect(QVector3D d) {
-	QVector3D startVector = QVector3D(1-d.x(), 0.f, 1-d.z());
-	QVector3D endVector   = QVector3D(1-d.x(), 1.f, 1-d.z());
+	QVector3D startVector = QVector3D(1 - d.x(), 0.f, 1 - d.z());
+	QVector3D endVector   = QVector3D(1 - d.x(), 1.f, 1 - d.z());
 
 	m_intersectLineGroup->vertices().clear();
 	m_intersectLineGroup->indices().clear();
@@ -70,11 +70,9 @@ void SurfaceChartEntity::drawIntersect(QVector3D d) {
 	LineGroup::Vertex start;
 	LineGroup::Vertex end;
 	start.Position3D = startVector;
-	start.Color4D = QVector4D(0.5,0,1,1);
-	end.Position3D = endVector;
-	end.Color4D = QVector4D(0.5,0,1,1);
-	
-	
+	start.Color4D    = QVector4D(0.5, 0, 1, 1);
+	end.Position3D   = endVector;
+	end.Color4D      = QVector4D(0.5, 0, 1, 1);
 
 	m_intersectLineGroup->vertices().push_back(start);
 	m_intersectLineGroup->vertices().push_back(end);
@@ -92,8 +90,12 @@ void SurfaceChartEntity::debug(QVector3D d) {
 		auto itMax = std::max_element(data.begin(), data.end());
 		if(itMax == data.end())
 			return;
-		if(i == Z_Axis)
-			qDebug() << a.name() << ": " << static_cast<size_t>(((*itMax - *itMin) * d[i]) + *itMin);
+		if(i == Z_Axis) {
+			float temp = ((*itMax - *itMin) * d[i]) + *itMin;
+			temp += 0.5;
+
+			qDebug() << a.name() << ": " << static_cast<size_t>(temp);
+		}
 		else
 			qDebug() << a.name() << ": " << ((*itMax - *itMin) * d[i]) + *itMin;
 	}
@@ -117,6 +119,11 @@ bool SurfaceChartEntity::addNormalizedAxis(Direction3D direction, std::vector<fl
 		return false;
 
 	return addAxis(direction, data, normalizedData);
+}
+
+bool SurfaceChartEntity::addLinearAxis(Direction3D direction, QStringList)
+{
+	return true;
 }
 
 bool SurfaceChartEntity::addLinearAxis(Direction3D direction, float min, float max, unsigned int ticks) {
