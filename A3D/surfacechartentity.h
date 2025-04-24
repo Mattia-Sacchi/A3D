@@ -50,6 +50,8 @@ public:
 
 	void debug(QVector3D);
 
+	void drawIntersect(QVector3D);
+
 	void loadSurface(Mesh* mesh);
 
 private:
@@ -61,6 +63,8 @@ private:
 	LineGroup* m_lineGroup;
 
 	LineGroup* m_smallerLineGroup;
+
+	LineGroup* m_intersectLineGroup;
 
 	LineGroup::Vertex m_origin;
 	std::map<Direction3D, Axis> m_axes;
