@@ -52,6 +52,7 @@ set(SOURCES
     A3D/materialproperties.cpp
     A3D/materialpropertiescache.cpp
     A3D/materialpropertiescacheogl.cpp
+    A3D/maps.cpp
     A3D/mesh.cpp
     A3D/meshcache.cpp
     A3D/meshcacheogl.cpp
@@ -95,6 +96,7 @@ set(HEADERS
     A3D/materialproperties.h
     A3D/materialpropertiescache.h
     A3D/materialpropertiescacheogl.h
+    A3D/maps.h
     A3D/mesh.h
     A3D/meshcache.h
     A3D/meshcacheogl.h

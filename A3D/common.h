@@ -30,6 +30,63 @@
 
 namespace A3D {
 
+enum Direction3D {
+	D_X_Axis = 0,
+	D_Y_Axis,
+	D_Z_Axis,
+	D_Negative_X,
+	D_Negative_Y,
+	D_Negative_Z,
+	D_Count,
+	D_Positive_Count = D_Negative_X,
+};
+
+struct AxisDataQuid {
+	QString text;
+	float value;
+};
+
+struct AxisData {
+	std::vector<AxisDataQuid> m_data;
+	bool m_isFixed;
+
+	inline size_t size() const { return m_data.size(); }
+
+	inline AxisData()
+		: m_data({}),
+		  m_isFixed(false) {}
+
+	inline std::vector<float> toVector() {
+		std::vector<float> vec;
+		vec.clear();
+		vec.reserve(m_data.size());
+		for(size_t i = 0; i < m_data.size(); i++)
+			vec.push_back(m_data[i].value);
+		return vec;
+	}
+
+	inline AxisData(std::vector<float> const& ob)
+		: m_isFixed(false) {
+		m_data.reserve(ob.size());
+		for(size_t i = 0; i < ob.size(); i++)
+			m_data.push_back({ QString::number(ob[i]), ob[i] });
+	}
+
+	inline AxisData(std::vector<QString> const& ob)
+		: m_isFixed(true) {
+		m_data.reserve(ob.size());
+		for(size_t i = 0; i < ob.size(); i++)
+			m_data.push_back({ ob[i], static_cast<float>(i) });
+	}
+
+	inline AxisData(QStringList const& ob)
+		: m_isFixed(true) {
+		m_data.reserve(ob.size());
+		for(size_t i = 0; i < ob.size(); i++)
+			m_data.push_back({ ob[i], static_cast<float>(i) });
+	}
+};
+
 class Entity;
 class Model;
 class Group;
@@ -119,7 +176,10 @@ inline QImage const* imageWithFormat(QImage::Format format, QImage const& base, 
 	return &storage;
 }
 
-bool intersectTriangle(QVector3D const& rayOrigin, QVector3D const& rayDirection, QVector3D const& triangle0, QVector3D const& triangle1, QVector3D const& triangle2, QVector3D& hitPoint, float const tolerance = 1e-6);
+bool intersectTriangle(
+	QVector3D const& rayOrigin, QVector3D const& rayDirection, QVector3D const& triangle0, QVector3D const& triangle1, QVector3D const& triangle2, QVector3D& hitPoint,
+	float const tolerance = 1e-6
+);
 
 }
 

@@ -4,7 +4,9 @@
 #include "linegroup.h"
 #include "entity.h"
 #include "mesh.h"
+#include "maps.h"
 #include <QObject>
+#include <vector>
 
 namespace A3D {
 
@@ -13,40 +15,29 @@ class SurfaceChartEntity : public Entity {
 public:
 	SurfaceChartEntity(Entity* parent = nullptr);
 
-	enum Direction3D {
-		X_Axis = 0,
-		Y_Axis,
-		Z_Axis,
-		Negative_X,
-		Negative_Y,
-		Negative_Z,
-		D_Count,
-	};
-
 	struct Axis {
-		Axis(std::vector<float> data, std::vector<float> normalizedData)
+		Axis(AxisData data, std::vector<float> normalizedData)
 			: m_name(""),
-			  m_data(data),
-			  m_normalizedData(normalizedData) {}
+			  m_axisData(std::move(data)),
+			  m_normalizedData(std::move(normalizedData)) {}
+
+		Axis() {}
 
 		inline void setName(QString name) { m_name = name; }
 		inline QString name() const { return m_name; }
 		QString m_name;
-		QStringList m_labels;
-		std::vector<float> m_data;
+		AxisData m_axisData;
 		std::vector<float> m_normalizedData;
 	};
 
 	void setTickLength(float);
 
-	bool addNormalizedAxis(Direction3D direction, std::vector<float> data);
-	bool addLinearAxis(Direction3D direction, float min, float max, unsigned int ticks = 10);
-	bool addLinearAxis(Direction3D direction, QStringList);
+	bool setMap(ResourceManager* rm, Map map);
 
 	inline bool setAxisName(Direction3D dir, QString name) {
-		if(m_axes.find(dir) == m_axes.end())
+		if(dir >= m_axes.size())
 			return false;
-		m_axes.at(dir).setName(name);
+		m_axes[dir].setName(name);
 		return true;
 	}
 
@@ -54,13 +45,14 @@ public:
 
 	void drawIntersect(QVector3D);
 
-	void loadSurface(Mesh* mesh);
-
 private:
 	const std::array<QVector3D, D_Count> m_commonDirections = {
 		QVector3D(1, 0, 0), QVector3D(0, 1, 0), QVector3D(0, 0, 1), QVector3D(-1, 0, 0), QVector3D(0, -1, 0), QVector3D(0, 0, -1),
 	};
-	bool addAxis(Direction3D direction, std::vector<float> data, std::vector<float> normalizedData);
+	bool addAxis(Direction3D direction, AxisData data);
+	Axis getAxisFromAxisData(AxisData data);
+	void addTickText(Direction3D dir, QString text, QVector3D textBasePosition);
+	void addTick(LineGroup::Vertex base, LineGroup::Vertex target);
 	float m_tickLength;
 	LineGroup* m_lineGroup;
 
@@ -69,7 +61,7 @@ private:
 	LineGroup* m_intersectLineGroup;
 
 	LineGroup::Vertex m_origin;
-	std::map<Direction3D, Axis> m_axes;
+	std::array<Axis, D_Positive_Count> m_axes;
 };
 
 }

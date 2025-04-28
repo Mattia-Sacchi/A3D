@@ -9,72 +9,8 @@
 #include "A3D/textbillboardentity.h"
 #include "A3D/surfacechartentity.h"
 #include "keyeventmanager.h"
-
-std::vector<float> generateGaussianKernel(int size, float sigma) {
-	if(size % 2 == 0) {
-		throw std::invalid_argument("Kernel size must be odd");
-	}
-
-	int halfSize = size / 2;
-	std::vector<std::vector<float>> kernel(size, std::vector<float>(size));
-	float sum = 0.0f;
-
-	const float PI = 3.14159265358979323846f;
-	float sigma2   = 2.0f * sigma * sigma;
-
-	for(int y = -halfSize; y <= halfSize; ++y) {
-		for(int x = -halfSize; x <= halfSize; ++x) {
-			float value                        = std::exp(-(x * x + y * y) / sigma2) / (PI * sigma2);
-			kernel[y + halfSize][x + halfSize] = value;
-			sum += value;
-		}
-	}
-
-	// Normalize the kernel
-	for(int y = 0; y < size; ++y)
-		for(int x = 0; x < size; ++x)
-			kernel[y][x] /= sum;
-
-	std::vector<float> data;
-
-	for(int y = 0; y < size; ++y)
-		for(int x = 0; x < size; ++x)
-			data.push_back(kernel[y][x]);
-	return data;
-}
-
-std::vector<float> generateGaussianEdgeKernel(int size, float power) {
-	if(size % 2 == 0) {
-		throw std::invalid_argument("Size must be odd");
-	}
-
-	int halfSize = size / 2;
-	std::vector<std::vector<float>> matrix(size, std::vector<float>(size));
-	float maxDist = std::sqrt(2.0f) * halfSize; // Diagonal corner distance
-
-	float sum = 0.0f;
-
-	for(int y = -halfSize; y <= halfSize; ++y) {
-		for(int x = -halfSize; x <= halfSize; ++x) {
-			float dist                         = std::sqrt(x * x + y * y);
-			float value                        = std::pow(dist / maxDist, power); // scale to [0,1] and raise to power
-			matrix[y + halfSize][x + halfSize] = value;
-			sum += value;
-		}
-	}
-
-	// Optional normalization
-	for(int y = 0; y < size; ++y)
-		for(int x = 0; x < size; ++x)
-			matrix[y][x] /= sum;
-
-	std::vector<float> data;
-
-	for(int y = 0; y < size; ++y)
-		for(int x = 0; x < size; ++x)
-			data.push_back(matrix[y][x]);
-	return data;
-}
+#include "mathfunctions.h"
+#include "A3D/maps.h"
 
 int main(int argc, char* argv[]) {
 
@@ -88,64 +24,32 @@ int main(int argc, char* argv[]) {
 
 	A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
 
-	std::vector<float> xAxisData = { 0, 10, 15, 20, 30, 40, 50, 75, 100 }; // Gas
-	std::vector<float> zAxisData = { 2, 3, 4, 5, 6 };                      // Marcia Target
-	float yMax                   = 6400;
-	float yMin                   = 1800;
+	A3D::Map autoUpMap;
+	bool ret = true;
+	ret      = ret && autoUpMap.setAxis(A3D::D_X_Axis, { 0, 10, 15, 20, 30, 40, 50, 75, 100 });
+	ret      = ret && autoUpMap.setFixedAxis(A3D::D_Z_Axis, { "1to2", "2to3", "3to4", "4to5", "5to6" });
+	ret      = ret && autoUpMap.setLinearAxis(A3D::D_Y_Axis, 1800, 6400, 10);
+	ret      = ret
+	      && autoUpMap.setData(
+			  {
+				  1800, 2000, 2600, 3000, 3500, 4300, 4600, 5800, 6100, // 2
+				  1800, 2300, 2900, 3300, 3500, 4300, 4600, 5800, 6100, // 3
+				  1800, 2300, 2900, 3300, 3500, 4300, 4600, 5800, 6100, // 4
+				  1800, 2300, 2900, 3300, 3900, 4300, 4600, 6000, 6100, // 5
+				  1800, 2300, 2900, 3300, 4000, 4600, 4900, 6100, 6400, // 6
+			  }
+		  );
 
-	// Giri
-	A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(
-		s->resourceManager(), xAxisData, zAxisData,
-
-		{
-			1800, 2000, 2600, 3000, 3500, 4300, 4600, 5800, 6100, // 2
-			1800, 2300, 2900, 3300, 3500, 4300, 4600, 5800, 6100, // 3
-			1800, 2300, 2900, 3300, 3500, 4300, 4600, 5800, 6100, // 4
-			1800, 2300, 2900, 3300, 3900, 4300, 4600, 6000, 6100, // 5
-			1800, 2300, 2900, 3300, 4000, 4600, 4900, 6100, 6400, // 6
-		},
-		false, true
-	);
-	sampleMeshC->optimizeIndices();
-	chart->setTickLength(1);
-	chart->loadSurface(sampleMeshC);
-	chart->addNormalizedAxis(A3D::SurfaceChartEntity::X_Axis, xAxisData);
-	chart->setAxisName(A3D::SurfaceChartEntity::X_Axis, "Gas");
-	chart->addLinearAxis(A3D::SurfaceChartEntity::Y_Axis, yMin, yMax);
-	chart->setAxisName(A3D::SurfaceChartEntity::Y_Axis, "RPM");
-	chart->addNormalizedAxis(A3D::SurfaceChartEntity::Z_Axis, zAxisData);
-	chart->setAxisName(A3D::SurfaceChartEntity::Z_Axis, "Target Gear");
-
-	chart->setPosition(QVector3D(0, 0, 3));
-
-	{
-		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
-		float yMax                     = 200;
-		float yMin                     = 0;
-		static const size_t size       = 151;
-		std::vector<float> ax;
-		for(int i = 0; i < size; i++)
-			ax.push_back(i);
-
-		std::vector<float> gaussMatrix     = generateGaussianKernel(size, 30.f);
-		std::vector<float> edgeGuassMatrix = generateGaussianEdgeKernel(size, 5.f);
-		for(int i = 0; i < gaussMatrix.size(); i++) {
-			gaussMatrix[i] += edgeGuassMatrix[i] * 0.5;
-		}
-
-		A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(s->resourceManager(), ax, ax, gaussMatrix);
-		chart->setTickLength(1);
-
-		chart->loadSurface(sampleMeshC);
-		chart->addLinearAxis(A3D::SurfaceChartEntity::X_Axis, 0, 6);
-		chart->addLinearAxis(A3D::SurfaceChartEntity::Y_Axis, yMin, yMax);
-		chart->addLinearAxis(A3D::SurfaceChartEntity::Z_Axis, 0, 6);
-
-		chart->setPosition(QVector3D(0, 0, 1));
+	if(!autoUpMap.isValid() || !ret) {
+		qDebug() << "Error map is not valid";
+		return 1;
 	}
+	chart->setTickLength(1);
+	chart->setMap(s->resourceManager(), autoUpMap);
+	chart->setPosition(QVector3D(0, 0, 0));
 
 	A3D::View* v = new A3D::View(&w);
-	v->camera().setPosition(QVector3D(10.f, 0.f, 2.f));
+	v->camera().setPosition(QVector3D(2.f, 2.f, 2.f));
 	v->camera().setOrientationTarget(QVector3D(0.f, 0.f, 0.f));
 	v->setScene(s);
 
@@ -211,3 +115,31 @@ int main(int argc, char* argv[]) {
 	int rv = a.exec();
 	return rv;
 }
+
+/*
+	{
+		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
+		float yMax                     = 200;
+		float yMin                     = 0;
+		static const size_t size       = 151;
+		std::vector<float> ax;
+		for(int i = 0; i < size; i++)
+			ax.push_back(i);
+
+		std::vector<float> gaussMatrix     = generateGaussianKernel(size, 30.f);
+		std::vector<float> edgeGuassMatrix = generateGaussianEdgeKernel(size, 5.f);
+		for(int i = 0; i < gaussMatrix.size(); i++) {
+			gaussMatrix[i] += edgeGuassMatrix[i] * 0.5;
+		}
+
+		A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(s->resourceManager(), ax, ax, gaussMatrix);
+		chart->setTickLength(1);
+
+		chart->loadSurface(sampleMeshC);
+		chart->addLinearAxis(A3D::SurfaceChartEntity::X_Axis, 0, 6);
+		chart->addLinearAxis(A3D::SurfaceChartEntity::Y_Axis, yMin, yMax);
+		chart->addLinearAxis(A3D::SurfaceChartEntity::Z_Axis, 0, 6);
+
+		chart->setPosition(QVector3D(0, 0, 1));
+	}
+*/
