@@ -47,6 +47,9 @@ int main(int argc, char* argv[]) {
 	chart->setTickLength(1);
 	chart->setMap(s->resourceManager(), autoUpMap);
 	chart->setPosition(QVector3D(0, 0, 0));
+	chart->setAxisName(A3D::D_X_Axis, "Gas");
+	chart->setAxisName(A3D::D_Y_Axis, "Rpm");
+	chart->setAxisName(A3D::D_Z_Axis, "Target Gear");
 
 	A3D::View* v = new A3D::View(&w);
 	v->camera().setPosition(QVector3D(2.f, 2.f, 2.f));
