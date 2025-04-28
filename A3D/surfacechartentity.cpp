@@ -110,13 +110,15 @@ void SurfaceChartEntity::debug(QVector3D d) {
 		auto itMax = std::max_element(data.begin(), data.end());
 		if(itMax == data.end())
 			return;
-
+		float pos = d[i];
 		if(a.m_axisData.m_isFixed) {
 			// I need to denormalize it and obtain back the string
-			qDebug() << a.name() << ": " << ((*itMax - *itMin) * d[i]) + *itMin;
+			std::size_t c = static_cast<std::size_t>(pos * (a.m_axisData.size()));
+			c             = std::clamp<size_t>(c, 0, a.m_axisData.size() - 1);
+			qDebug() << a.name() << ": " << a.m_axisData.m_data[c].text;
 		}
 		else
-			qDebug() << a.name() << ": " << ((*itMax - *itMin) * d[i]) + *itMin;
+			qDebug() << a.name() << ": " << ((*itMax - *itMin) * pos) + *itMin;
 	}
 }
 

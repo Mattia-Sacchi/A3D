@@ -31,8 +31,8 @@ Mesh* Mesh::generateSurfaceMesh(
 	std::size_t const height = verticalAxis.size();
 	std::size_t const width  = horizontalAxis.size();
 
-	float const xThickness = (1.f/width) *0.5;
-	float const yThickness = (1.f/height) *0.5;
+	float const xThickness = (1.f/width) * 0.9;
+	float const yThickness = (1.f/height) * 0.9;
 
 	for(size_t y = 0; y < height - 1 + verticalAxisFixed; ++y) {
 		for(size_t x = 0; x < width - 1 + horizontalAxisFixed; ++x) {
