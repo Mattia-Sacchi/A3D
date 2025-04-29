@@ -4,6 +4,7 @@
 #include "common.h"
 #include "meshcache.h"
 #include "resource.h"
+#include "maps.h"
 
 namespace A3D {
 
@@ -39,7 +40,8 @@ public:
 	};
 	static Mesh* standardMesh(StandardMesh);
 
-	static Mesh* generateSurfaceMesh(ResourceManager* parent, std::vector<float> horizontalAxis, std::vector<float> verticalAxis, std::vector<float> data, bool horizontalAxisFixed = false, bool verticalAxisFixed = false);
+
+	static Mesh* generateSurfaceMesh(ResourceManager* parent,Map const& map);
 
 	enum DrawMode {
 		Triangles,

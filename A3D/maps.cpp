@@ -6,7 +6,7 @@ bool Map::setLinearAxis(Direction3D dir, float min, float max, size_t ticks) {
 	if(dir >= A3D::D_Positive_Count) {
 		return false;
 	}
-	m_axes[dir] = getLinearAxis(min, max, ticks);
+	m_axes[dir] = getLinearAxis(min, max, ticks-1);
 	return true;
 }
 

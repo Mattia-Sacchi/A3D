@@ -16,50 +16,74 @@ static void generateNormal(A3D::Mesh::Vertex& triangleVertexA, A3D::Mesh::Vertex
 }
 
 Mesh* Mesh::generateSurfaceMesh(
-	A3D::ResourceManager* parent, std::vector<float> horizontalAxis, std::vector<float> verticalAxis, std::vector<float> data, bool horizontalAxisFixed, bool verticalAxisFixed
+	A3D::ResourceManager* parent, Map const& map
 ) {
-	if(horizontalAxis.size() * verticalAxis.size() != data.size())
+	if(!map.isValid())
+		return nullptr;
+	std::vector<float> data = map.data();
+	std::vector<float> xAxis = map.getAxis(D_X_Axis).toVector();
+	std::vector<float> yAxis = map.getAxis(D_Y_Axis).toVector();
+	std::vector<float> zAxis = map.getAxis(D_Z_Axis).toVector();
+
+	bool xAxisFixed = map.getAxis(D_X_Axis).m_isFixed;
+	bool yAxisFixed = map.getAxis(D_Y_Axis).m_isFixed;
+	bool zAxisFixed = map.getAxis(D_Z_Axis).m_isFixed;
+
+	float yMin = 0.f;
+	float yMax = 0.f;
+
+	auto itMin = std::min_element(yAxis.begin(), yAxis.end());
+	auto itMax = std::max_element(yAxis.begin(), yAxis.end());
+	yMin = *itMin;
+	yMax = *itMax;
+	// Sanity check already did in map isValid();
+
+	if(xAxis.size() * zAxis.size() != data.size())
 		return nullptr;
 
 	A3D::Mesh* mesh = new A3D::Mesh(parent);
 	mesh->setDrawMode(A3D::Mesh::IndexedTriangles);
 
-	normalize(horizontalAxis);
-	normalize(verticalAxis);
-	normalize(data);
+	normalize(xAxis);
+	normalize(zAxis);
+	if(yAxisFixed)
+		normalize(data);
+	else
+		normalizeMinMax(data,yMin,yMax);
 
-	std::size_t const height = verticalAxis.size();
-	std::size_t const width  = horizontalAxis.size();
+
+	std::size_t const height = zAxis.size();
+	std::size_t const width  = xAxis.size();
 
 	float const xThickness = (1.f/width) * 0.9;
-	float const yThickness = (1.f/height) * 0.9;
+	float const zThickness = (1.f/height) * 0.9;
 
-	for(size_t y = 0; y < height - 1 + verticalAxisFixed; ++y) {
-		for(size_t x = 0; x < width - 1 + horizontalAxisFixed; ++x) {
+	for(size_t y = 0; y < height - 1 + zAxisFixed; ++y) {
+		for(size_t x = 0; x < width - 1 + xAxisFixed; ++x) {
 			A3D::Mesh::Vertex topLeft;
 			A3D::Mesh::Vertex topRight;
 			A3D::Mesh::Vertex bottomLeft;
 			A3D::Mesh::Vertex bottomRight;
 
-			getVertexFromCoordinate(topLeft, horizontalAxis, verticalAxis, data, x, y);
-			getVertexFromCoordinate(topRight, horizontalAxis, verticalAxis, data, x + 1 - horizontalAxisFixed, y);
-			getVertexFromCoordinate(bottomLeft, horizontalAxis, verticalAxis, data, x, y + 1 - verticalAxisFixed);
-			getVertexFromCoordinate(bottomRight, horizontalAxis, verticalAxis, data, x + 1 - horizontalAxisFixed, y + 1 - verticalAxisFixed);
+			getVertexFromCoordinate(topLeft, xAxis, zAxis, data, x, y);
+			getVertexFromCoordinate(topRight, xAxis, zAxis, data, x + 1 - xAxisFixed, y);
+			getVertexFromCoordinate(bottomLeft, xAxis, zAxis, data, x, y + 1 - zAxisFixed);
+			getVertexFromCoordinate(bottomRight, xAxis, zAxis, data, x + 1 - xAxisFixed, y + 1 - zAxisFixed);
 
-			if(horizontalAxisFixed) {
+			if(xAxisFixed) {
 
-				float leftThickness  = topLeft.Position3D.x() * yThickness;
-				float rightThickness = (1 - topLeft.Position3D.x()) * yThickness;
+				float leftThickness  = topLeft.Position3D.x() * xThickness;
+				float rightThickness = (1 - topLeft.Position3D.x()) * xThickness;
 
 				topLeft.Position3D.setX(topLeft.Position3D.x() - leftThickness);
 				bottomLeft.Position3D.setX(bottomLeft.Position3D.x() - leftThickness);
 				topRight.Position3D.setX(topRight.Position3D.x() + rightThickness);
 				bottomRight.Position3D.setX(bottomRight.Position3D.x() + rightThickness);
 			}
-			if(verticalAxisFixed) {
+			if(zAxisFixed) {
 
-				float leftThickness  = topLeft.Position3D.z() * yThickness;
-				float rightThickness = (1 - topLeft.Position3D.z()) * yThickness;
+				float leftThickness  = topLeft.Position3D.z() * zThickness;
+				float rightThickness = (1 - topLeft.Position3D.z()) * zThickness;
 
 
 				topLeft.Position3D.setZ(topLeft.Position3D.z()- leftThickness);
