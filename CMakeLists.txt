@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(A3D)
+project(Tools_A3D)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -28,6 +28,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 set(SOURCES
     main.cpp
     keyeventmanager.cpp
+    mathfunctions.cpp
     A3D/entitycontroller.cpp
     A3D/keycameracontroller.cpp
     A3D/linegroup.cpp
@@ -72,6 +73,7 @@ set(SOURCES
 # Header files
 set(HEADERS
     keyeventmanager.h
+    mathfunctions.h
     A3D/entitycontroller.h
     A3D/keycameracontroller.h
     A3D/linegroup.h

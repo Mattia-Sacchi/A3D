@@ -157,7 +157,7 @@ void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* r, CoreGLFunctio
 	// Mip Levels = 1 -> Size =   8x8
 
 	static int const maxMipLevels        = 5;
-	static int const prefilterSideLength = 4 * static_cast<int>(std::powf(2.f, static_cast<float>(maxMipLevels)) + 0.1f);
+	static int const prefilterSideLength = 4 * static_cast<int>(std::pow(2.f, static_cast<float>(maxMipLevels)) + 0.1f);
 	static QSize const prefilterSize(prefilterSideLength, prefilterSideLength);
 
 	gl->glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemapPrefilter);
@@ -201,7 +201,7 @@ void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* r, CoreGLFunctio
 	for(int i = maxMipLevels; i >= 1; --i) {
 		int const glMipLevel = maxMipLevels - i;
 
-		int const mipLevelSideLength = 4 * static_cast<int>(std::powf(2.f, static_cast<float>(i)) + 0.1f);
+		int const mipLevelSideLength = 4 * static_cast<int>(std::pow(2.f, static_cast<float>(i)) + 0.1f);
 		QSize const mipLevelSize(mipLevelSideLength, mipLevelSideLength);
 
 		gl->glViewport(0, 0, mipLevelSize.width(), mipLevelSize.height());
