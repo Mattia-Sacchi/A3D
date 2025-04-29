@@ -15,41 +15,42 @@ static void generateNormal(A3D::Mesh::Vertex& triangleVertexA, A3D::Mesh::Vertex
 		= QVector3D::normal(triangleVertexA.Position3D, triangleVertexB.Position3D, triangleVertexC.Position3D);
 }
 
+static void normalize(std::vector<float> & data, float min, float max, bool fixed)
+{
+	if(fixed)
+		normalize(data);
+	else
+		normalizeMinMax(data,min,max);
+}
+
 Mesh* Mesh::generateSurfaceMesh(
 	A3D::ResourceManager* parent, Map const& map
 ) {
 	if(!map.isValid())
 		return nullptr;
 	std::vector<float> data = map.data();
-	std::vector<float> xAxis = map.getAxis(D_X_Axis).toVector();
-	std::vector<float> yAxis = map.getAxis(D_Y_Axis).toVector();
-	std::vector<float> zAxis = map.getAxis(D_Z_Axis).toVector();
+	
+	AxisData xAxisData = map.getAxis(D_X_Axis);
+	AxisData yAxisData = map.getAxis(D_Y_Axis);
+	AxisData zAxisData = map.getAxis(D_Z_Axis);
 
-	bool xAxisFixed = map.getAxis(D_X_Axis).m_isFixed;
-	bool yAxisFixed = map.getAxis(D_Y_Axis).m_isFixed;
-	bool zAxisFixed = map.getAxis(D_Z_Axis).m_isFixed;
+	std::vector<float> xAxis = xAxisData.toVector();
+	std::vector<float> yAxis = yAxisData.toVector();
+	std::vector<float> zAxis = zAxisData.toVector();
 
-	float yMin = 0.f;
-	float yMax = 0.f;
+	bool const xAxisFixed = xAxisData.m_isFixed;
+	bool const yAxisFixed = yAxisData.m_isFixed;
+	bool const zAxisFixed = zAxisData.m_isFixed;
 
-	auto itMin = std::min_element(yAxis.begin(), yAxis.end());
-	auto itMax = std::max_element(yAxis.begin(), yAxis.end());
-	yMin = *itMin;
-	yMax = *itMax;
-	// Sanity check already did in map isValid();
-
-	if(xAxis.size() * zAxis.size() != data.size())
-		return nullptr;
+	
 
 	A3D::Mesh* mesh = new A3D::Mesh(parent);
 	mesh->setDrawMode(A3D::Mesh::IndexedTriangles);
 
-	normalize(xAxis);
-	normalize(zAxis);
-	if(yAxisFixed)
-		normalize(data);
-	else
-		normalizeMinMax(data,yMin,yMax);
+	normalize(xAxis, xAxisData.m_min, xAxisData.m_max, xAxisFixed);
+	normalize(zAxis, zAxisData.m_min, zAxisData.m_max, zAxisFixed);
+	normalize(data, yAxisData.m_min, yAxisData.m_max, yAxisFixed);
+
 
 
 	std::size_t const height = zAxis.size();

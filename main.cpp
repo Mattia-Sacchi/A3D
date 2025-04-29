@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 	bool ret = true;
 	ret      = ret && autoUpMap.setAxis(A3D::D_X_Axis, { 0, 10, 15, 20, 30, 40, 50, 75, 100 });
 	ret      = ret && autoUpMap.setFixedAxis(A3D::D_Z_Axis, { "1to2", "2to3", "3to4", "4to5", "5to6" });
-	ret      = ret && autoUpMap.setLinearAxis(A3D::D_Y_Axis, 800, 7000, 10);
+	ret      = ret && autoUpMap.setLinearAxis(A3D::D_Y_Axis, 1500, 7000, 10);
 	ret      = ret
 	      && autoUpMap.setData(
 			  {
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 		bool ret = true;
 		ret      = ret && autoUpMap.setAxis(A3D::D_X_Axis, { 0, 10, 15, 20, 30, 40, 50, 75, 100 });
 		ret      = ret && autoUpMap.setFixedAxis(A3D::D_Z_Axis, { "1to2", "2to3", "3to4", "4to5", "5to6" });
-		ret      = ret && autoUpMap.setLinearAxis(A3D::D_Y_Axis, 800, 7000, 10);
+		ret      = ret && autoUpMap.setLinearAxis(A3D::D_Y_Axis, 1500, 7000, 10);
 		ret      = ret
 			  && autoUpMap.setData(
 				  {
