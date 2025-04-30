@@ -15,51 +15,76 @@ static void generateNormal(A3D::Mesh::Vertex& triangleVertexA, A3D::Mesh::Vertex
 		= QVector3D::normal(triangleVertexA.Position3D, triangleVertexB.Position3D, triangleVertexC.Position3D);
 }
 
+static void normalize(std::vector<float> & data, float min, float max, bool fixed)
+{
+	if(fixed)
+		normalize(data);
+	else
+		normalizeMinMax(data,min,max);
+}
+
 Mesh* Mesh::generateSurfaceMesh(
-	A3D::ResourceManager* parent, std::vector<float> horizontalAxis, std::vector<float> verticalAxis, std::vector<float> data, bool horizontalAxisFixed, bool verticalAxisFixed
+	A3D::ResourceManager* parent, Map const& map
 ) {
-	if(horizontalAxis.size() * verticalAxis.size() != data.size())
+	if(!map.isValid())
 		return nullptr;
+	std::vector<float> data = map.data();
+	
+	AxisData xAxisData = map.getAxis(D_X_Axis);
+	AxisData yAxisData = map.getAxis(D_Y_Axis);
+	AxisData zAxisData = map.getAxis(D_Z_Axis);
+
+	std::vector<float> xAxis = xAxisData.toVector();
+	std::vector<float> yAxis = yAxisData.toVector();
+	std::vector<float> zAxis = zAxisData.toVector();
+
+	bool const xAxisFixed = xAxisData.m_isFixed;
+	bool const yAxisFixed = yAxisData.m_isFixed;
+	bool const zAxisFixed = zAxisData.m_isFixed;
+
+	
 
 	A3D::Mesh* mesh = new A3D::Mesh(parent);
 	mesh->setDrawMode(A3D::Mesh::IndexedTriangles);
 
-	normalize(horizontalAxis);
-	normalize(verticalAxis);
-	normalize(data);
+	normalize(xAxis, xAxisData.m_min, xAxisData.m_max, xAxisFixed);
+	normalize(zAxis, zAxisData.m_min, zAxisData.m_max, zAxisFixed);
+	normalize(data, yAxisData.m_min, yAxisData.m_max, yAxisFixed);
 
-	std::size_t const height = verticalAxis.size();
-	std::size_t const width  = horizontalAxis.size();
+
+
+	std::size_t const height = zAxis.size();
+	std::size_t const width  = xAxis.size();
 
 	float const xThickness = (1.f/width) * 0.9;
-	float const yThickness = (1.f/height) * 0.9;
+	float const zThickness = (1.f/height) * 0.9;
 
-	for(size_t y = 0; y < height - 1 + verticalAxisFixed; ++y) {
-		for(size_t x = 0; x < width - 1 + horizontalAxisFixed; ++x) {
+	for(size_t y = 0; y < height - 1 + zAxisFixed; ++y) {
+		for(size_t x = 0; x < width - 1 + xAxisFixed; ++x) {
 			A3D::Mesh::Vertex topLeft;
 			A3D::Mesh::Vertex topRight;
 			A3D::Mesh::Vertex bottomLeft;
 			A3D::Mesh::Vertex bottomRight;
 
-			getVertexFromCoordinate(topLeft, horizontalAxis, verticalAxis, data, x, y);
-			getVertexFromCoordinate(topRight, horizontalAxis, verticalAxis, data, x + 1 - horizontalAxisFixed, y);
-			getVertexFromCoordinate(bottomLeft, horizontalAxis, verticalAxis, data, x, y + 1 - verticalAxisFixed);
-			getVertexFromCoordinate(bottomRight, horizontalAxis, verticalAxis, data, x + 1 - horizontalAxisFixed, y + 1 - verticalAxisFixed);
+			getVertexFromCoordinate(topLeft, xAxis, zAxis, data, x, y);
+			getVertexFromCoordinate(topRight, xAxis, zAxis, data, x + 1 - xAxisFixed, y);
+			getVertexFromCoordinate(bottomLeft, xAxis, zAxis, data, x, y + 1 - zAxisFixed);
+			getVertexFromCoordinate(bottomRight, xAxis, zAxis, data, x + 1 - xAxisFixed, y + 1 - zAxisFixed);
 
-			if(horizontalAxisFixed) {
+			if(xAxisFixed) {
 
-				float leftThickness  = topLeft.Position3D.x() * yThickness;
-				float rightThickness = (1 - topLeft.Position3D.x()) * yThickness;
+				float leftThickness  = topLeft.Position3D.x() * xThickness;
+				float rightThickness = (1 - topLeft.Position3D.x()) * xThickness;
 
 				topLeft.Position3D.setX(topLeft.Position3D.x() - leftThickness);
 				bottomLeft.Position3D.setX(bottomLeft.Position3D.x() - leftThickness);
 				topRight.Position3D.setX(topRight.Position3D.x() + rightThickness);
 				bottomRight.Position3D.setX(bottomRight.Position3D.x() + rightThickness);
 			}
-			if(verticalAxisFixed) {
+			if(zAxisFixed) {
 
-				float leftThickness  = topLeft.Position3D.z() * yThickness;
-				float rightThickness = (1 - topLeft.Position3D.z()) * yThickness;
+				float leftThickness  = topLeft.Position3D.z() * zThickness;
+				float rightThickness = (1 - topLeft.Position3D.z()) * zThickness;
 
 
 				topLeft.Position3D.setZ(topLeft.Position3D.z()- leftThickness);

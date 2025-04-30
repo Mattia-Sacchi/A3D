@@ -81,7 +81,7 @@ bool SurfaceChartEntity::setMap(ResourceManager* rm, Map map) {
 	AxisData zAxis = map.getAxis(D_Z_Axis);
 	AxisData yAxis = map.getAxis(D_Y_Axis);
 
-	Mesh* mesh = Mesh::generateSurfaceMesh(rm, xAxis.toVector(), zAxis.toVector(), map.data(), xAxis.m_isFixed, zAxis.m_isFixed);
+	Mesh* mesh = Mesh::generateSurfaceMesh(rm, map);
 
 	mesh->setRenderOptions(Mesh::DisableCulling);
 	g->setRotation(QQuaternion::fromAxisAndAngle(0, 1, 0, 180));

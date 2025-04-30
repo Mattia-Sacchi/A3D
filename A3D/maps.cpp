@@ -6,7 +6,7 @@ bool Map::setLinearAxis(Direction3D dir, float min, float max, size_t ticks) {
 	if(dir >= A3D::D_Positive_Count) {
 		return false;
 	}
-	m_axes[dir] = getLinearAxis(min, max, ticks);
+	m_axes[dir] = AxisData(getLinearAxis(min, max, ticks-1), min, max);
 	return true;
 }
 
@@ -22,6 +22,8 @@ bool Map::setAxis(Direction3D dir, std::vector<float> data) {
 	if(dir >= D_Positive_Count) {
 		return false;
 	}
+
+	//for(float const& it : )
 	m_axes[dir] = data;
 	return true;
 }
