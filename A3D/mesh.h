@@ -40,9 +40,6 @@ public:
 	};
 	static Mesh* standardMesh(StandardMesh);
 
-
-	static Mesh* generateSurfaceMesh(ResourceManager* parent,Map const& map);
-
 	enum DrawMode {
 		Triangles,
 		IndexedTriangles,

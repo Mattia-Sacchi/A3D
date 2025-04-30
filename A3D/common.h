@@ -41,6 +41,20 @@ enum Direction3D {
 	D_Positive_Count = D_Negative_X,
 };
 
+inline std::vector<float> getLinearAxis(float min, float max, size_t ticks = 10) {
+	std::vector<float> data;
+	data.clear();
+	data.reserve(ticks);
+
+	float const multiplier       = 1 / static_cast<float>(ticks);
+	float const strokeMultiplier = (max - min) / ticks;
+
+	for(size_t i = 0; i <= ticks; i++)
+		data.push_back((strokeMultiplier * i) + min);
+
+	return data;
+}
+
 struct AxisDataQuid {
 	QString text;
 	float value;
@@ -51,12 +65,25 @@ struct AxisData {
 	bool m_isFixed;
 	float m_min;
 	float m_max;
+	size_t m_ticks;
+	bool m_isChartData;
+
+	inline bool isChartData() const { return m_isChartData; }
+
+	inline std::vector<float> getChartData() const
+	{
+		return getLinearAxis(m_min, m_max, m_ticks);
+	}
 
 	inline size_t size() const { return m_data.size(); }
 
 	inline AxisData()
 		: m_data({}),
-		  m_isFixed(false) {}
+		  m_isFixed(false),
+		  m_min(0.f),
+		  m_max(0.f),
+		  m_ticks(0),
+		  m_isChartData(true) {}
 
 	inline std::vector<float> toVector() {
 		std::vector<float> vec;
@@ -67,42 +94,67 @@ struct AxisData {
 		return vec;
 	}
 
+	inline AxisData(std::vector<float> const& ob, size_t ticks)
+		: AxisData(ob) {
+		m_ticks       = ticks;
+		m_isChartData = false;
+	}
+
 	inline AxisData(std::vector<float> const& ob)
-		: m_isFixed(false) {
-		m_data.reserve(ob.size());
+		: m_isFixed(false),
+		  m_isChartData(true) {
+		m_data.reserve(m_ticks = ob.size());
 		m_min = ob.front();
 		m_max = ob.front();
-		
-		for(size_t i = 0; i < ob.size(); i++){
+
+		for(size_t i = 0; i < m_ticks; i++) {
 			if(ob[i] < m_min)
 				m_min = ob[i];
 			if(ob[i] > m_max)
 				m_max = ob[i];
-				
+
 			m_data.push_back({ QString::number(ob[i]), ob[i] });
 		}
 	}
 
-	inline AxisData(std::vector<float> const& ob, float min , float max)
-		: m_isFixed(false), m_min(min),m_max(max) {
+	inline AxisData(std::vector<float> const& ob, float min, float max)
+		: m_isFixed(false),
+		  m_min(min),
+		  m_max(max),
+		  m_isChartData(true) {
+		m_data.reserve(m_ticks = ob.size());
+		for(size_t i = 0; i < m_ticks; i++)
+			m_data.push_back({ QString::number(ob[i]), ob[i] });
+	}
+
+	inline AxisData(std::vector<float> const& ob, float min, float max, size_t chartTicks)
+		: m_isFixed(false),
+		  m_min(min),
+		  m_max(max),
+		  m_isChartData(false) {
+		m_ticks = chartTicks;
 		m_data.reserve(ob.size());
-		
 		for(size_t i = 0; i < ob.size(); i++)
 			m_data.push_back({ QString::number(ob[i]), ob[i] });
-		
 	}
 
 	inline AxisData(std::vector<QString> const& ob)
-		: m_isFixed(true),m_min(0.f),m_max(1.f) {
-		m_data.reserve(ob.size());
-		for(size_t i = 0; i < ob.size(); i++)
+		: m_isFixed(true),
+		  m_min(0.f),
+		  m_max(ob.size()),
+		  m_isChartData(true) {
+		m_data.reserve(m_ticks = ob.size());
+		for(size_t i = 0; i < m_ticks; i++)
 			m_data.push_back({ ob[i], static_cast<float>(i) });
 	}
 
 	inline AxisData(QStringList const& ob)
-		: m_isFixed(true),m_min(0.f),m_max(1.f) {
-		m_data.reserve(ob.size());
-		for(size_t i = 0; i < ob.size(); i++)
+		: m_isFixed(true),
+		  m_min(0.f),
+		  m_max(ob.size()),
+		  m_isChartData(true) {
+		m_data.reserve(m_ticks = ob.size());
+		for(size_t i = 0; i < m_ticks; i++)
 			m_data.push_back({ ob[i], static_cast<float>(i) });
 	}
 };

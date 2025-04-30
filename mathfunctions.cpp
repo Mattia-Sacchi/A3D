@@ -1,6 +1,6 @@
 #include "mathfunctions.h" 
 #include <vector>
-#include <math.h>>
+#include <cmath>
 #include <stdexcept>
 
 std::vector < float> generateGaussianKernel(int size, float sigma) {

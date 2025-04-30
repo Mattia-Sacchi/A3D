@@ -1,6 +1,6 @@
 #include "surfacechartentity.h"
 #include "textbillboardentity.h"
-
+#include "surfacemesh.h"
 namespace A3D {
 
 SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
@@ -81,7 +81,7 @@ bool SurfaceChartEntity::setMap(ResourceManager* rm, Map map) {
 	AxisData zAxis = map.getAxis(D_Z_Axis);
 	AxisData yAxis = map.getAxis(D_Y_Axis);
 
-	Mesh* mesh = Mesh::generateSurfaceMesh(rm, map);
+	SurfaceMesh* mesh = SurfaceMesh::generateSurfaceMesh(rm, map);
 
 	mesh->setRenderOptions(Mesh::DisableCulling);
 	g->setRotation(QQuaternion::fromAxisAndAngle(0, 1, 0, 180));
@@ -140,31 +140,21 @@ inline void setupTextInfo(TextBillboardEntity* text, QString textValue) {
 
 SurfaceChartEntity::Axis SurfaceChartEntity::getAxisFromAxisData(AxisData axisData) {
 	std::vector<float> data;
-	data.clear();
 	float min = 0.f;
 	float max = 0.f;
+	data.clear();
 
-	if(!axisData.m_isFixed) {
-
-		data.reserve(axisData.size());
-		for(size_t i = 0; i < axisData.size(); i++)
-			data.push_back(axisData.m_data[i].value);
-
-		// Sanity check already did in Map
-		auto itMin = std::min_element(data.begin(), data.end());
-		min        = *itMin;
-
-		// Sanity check already did in Map
-		auto itMax = std::max_element(data.begin(), data.end());
-		max        = *itMax;
+	if(axisData.isChartData()) {
+		data = axisData.toVector();
+		min  = axisData.m_min;
+		// In case of fixed axis the vector is create with a for from 0 to QStringList size
+		max = axisData.m_isFixed ? axisData.m_max - 1 : axisData.m_max;
 	}
 	else {
-		data.reserve(axisData.size());
-		for(size_t i = 0; i < axisData.size(); i++)
-			data.push_back(i);
-
-		min = 0;
-		max = axisData.size() - 1;
+		data = axisData.getChartData();
+		min  = axisData.m_min;
+		// In case of fixed axis the vector is create with a for from 0 to QStringList size
+		max = axisData.m_max;
 	}
 
 	std::vector<float> normalizedData = data;
@@ -275,8 +265,12 @@ void SurfaceChartEntity::addTick(LineGroup::Vertex base, LineGroup::Vertex targe
 
 bool SurfaceChartEntity::addAxis(Direction3D direction, AxisData axisData) {
 
-	Axis axis               = getAxisFromAxisData(axisData);
-	std::vector<float> data = axis.m_axisData.toVector();
+	Axis axis = getAxisFromAxisData(axisData);
+	std::vector<float> data;
+	if(axisData.isChartData())
+		data = axis.m_axisData.toVector();
+	else
+		data = axis.m_axisData.getChartData();
 
 	// Draw the main axis
 	QVector3D directionVector = m_commonDirections[direction];
