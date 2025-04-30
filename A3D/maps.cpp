@@ -2,11 +2,15 @@
 
 namespace A3D {
 
-bool Map::setLinearAxis(Direction3D dir, float min, float max, size_t ticks) {
+bool Map::setLinearAxis(Direction3D dir, float min, float max, size_t ticks, size_t chartTicks) {
 	if(dir >= A3D::D_Positive_Count) {
 		return false;
 	}
-	m_axes[dir] = AxisData(getLinearAxis(min, max, ticks-1), min, max);
+
+	if(chartTicks)
+		m_axes[dir] = AxisData(getLinearAxis(min, max, ticks - 1), min, max, chartTicks);
+	else
+		m_axes[dir] = AxisData(getLinearAxis(min, max, ticks - 1), min, max);
 	return true;
 }
 
@@ -18,28 +22,15 @@ bool Map::setFixedAxis(Direction3D dir, QStringList list) {
 	return true;
 }
 
-bool Map::setAxis(Direction3D dir, std::vector<float> data) {
+bool Map::setAxis(Direction3D dir, std::vector<float> data, size_t chartTicks) {
 	if(dir >= D_Positive_Count) {
 		return false;
 	}
-
-	//for(float const& it : )
-	m_axes[dir] = data;
+	if(chartTicks)
+		m_axes[dir] = AxisData(data, chartTicks);
+	else
+		m_axes[dir] = data;
 	return true;
-}
-
-std::vector<float> Map::getLinearAxis(float min, float max, size_t ticks) const {
-	std::vector<float> data;
-	data.clear();
-	data.reserve(ticks);
-
-	float const multiplier       = 1 / static_cast<float>(ticks);
-	float const strokeMultiplier = (max - min) / ticks;
-
-	for(size_t i = 0; i <= ticks; i++)
-		data.push_back((strokeMultiplier * i) + min);
-
-	return data;
 }
 
 bool Map::setData(std::vector<float> data) {

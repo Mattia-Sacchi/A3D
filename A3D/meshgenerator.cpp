@@ -1,4 +1,4 @@
-#include "mesh.h"
+#include "surfacemesh.h"
 #include <algorithm>
 
 namespace A3D {
@@ -23,7 +23,7 @@ static void normalize(std::vector<float> & data, float min, float max, bool fixe
 		normalizeMinMax(data,min,max);
 }
 
-Mesh* Mesh::generateSurfaceMesh(
+SurfaceMesh* SurfaceMesh::generateSurfaceMesh(
 	A3D::ResourceManager* parent, Map const& map
 ) {
 	if(!map.isValid())
@@ -44,14 +44,12 @@ Mesh* Mesh::generateSurfaceMesh(
 
 	
 
-	A3D::Mesh* mesh = new A3D::Mesh(parent);
+	A3D::SurfaceMesh* mesh = new A3D::SurfaceMesh(parent);
 	mesh->setDrawMode(A3D::Mesh::IndexedTriangles);
 
 	normalize(xAxis, xAxisData.m_min, xAxisData.m_max, xAxisFixed);
 	normalize(zAxis, zAxisData.m_min, zAxisData.m_max, zAxisFixed);
 	normalize(data, yAxisData.m_min, yAxisData.m_max, yAxisFixed);
-
-
 
 	std::size_t const height = zAxis.size();
 	std::size_t const width  = xAxis.size();
@@ -126,6 +124,7 @@ Mesh* Mesh::generateSurfaceMesh(
 		mesh->indices().push_back(i);
 
 	mesh->invalidateCache();
+
 	return mesh;
 }
 

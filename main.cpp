@@ -24,7 +24,6 @@ int main(int argc, char* argv[]) {
 
 	A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
 
-
 	A3D::Map autoUpMap;
 	bool ret = true;
 	ret      = ret && autoUpMap.setAxis(A3D::D_X_Axis, { 0, 10, 15, 20, 30, 40, 50, 75, 100 });
@@ -60,7 +59,7 @@ int main(int argc, char* argv[]) {
 		ret      = ret && autoUpMap.setFixedAxis(A3D::D_Z_Axis, { "1to2", "2to3", "3to4", "4to5", "5to6" });
 		ret      = ret && autoUpMap.setLinearAxis(A3D::D_Y_Axis, 1500, 7000, 10);
 		ret      = ret
-			  && autoUpMap.setData(
+		      && autoUpMap.setData(
 				  {
 					  1800, 2000, 2300, 2500, 2900, 3900, 4100, 4900, 5100, // 2
 					  1800, 2100, 2300, 3000, 3200, 3900, 4100, 4900, 5100, // 3
@@ -68,7 +67,7 @@ int main(int argc, char* argv[]) {
 					  1800, 2100, 2300, 3000, 3400, 3900, 4100, 4900, 5100, // 5
 					  1800, 2100, 2300, 3000, 3600, 4000, 4600, 5900, 6400, // 6
 				  }
-				  );
+			  );
 
 		if(!autoUpMap.isValid() || !ret) {
 			qDebug() << "Error map is not valid";
@@ -82,8 +81,6 @@ int main(int argc, char* argv[]) {
 		test->setAxisName(A3D::D_Z_Axis, "Target Gear");
 	}
 
-
-
 	{
 		A3D::Map gaussMatrixMap;
 		A3D::SurfaceChartEntity* gauss = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
@@ -96,17 +93,16 @@ int main(int argc, char* argv[]) {
 		}
 
 		gauss->setTickLength(1);
-		gaussMatrixMap.setLinearAxis(A3D::D_X_Axis, 0, 1,143);
-		gaussMatrixMap.setFixedAxis(A3D::D_Y_Axis, {"Start", "End"});
-		gaussMatrixMap.setLinearAxis(A3D::D_Z_Axis, 0, 1,143);
+		gaussMatrixMap.setLinearAxis(A3D::D_X_Axis, 1, 0, 143,5);
+		gaussMatrixMap.setFixedAxis(A3D::D_Y_Axis, { "Low", "High" });
+		gaussMatrixMap.setLinearAxis(A3D::D_Z_Axis, 1, 0, 143,5);
 
 		gaussMatrixMap.setData(gaussMatrix);
 
-		gauss->setMap(s->resourceManager(),gaussMatrixMap);
+		gauss->setMap(s->resourceManager(), gaussMatrixMap);
 
 		gauss->setPosition(QVector3D(0, 0, 2));
 	}
-
 
 	A3D::View* v = new A3D::View(&w);
 	v->camera().setPosition(QVector3D(2.f, 2.f, 2.f));

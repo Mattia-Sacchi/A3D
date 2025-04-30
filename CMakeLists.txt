@@ -36,6 +36,7 @@ set(SOURCES
     A3D/linegroupcacheogl.cpp
     A3D/meshgenerator.cpp
     A3D/scenecontroller.cpp
+    A3D/surfacemesh.cpp
     A3D/surfacechartentity.cpp
     A3D/textbillboardentity.cpp
     A3D/viewcontroller.cpp
@@ -80,6 +81,7 @@ set(HEADERS
     A3D/linegroupcache.h
     A3D/linegroupcacheogl.h
     A3D/scenecontroller.h
+    A3D/surfacemesh.h
     A3D/surfacechartentity.h
     A3D/textbillboardentity.h
     A3D/viewcontroller.h

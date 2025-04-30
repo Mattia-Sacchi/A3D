@@ -131,7 +131,6 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 	newMesh.invalidateCache();
 	return &newMesh;
 }
-
 Mesh::Mesh(ResourceManager* resourceManager)
 	: Resource{ resourceManager },
 	  m_drawMode(Triangles),

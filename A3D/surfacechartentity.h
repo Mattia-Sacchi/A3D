@@ -3,7 +3,6 @@
 
 #include "linegroup.h"
 #include "entity.h"
-#include "mesh.h"
 #include "maps.h"
 #include <QObject>
 #include <vector>

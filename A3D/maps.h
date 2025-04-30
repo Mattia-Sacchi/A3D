@@ -10,9 +10,9 @@ public:
 	Map()
 		: m_isValid(false) {}
 
-	bool setLinearAxis(Direction3D dir, float min, float max, size_t ticks);
+	bool setLinearAxis(Direction3D dir, float min, float max, size_t ticks, size_t chartTicks = 0);
 	bool setFixedAxis(Direction3D dir, QStringList list);
-	bool setAxis(Direction3D dir, std::vector<float> data);
+	bool setAxis(Direction3D dir, std::vector<float> data, size_t chartTicks = 0);
 	// Last function to call check if everything is ok
 	bool setData(std::vector<float> data);
 	inline std::vector<float> data() const { return m_data; }
@@ -25,11 +25,13 @@ public:
 
 	inline bool isValid() const { return m_isValid; }
 
+	
+
 private:
 	std::array<AxisData, A3D::D_Positive_Count> m_axes;
 	std::vector<float> m_data;
 	bool m_isValid;
-	std::vector<float> getLinearAxis(float min, float max, size_t ticks = 10) const;
+	
 };
 }
 #endif
