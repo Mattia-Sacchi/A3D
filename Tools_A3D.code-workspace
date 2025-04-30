@@ -6,6 +6,7 @@
 	],
 	"settings": {
 		"files.associations": {
+			"*.py": "python",
 			"vector": "cpp",
 			"optional": "cpp",
 			"algorithm": "cpp",
@@ -84,7 +85,8 @@
 			"xtree": "cpp",
 			"xutility": "cpp",
 			"qgenericmatrix": "cpp",
-			"qobject": "cpp"
+			"qobject": "cpp",
+			"string_view": "cpp"
 		}
 	}
 }

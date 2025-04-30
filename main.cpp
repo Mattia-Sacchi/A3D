@@ -24,11 +24,12 @@ int main(int argc, char* argv[]) {
 
 	A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
 
+
 	A3D::Map autoUpMap;
 	bool ret = true;
 	ret      = ret && autoUpMap.setAxis(A3D::D_X_Axis, { 0, 10, 15, 20, 30, 40, 50, 75, 100 });
 	ret      = ret && autoUpMap.setFixedAxis(A3D::D_Z_Axis, { "1to2", "2to3", "3to4", "4to5", "5to6" });
-	ret      = ret && autoUpMap.setLinearAxis(A3D::D_Y_Axis, 1800, 6400, 10);
+	ret      = ret && autoUpMap.setLinearAxis(A3D::D_Y_Axis, 1500, 7000, 10);
 	ret      = ret
 	      && autoUpMap.setData(
 			  {
@@ -50,6 +51,62 @@ int main(int argc, char* argv[]) {
 	chart->setAxisName(A3D::D_X_Axis, "Gas");
 	chart->setAxisName(A3D::D_Y_Axis, "Rpm");
 	chart->setAxisName(A3D::D_Z_Axis, "Target Gear");
+
+	{
+		A3D::SurfaceChartEntity* test = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
+		A3D::Map autoUpMap;
+		bool ret = true;
+		ret      = ret && autoUpMap.setAxis(A3D::D_X_Axis, { 0, 10, 15, 20, 30, 40, 50, 75, 100 });
+		ret      = ret && autoUpMap.setFixedAxis(A3D::D_Z_Axis, { "1to2", "2to3", "3to4", "4to5", "5to6" });
+		ret      = ret && autoUpMap.setLinearAxis(A3D::D_Y_Axis, 1500, 7000, 10);
+		ret      = ret
+			  && autoUpMap.setData(
+				  {
+					  1800, 2000, 2300, 2500, 2900, 3900, 4100, 4900, 5100, // 2
+					  1800, 2100, 2300, 3000, 3200, 3900, 4100, 4900, 5100, // 3
+					  1800, 2100, 2300, 3000, 3200, 3900, 4100, 4900, 5100, // 4
+					  1800, 2100, 2300, 3000, 3400, 3900, 4100, 4900, 5100, // 5
+					  1800, 2100, 2300, 3000, 3600, 4000, 4600, 5900, 6400, // 6
+				  }
+				  );
+
+		if(!autoUpMap.isValid() || !ret) {
+			qDebug() << "Error map is not valid";
+			return 1;
+		}
+		test->setTickLength(1);
+		test->setMap(s->resourceManager(), autoUpMap);
+		test->setPosition(QVector3D(2, 0, 0));
+		test->setAxisName(A3D::D_X_Axis, "Gas");
+		test->setAxisName(A3D::D_Y_Axis, "Rpm");
+		test->setAxisName(A3D::D_Z_Axis, "Target Gear");
+	}
+
+
+
+	{
+		A3D::Map gaussMatrixMap;
+		A3D::SurfaceChartEntity* gauss = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
+		static const size_t size       = 143;
+
+		std::vector<float> gaussMatrix     = generateGaussianKernel(size, 30.f);
+		std::vector<float> edgeGuassMatrix = generateGaussianEdgeKernel(size, 5.f);
+		for(int i = 0; i < gaussMatrix.size(); i++) {
+			gaussMatrix[i] += edgeGuassMatrix[i] * 0.5;
+		}
+
+		gauss->setTickLength(1);
+		gaussMatrixMap.setLinearAxis(A3D::D_X_Axis, 0, 1,143);
+		gaussMatrixMap.setFixedAxis(A3D::D_Y_Axis, {"Start", "End"});
+		gaussMatrixMap.setLinearAxis(A3D::D_Z_Axis, 0, 1,143);
+
+		gaussMatrixMap.setData(gaussMatrix);
+
+		gauss->setMap(s->resourceManager(),gaussMatrixMap);
+
+		gauss->setPosition(QVector3D(0, 0, 2));
+	}
+
 
 	A3D::View* v = new A3D::View(&w);
 	v->camera().setPosition(QVector3D(2.f, 2.f, 2.f));
@@ -118,31 +175,3 @@ int main(int argc, char* argv[]) {
 	int rv = a.exec();
 	return rv;
 }
-
-/*
-	{
-		A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
-		float yMax                     = 200;
-		float yMin                     = 0;
-		static const size_t size       = 151;
-		std::vector<float> ax;
-		for(int i = 0; i < size; i++)
-			ax.push_back(i);
-
-		std::vector<float> gaussMatrix     = generateGaussianKernel(size, 30.f);
-		std::vector<float> edgeGuassMatrix = generateGaussianEdgeKernel(size, 5.f);
-		for(int i = 0; i < gaussMatrix.size(); i++) {
-			gaussMatrix[i] += edgeGuassMatrix[i] * 0.5;
-		}
-
-		A3D::Mesh* sampleMeshC = A3D::Mesh::generateSurfaceMesh(s->resourceManager(), ax, ax, gaussMatrix);
-		chart->setTickLength(1);
-
-		chart->loadSurface(sampleMeshC);
-		chart->addLinearAxis(A3D::SurfaceChartEntity::X_Axis, 0, 6);
-		chart->addLinearAxis(A3D::SurfaceChartEntity::Y_Axis, yMin, yMax);
-		chart->addLinearAxis(A3D::SurfaceChartEntity::Z_Axis, 0, 6);
-
-		chart->setPosition(QVector3D(0, 0, 1));
-	}
-*/

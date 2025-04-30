@@ -17,7 +17,7 @@ public:
 	bool setData(std::vector<float> data);
 	inline std::vector<float> data() const { return m_data; }
 
-	inline AxisData getAxis(Direction3D dir) {
+	inline AxisData getAxis(Direction3D dir)  const{
 		if(dir >= D_Positive_Count)
 			return AxisData();
 		return m_axes[dir];

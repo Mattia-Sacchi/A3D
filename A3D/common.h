@@ -49,6 +49,8 @@ struct AxisDataQuid {
 struct AxisData {
 	std::vector<AxisDataQuid> m_data;
 	bool m_isFixed;
+	float m_min;
+	float m_max;
 
 	inline size_t size() const { return m_data.size(); }
 
@@ -68,19 +70,37 @@ struct AxisData {
 	inline AxisData(std::vector<float> const& ob)
 		: m_isFixed(false) {
 		m_data.reserve(ob.size());
+		m_min = ob.front();
+		m_max = ob.front();
+		
+		for(size_t i = 0; i < ob.size(); i++){
+			if(ob[i] < m_min)
+				m_min = ob[i];
+			if(ob[i] > m_max)
+				m_max = ob[i];
+				
+			m_data.push_back({ QString::number(ob[i]), ob[i] });
+		}
+	}
+
+	inline AxisData(std::vector<float> const& ob, float min , float max)
+		: m_isFixed(false), m_min(min),m_max(max) {
+		m_data.reserve(ob.size());
+		
 		for(size_t i = 0; i < ob.size(); i++)
 			m_data.push_back({ QString::number(ob[i]), ob[i] });
+		
 	}
 
 	inline AxisData(std::vector<QString> const& ob)
-		: m_isFixed(true) {
+		: m_isFixed(true),m_min(0.f),m_max(1.f) {
 		m_data.reserve(ob.size());
 		for(size_t i = 0; i < ob.size(); i++)
 			m_data.push_back({ ob[i], static_cast<float>(i) });
 	}
 
 	inline AxisData(QStringList const& ob)
-		: m_isFixed(true) {
+		: m_isFixed(true),m_min(0.f),m_max(1.f) {
 		m_data.reserve(ob.size());
 		for(size_t i = 0; i < ob.size(); i++)
 			m_data.push_back({ ob[i], static_cast<float>(i) });
