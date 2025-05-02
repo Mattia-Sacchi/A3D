@@ -124,6 +124,8 @@ qt_add_executable(${PROJECT_NAME}
     ${SOURCES}
     ${HEADERS}
     ${COMPILED_RESOURCE_FILES}
+    keyeventmanager.h
+    keyeventmanager.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

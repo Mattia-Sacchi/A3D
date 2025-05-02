@@ -7,8 +7,10 @@
 #include "A3D/view.h"
 #include "A3D/keyboardcameracontroller.h"
 #include "A3D/surfacechartentity.h"
-// #include "mathfunctions.h"
 #include "A3D/chart.h"
+
+// #include "mathfunctions.h"
+#include "keyeventmanager.h"
 
 int main(int argc, char* argv[]) {
 
@@ -144,8 +146,8 @@ int main(int argc, char* argv[]) {
 	QObject::connect(&t, &QTimer::timeout, s, &A3D::Scene::updateScene);
 
 	// Used just for testing
-    /*KeyEventManager* kem = new KeyEventManager(v);
-	kem->setMouseBinding(Qt::RightButton, [=]() {
+    KeyEventManager* kem = new KeyEventManager(v);
+    kem->setBinding(Qt::RightButton, [=]() {
         A3D::View* view               = v;
         QPoint cursorPosition         = view->mapFromGlobal(QCursor::pos());
         QPointF normalizedPosition    = view->toNormalizedPoint(cursorPosition.toPointF());
@@ -163,6 +165,7 @@ int main(int argc, char* argv[]) {
 
                 if(res->m_resultingEntity == chart) {
                     chart->setMarker(QVector2D(res->m_groupLocalHitPoint.x(), res->m_groupLocalHitPoint.z()));
+                    v->update();
 
                     QVector3D const value = chart->mapChart().getValueFromMesh(chart->marker());
 
@@ -189,7 +192,8 @@ int main(int argc, char* argv[]) {
 		else {
 			qDebug() << "No intersection!";
 		}
-    });*/
+    });
+
 	v->run();
 	s->run();
 
