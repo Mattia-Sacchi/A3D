@@ -73,42 +73,42 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 				QVector3D norm;
 				QVector2D tex;
 			} vertices[36] = {
-				{{ -1.0f, -1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 0.0f, 0.0f }},
-                {{ +1.0f, +1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 1.0f, 1.0f }},
-				{{ +1.0f, -1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 1.0f, 0.0f }},
-                {{ +1.0f, +1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 1.0f, 1.0f }},
-				{{ -1.0f, -1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 0.0f, 0.0f }},
-                {{ -1.0f, +1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 0.0f, 1.0f }},
-				{{ -1.0f, -1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 0.0f, 0.0f }},
-                {{ +1.0f, -1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 1.0f, 0.0f }},
-				{{ +1.0f, +1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 1.0f, 1.0f }},
-                {{ +1.0f, +1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 1.0f, 1.0f }},
-				{{ -1.0f, +1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 0.0f, 1.0f }},
-                {{ -1.0f, -1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 0.0f, 0.0f }},
-				{{ -1.0f, +1.0f, +1.0f }, { -1.0f, +0.0f, +0.0f }, { 1.0f, 0.0f }},
-                {{ -1.0f, +1.0f, -1.0f }, { -1.0f, +0.0f, +0.0f }, { 1.0f, 1.0f }},
-				{{ -1.0f, -1.0f, -1.0f }, { -1.0f, +0.0f, +0.0f }, { 0.0f, 1.0f }},
-                {{ -1.0f, -1.0f, -1.0f }, { -1.0f, +0.0f, +0.0f }, { 0.0f, 1.0f }},
-				{{ -1.0f, -1.0f, +1.0f }, { -1.0f, +0.0f, +0.0f }, { 0.0f, 0.0f }},
-                {{ -1.0f, +1.0f, +1.0f }, { -1.0f, +0.0f, +0.0f }, { 1.0f, 0.0f }},
-				{{ +1.0f, +1.0f, +1.0f }, { +1.0f, +0.0f, +0.0f }, { 1.0f, 0.0f }},
-                {{ +1.0f, -1.0f, -1.0f }, { +1.0f, +0.0f, +0.0f }, { 0.0f, 1.0f }},
-				{{ +1.0f, +1.0f, -1.0f }, { +1.0f, +0.0f, +0.0f }, { 1.0f, 1.0f }},
-                {{ +1.0f, -1.0f, -1.0f }, { +1.0f, +0.0f, +0.0f }, { 0.0f, 1.0f }},
-				{{ +1.0f, +1.0f, +1.0f }, { +1.0f, +0.0f, +0.0f }, { 1.0f, 0.0f }},
-                {{ +1.0f, -1.0f, +1.0f }, { +1.0f, +0.0f, +0.0f }, { 0.0f, 0.0f }},
-				{{ -1.0f, -1.0f, -1.0f }, { +0.0f, -1.0f, +0.0f }, { 0.0f, 1.0f }},
-                {{ +1.0f, -1.0f, -1.0f }, { +0.0f, -1.0f, +0.0f }, { 1.0f, 1.0f }},
-				{{ +1.0f, -1.0f, +1.0f }, { +0.0f, -1.0f, +0.0f }, { 1.0f, 0.0f }},
-                {{ +1.0f, -1.0f, +1.0f }, { +0.0f, -1.0f, +0.0f }, { 1.0f, 0.0f }},
-				{{ -1.0f, -1.0f, +1.0f }, { +0.0f, -1.0f, +0.0f }, { 0.0f, 0.0f }},
-                {{ -1.0f, -1.0f, -1.0f }, { +0.0f, -1.0f, +0.0f }, { 0.0f, 1.0f }},
-				{{ -1.0f, +1.0f, -1.0f }, { +0.0f, +1.0f, +0.0f }, { 0.0f, 1.0f }},
-                {{ +1.0f, +1.0f, +1.0f }, { +0.0f, +1.0f, +0.0f }, { 1.0f, 0.0f }},
-				{{ +1.0f, +1.0f, -1.0f }, { +0.0f, +1.0f, +0.0f }, { 1.0f, 1.0f }},
-                {{ +1.0f, +1.0f, +1.0f }, { +0.0f, +1.0f, +0.0f }, { 1.0f, 0.0f }},
-				{{ -1.0f, +1.0f, -1.0f }, { +0.0f, +1.0f, +0.0f }, { 0.0f, 1.0f }},
-                {{ -1.0f, +1.0f, +1.0f }, { +0.0f, +1.0f, +0.0f }, { 0.0f, 0.0f }}
+				{ { -1.0f, -1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 0.0f, 0.0f } },
+                { { +1.0f, +1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 1.0f, 1.0f } },
+				{ { +1.0f, -1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 1.0f, 0.0f } },
+                { { +1.0f, +1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 1.0f, 1.0f } },
+				{ { -1.0f, -1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 0.0f, 0.0f } },
+                { { -1.0f, +1.0f, -1.0f }, { +0.0f, +0.0f, -1.0f }, { 0.0f, 1.0f } },
+				{ { -1.0f, -1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 0.0f, 0.0f } },
+                { { +1.0f, -1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 1.0f, 0.0f } },
+				{ { +1.0f, +1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 1.0f, 1.0f } },
+                { { +1.0f, +1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 1.0f, 1.0f } },
+				{ { -1.0f, +1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 0.0f, 1.0f } },
+                { { -1.0f, -1.0f, +1.0f }, { +0.0f, +0.0f, +1.0f }, { 0.0f, 0.0f } },
+				{ { -1.0f, +1.0f, +1.0f }, { -1.0f, +0.0f, +0.0f }, { 1.0f, 0.0f } },
+                { { -1.0f, +1.0f, -1.0f }, { -1.0f, +0.0f, +0.0f }, { 1.0f, 1.0f } },
+				{ { -1.0f, -1.0f, -1.0f }, { -1.0f, +0.0f, +0.0f }, { 0.0f, 1.0f } },
+                { { -1.0f, -1.0f, -1.0f }, { -1.0f, +0.0f, +0.0f }, { 0.0f, 1.0f } },
+				{ { -1.0f, -1.0f, +1.0f }, { -1.0f, +0.0f, +0.0f }, { 0.0f, 0.0f } },
+                { { -1.0f, +1.0f, +1.0f }, { -1.0f, +0.0f, +0.0f }, { 1.0f, 0.0f } },
+				{ { +1.0f, +1.0f, +1.0f }, { +1.0f, +0.0f, +0.0f }, { 1.0f, 0.0f } },
+                { { +1.0f, -1.0f, -1.0f }, { +1.0f, +0.0f, +0.0f }, { 0.0f, 1.0f } },
+				{ { +1.0f, +1.0f, -1.0f }, { +1.0f, +0.0f, +0.0f }, { 1.0f, 1.0f } },
+                { { +1.0f, -1.0f, -1.0f }, { +1.0f, +0.0f, +0.0f }, { 0.0f, 1.0f } },
+				{ { +1.0f, +1.0f, +1.0f }, { +1.0f, +0.0f, +0.0f }, { 1.0f, 0.0f } },
+                { { +1.0f, -1.0f, +1.0f }, { +1.0f, +0.0f, +0.0f }, { 0.0f, 0.0f } },
+				{ { -1.0f, -1.0f, -1.0f }, { +0.0f, -1.0f, +0.0f }, { 0.0f, 1.0f } },
+                { { +1.0f, -1.0f, -1.0f }, { +0.0f, -1.0f, +0.0f }, { 1.0f, 1.0f } },
+				{ { +1.0f, -1.0f, +1.0f }, { +0.0f, -1.0f, +0.0f }, { 1.0f, 0.0f } },
+                { { +1.0f, -1.0f, +1.0f }, { +0.0f, -1.0f, +0.0f }, { 1.0f, 0.0f } },
+				{ { -1.0f, -1.0f, +1.0f }, { +0.0f, -1.0f, +0.0f }, { 0.0f, 0.0f } },
+                { { -1.0f, -1.0f, -1.0f }, { +0.0f, -1.0f, +0.0f }, { 0.0f, 1.0f } },
+				{ { -1.0f, +1.0f, -1.0f }, { +0.0f, +1.0f, +0.0f }, { 0.0f, 1.0f } },
+                { { +1.0f, +1.0f, +1.0f }, { +0.0f, +1.0f, +0.0f }, { 1.0f, 0.0f } },
+				{ { +1.0f, +1.0f, -1.0f }, { +0.0f, +1.0f, +0.0f }, { 1.0f, 1.0f } },
+                { { +1.0f, +1.0f, +1.0f }, { +0.0f, +1.0f, +0.0f }, { 1.0f, 0.0f } },
+				{ { -1.0f, +1.0f, -1.0f }, { +0.0f, +1.0f, +0.0f }, { 0.0f, 1.0f } },
+                { { -1.0f, +1.0f, +1.0f }, { +0.0f, +1.0f, +0.0f }, { 0.0f, 0.0f } }
 			};
 
 			newMesh.vertices().reserve(36);
@@ -131,7 +131,6 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 	newMesh.invalidateCache();
 	return &newMesh;
 }
-
 Mesh::Mesh(ResourceManager* resourceManager)
 	: Resource{ resourceManager },
 	  m_drawMode(Triangles),
@@ -186,6 +185,93 @@ void Mesh::setContents(Contents contents) {
 
 Mesh::Contents Mesh::contents() const {
 	return m_contents;
+}
+
+std::optional<QVector3D> Mesh::intersect(QVector3D origin, QVector3D dir) const {
+	if((contents() & Position3D) != Position3D)
+		return std::nullopt;
+
+	QVector3D nearestHit;
+	double nearestHitDistance = -1;
+
+	QVector3D hit;
+
+	switch(drawMode()) {
+
+	case Triangles:
+		for(std::size_t i = 0; i + 2 < m_vertices.size(); i += 3) {
+			QVector3D const& v0 = m_vertices[i].Position3D;
+			QVector3D const& v1 = m_vertices[i + 1].Position3D;
+			QVector3D const& v2 = m_vertices[i + 2].Position3D;
+
+			if(intersectTriangle(origin, dir, v0, v1, v2, hit)) {
+				double currentDistance = origin.distanceToPoint(hit);
+				if(nearestHitDistance < 0.0 || currentDistance < nearestHitDistance) {
+					nearestHitDistance = currentDistance;
+					nearestHit         = hit;
+				}
+			}
+		}
+		break;
+
+	case IndexedTriangles:
+		for(std::size_t i = 0; i + 2 < m_indices.size(); i += 3) {
+			QVector3D const& v0 = m_vertices[m_indices[i]].Position3D;
+			QVector3D const& v1 = m_vertices[m_indices[i + 1]].Position3D;
+			QVector3D const& v2 = m_vertices[m_indices[i + 2]].Position3D;
+
+			if(intersectTriangle(origin, dir, v0, v1, v2, hit)) {
+				double currentDistance = origin.distanceToPoint(hit);
+				if(nearestHitDistance < 0.0 || currentDistance < nearestHitDistance) {
+					nearestHitDistance = currentDistance;
+					nearestHit         = hit;
+				}
+			}
+		}
+		break;
+
+	case TriangleStrips:
+		for(int i = 2; i < m_vertices.size(); ++i) {
+			QVector3D v0 = m_vertices[i - 2].Position3D;
+			QVector3D v1 = m_vertices[i - 1].Position3D;
+			QVector3D v2 = m_vertices[i].Position3D;
+
+			QVector3D hit;
+			if(intersectTriangle(origin, dir, v0, v1, v2, hit)) {
+				double currentDistance = origin.distanceToPoint(hit);
+				if(nearestHitDistance < 0.0 || currentDistance < nearestHitDistance) {
+					nearestHitDistance = currentDistance;
+					nearestHit         = hit;
+				}
+			}
+		}
+		break;
+
+	case IndexedTriangleStrips:
+		for(int i = 2; i < m_indices.size(); ++i) {
+			QVector3D v0 = m_vertices[m_indices[i - 2]].Position3D;
+			QVector3D v1 = m_vertices[m_indices[i - 1]].Position3D;
+			QVector3D v2 = m_vertices[m_indices[i]].Position3D;
+
+			QVector3D hit;
+			if(intersectTriangle(origin, dir, v0, v1, v2, hit)) {
+				double currentDistance = origin.distanceToPoint(hit);
+				if(nearestHitDistance < 0.0 || currentDistance < nearestHitDistance) {
+					nearestHitDistance = currentDistance;
+					nearestHit         = hit;
+				}
+			}
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	if(nearestHitDistance < 0.0)
+		return std::nullopt;
+
+	return nearestHit;
 }
 
 std::size_t Mesh::packedVertexSize(Contents contents) {
@@ -338,6 +424,7 @@ std::vector<std::uint32_t> const& Mesh::indices() const {
 }
 
 void Mesh::invalidateCache(std::uintptr_t rendererID) {
+	m_packedData.clear();
 	if(rendererID == std::numeric_limits<std::uintptr_t>::max()) {
 		m_packedData.clear();
 		for(auto it = m_meshCache.begin(); it != m_meshCache.end();) {

@@ -158,4 +158,8 @@ void View::updateView() {
 		update(); // Redraw
 }
 
+QPointF View::toNormalizedPoint(QPointF viewLocalCoordinate) const {
+    return QPointF(viewLocalCoordinate.x() / static_cast<float>(width()), viewLocalCoordinate.y() / static_cast<float>(height()));
+}
+
 }

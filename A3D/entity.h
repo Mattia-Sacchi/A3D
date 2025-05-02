@@ -6,6 +6,7 @@
 #include <QPointer>
 #include <QMatrix4x4>
 #include <vector>
+#include <optional>
 #include "model.h"
 #include "entitycontroller.h"
 
@@ -59,6 +60,8 @@ public:
 	QVector3D scale() const;
 
 	QMatrix4x4 const& entityMatrix() const;
+
+	std::optional<IntersectionResult> intersect(QVector3D origin, QVector3D rayDirection) const;
 
 	void addController(EntityController*);
 	void removeController(EntityController*);

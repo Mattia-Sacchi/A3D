@@ -34,6 +34,7 @@ public:
 		PrefilterMaterial,
 		BRDFMaterial,
 		LineMaterial,
+		ColoredSurfaceMaterial,
 	};
 	static Material* standardMaterial(StandardMaterial);
 

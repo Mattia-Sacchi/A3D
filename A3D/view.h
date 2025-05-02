@@ -39,6 +39,9 @@ public:
 	QSize minimumSizeHint() const override;
 	QSize sizeHint() const override;
 
+    // use mapFromGlobal to convert global coordinates to local
+    QPointF toNormalizedPoint(QPointF viewLocalCoordinate) const;
+
 public slots:
 	void updateView();
 
