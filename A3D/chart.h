@@ -2,6 +2,7 @@
 #define CHART_H
 
 #include "common.h"
+#include <QFont>
 
 namespace A3D {
 
@@ -16,8 +17,24 @@ enum ChartAxisIndicatorType {
     CHAXIND_COUNT,
 };
 
+struct ChartAxisIndicatorStyle {
+    ChartAxisIndicatorStyle(QColor indicatorColor = Qt::white, QColor labelColor = Qt::white, QFont labelFont = QFont(QString(), 64), float labelSize = 1.f);
+    ChartAxisIndicatorStyle(ChartAxisIndicatorStyle const&)            = default;
+    ChartAxisIndicatorStyle(ChartAxisIndicatorStyle&&)                 = default;
+    ChartAxisIndicatorStyle& operator=(ChartAxisIndicatorStyle const&) = default;
+    ChartAxisIndicatorStyle& operator=(ChartAxisIndicatorStyle&&)      = default;
+
+    QColor m_indicatorColor;
+    QColor m_labelColor;
+    QFont m_labelFont;
+    float m_labelSize;
+};
+
 struct ChartAxisIndicator {
-    ChartAxisIndicator(ChartAxisIndicatorType type = CHAXIND_MAJOR_INDICATOR, float value = 0.f, float normalizedValue = 0.f, QString label = QString());
+    ChartAxisIndicator(
+        ChartAxisIndicatorType type = CHAXIND_MAJOR_INDICATOR, float value = 0.f, float normalizedValue = 0.f, QString label = QString(),
+        ChartAxisIndicatorStyle style = ChartAxisIndicatorStyle()
+    );
     ChartAxisIndicator(ChartAxisIndicator const&)            = default;
     ChartAxisIndicator(ChartAxisIndicator&&)                 = default;
     ChartAxisIndicator& operator=(ChartAxisIndicator const&) = default;
@@ -27,6 +44,18 @@ struct ChartAxisIndicator {
     float m_value;
     float m_normalizedValue;
     QString m_label;
+    ChartAxisIndicatorStyle m_style;
+};
+
+struct ChartAxisStyledEnumeratedIndicatorData {
+    ChartAxisStyledEnumeratedIndicatorData(QString label = QString(), ChartAxisIndicatorStyle style = ChartAxisIndicatorStyle());
+    ChartAxisStyledEnumeratedIndicatorData(ChartAxisStyledEnumeratedIndicatorData const&)            = default;
+    ChartAxisStyledEnumeratedIndicatorData(ChartAxisStyledEnumeratedIndicatorData&&)                 = default;
+    ChartAxisStyledEnumeratedIndicatorData& operator=(ChartAxisStyledEnumeratedIndicatorData const&) = default;
+    ChartAxisStyledEnumeratedIndicatorData& operator=(ChartAxisStyledEnumeratedIndicatorData&&)      = default;
+
+    QString m_label;
+    ChartAxisIndicatorStyle m_style;
 };
 
 class ChartAxisData {
@@ -40,16 +69,26 @@ public:
     void setName(QString name);
     QString name() const;
 
+    // Newly-added indicators will have this style.
+    void setDefaultIndicatorStyle(ChartAxisIndicatorStyle style);
+    ChartAxisIndicatorStyle defaultIndicatorStyle() const;
+
     void removeAllIndicators();
     void removeIndicators(ChartAxisIndicatorType indicatorType);
 
     // Sets the Type to CHAXIS_LINEAR_INTERPOLATED and adds all points.
+    // Is not affected by defaultIndicatorStyle.
     void setIndicators(std::vector<ChartAxisIndicator> points);
 
     // Sets the Type to CHAXIS_ENUMERATED and adds all points.
     // Also updates min/max values.
     // Only works when enumeratedPoints is not empty.
     void setIndicators(QStringList enumeratedPoints, ChartAxisIndicatorType indicatorType = CHAXIND_MAJOR_INDICATOR);
+
+    // Sets the Type to CHAXIS_ENUMERATED and adds all points.
+    // Also updates min/max values.
+    // Only works when enumeratedPoints is not empty.
+    void setIndicators(std::vector<ChartAxisStyledEnumeratedIndicatorData> styledEnumeratedPoints, ChartAxisIndicatorType indicatorType = CHAXIND_MAJOR_INDICATOR);
 
     // Only works when Type is CHAXIS_LINEAR_INTERPOLATED.
     void addIndicators(std::vector<float> const& points, int toStringPrecision = 3, ChartAxisIndicatorType indicatorType = CHAXIND_MAJOR_INDICATOR);
@@ -88,6 +127,7 @@ private:
 
     QString m_name;
     ChartAxisType m_type;
+    ChartAxisIndicatorStyle m_defaultStyle;
     std::vector<ChartAxisIndicator> m_indicators;
 
     float m_axisMinimumValue;
