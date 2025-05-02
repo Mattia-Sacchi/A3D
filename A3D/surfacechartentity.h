@@ -26,13 +26,30 @@ public:
     void setLabelDistances(QVector3D distance_x_y_z);
     QVector3D labelDistances() const;
 
+    
+
     void setMarker(QVector2D marker);
     QVector2D marker() const;
 
+    void setIndicatorsColor(QVector4D color);
+    QVector4D indicatorsColor() const;
+
+    void setLabelColor(QColor color);
+    QColor labelColor() const;
+
+    void setLabelFont(QFont font);
+    QFont labelFont() const;
+
 private:
     void updateSurfaceMesh();
+    void updateAxesLines();
     void updateIndicatorLines(Axis3D axis);
+    void updateAxesLabels();
     void updateIndicatorLabels(Axis3D axis);
+
+    void updateIndicatorLinesColor(Axis3D axis);
+    void updateIndicatorLabelsColor(Axis3D axis);
+    void updateIndicatorLabelsFont(Axis3D axis);
 
     MapChart3D m_mapChart;
     float m_enumStripThicknessX;
@@ -45,6 +62,11 @@ private:
 
     QVector2D m_marker;
     LineGroup* m_markerLineGroup;
+
+    QVector4D m_indicatorColor;
+    QColor m_labelColor;
+    QFont m_labelFont;
+
 };
 
 }

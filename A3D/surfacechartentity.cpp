@@ -5,7 +5,10 @@ namespace A3D {
 SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
     : Entity(parent),
       m_enumStripThicknessX(0.8f),
-      m_enumStripThicknessZ(0.8f) {
+      m_enumStripThicknessZ(0.8f),
+      m_indicatorColor(QVector4D(1.f, 0.5f, 0.f, 1.f)),
+      m_labelColor(Qt::white),
+      m_labelFont(QFont("Arial", 64)) {
 
 	A3D::Model* m = new A3D::Model(this);
     setModel(m);
@@ -47,13 +50,22 @@ SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
 void SurfaceChartEntity::setChart(MapChart3D map) {
     m_mapChart = std::move(map);
     updateSurfaceMesh();
+    updateAxesLines();
+    updateAxesLabels();
+}
+
+void SurfaceChartEntity::updateAxesLines(){
     updateIndicatorLines(AXIS_X);
     updateIndicatorLines(AXIS_Y);
     updateIndicatorLines(AXIS_Z);
+}
+
+void SurfaceChartEntity::updateAxesLabels(){
     updateIndicatorLabels(AXIS_X);
     updateIndicatorLabels(AXIS_Y);
     updateIndicatorLabels(AXIS_Z);
 }
+
 
 MapChart3D const& SurfaceChartEntity::mapChart() const {
     return m_mapChart;
@@ -80,9 +92,7 @@ void SurfaceChartEntity::setLabelDistances(QVector3D distance_x_y_z) {
     m_labelDistances = distance_x_y_z;
 
     if(m_mapChart.isValid()) {
-        updateIndicatorLabels(AXIS_X);
-        updateIndicatorLabels(AXIS_Y);
-        updateIndicatorLabels(AXIS_Z);
+        updateAxesLabels();
     }
 }
 
@@ -292,7 +302,7 @@ void SurfaceChartEntity::updateIndicatorLines(Axis3D axis) {
             continue;
 
         LineGroup::Vertex vertexBase;
-        vertexBase.Color4D = QVector4D(1.f, 0.5f, 0.f, 1.f);
+        vertexBase.Color4D = m_indicatorColor;
         setVectorAxis(vertexBase.Position3D, axis, indicator.m_normalizedValue);
 
         LineGroup::Vertex vxAxisA = vertexBase;
@@ -364,13 +374,13 @@ void SurfaceChartEntity::updateIndicatorLabels(Axis3D axis) {
         TextBillboardEntity* newBillboardB = emplaceChildEntity<TextBillboardEntity>();
 
         newBillboardA->setText(indicator.m_label);
-        newBillboardA->setColor(Qt::white);
+        newBillboardA->setColor(m_labelColor);
         newBillboardA->setFont(QFont("Arial", 64));
         newBillboardA->setScale(QVector3D(0.05f, 0.05f, 0.05f));
         newBillboardA->setPosition(vxAxisA);
 
         newBillboardB->setText(indicator.m_label);
-        newBillboardB->setColor(Qt::white);
+        newBillboardB->setColor(m_labelColor);
         newBillboardB->setFont(QFont("Arial", 64));
         newBillboardB->setScale(QVector3D(0.05f, 0.05f, 0.05f));
         newBillboardB->setPosition(vxAxisB);
@@ -378,6 +388,71 @@ void SurfaceChartEntity::updateIndicatorLabels(Axis3D axis) {
         indicatorLabels.push_back(newBillboardA);
         indicatorLabels.push_back(newBillboardB);
     }
+}
+
+void SurfaceChartEntity::setIndicatorsColor(QVector4D color){
+    if(color == m_indicatorColor)
+        return;
+    
+    m_indicatorColor = color;
+    updateIndicatorLinesColor(AXIS_X);
+    updateIndicatorLinesColor(AXIS_Y);
+    updateIndicatorLinesColor(AXIS_Z);
+        
+}
+
+void SurfaceChartEntity::updateIndicatorLinesColor(Axis3D axis)
+{
+    QPointer<LineGroup>(&indicatorLines)[CHAXIND_COUNT] = m_indicatorLines[axis];
+    for(ChartAxisIndicator const& indicator: m_mapChart.axisData(axis).indicators()) {
+        for(LineGroup::Vertex & it: indicatorLines[indicator.m_type]->vertices())
+            it.Color4D = m_indicatorColor;
+        indicatorLines[indicator.m_type]->invalidateCache();
+    }
+
+}
+
+void SurfaceChartEntity::updateIndicatorLabelsColor(Axis3D axis){
+    for(TextBillboardEntity * textBillboard : m_indicatorLabels[axis])
+        textBillboard->setColor(m_labelColor);
+}
+
+void SurfaceChartEntity::updateIndicatorLabelsFont(Axis3D axis){
+    for(TextBillboardEntity * textBillboard : m_indicatorLabels[axis])
+        textBillboard->setFont(m_labelFont);
+}
+
+
+
+void SurfaceChartEntity::setLabelColor(QColor color){
+    if(color == m_labelColor)
+        return;
+    m_labelColor = color;
+    updateIndicatorLabelsColor(AXIS_X);
+    updateIndicatorLabelsColor(AXIS_Y);
+    updateIndicatorLabelsColor(AXIS_Z);
+}
+
+QColor SurfaceChartEntity::labelColor() const{
+    return m_labelColor;
+}
+
+void SurfaceChartEntity::setLabelFont(QFont font){
+    if(font == m_labelFont)
+        return;
+    m_labelFont = font;
+    updateIndicatorLabelsFont(AXIS_X);
+    updateIndicatorLabelsFont(AXIS_Y);
+    updateIndicatorLabelsFont(AXIS_Z);
+}
+
+QFont SurfaceChartEntity::labelFont() const{
+    return m_labelFont;    
+}
+
+QVector4D SurfaceChartEntity::indicatorsColor() const
+{
+    return m_indicatorColor;
 }
 
 void SurfaceChartEntity::setMarker(QVector2D marker) {

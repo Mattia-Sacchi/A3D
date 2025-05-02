@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 	l.position             = QVector3D(0.f, 2.2f, 5.f);
 	l.color                = QVector4D(1.f, 1.f, 1.f, 500.f);
 
-	A3D::SurfaceChartEntity* chart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
+	A3D::SurfaceChartEntity* autoUpChart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
 
     A3D::MapChart3D autoUpMap;
 
@@ -65,61 +65,67 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-    chart->setChart(autoUpMap);
-    chart->setLabelDistances(QVector3D(0.05f, 0.05f, 0.05f));
+    autoUpChart->setChart(autoUpMap);
+    autoUpChart->setLabelDistances(QVector3D(0.1f, 0.1f, 0.1f));
+	autoUpChart->setIndicatorsColor(QVector4D(0,0,1,1));
+	autoUpChart->setLabelColor(Qt::yellow);
+	autoUpChart->setLabelFont(QFont("Helvetica [Cronyx]", 64));
 
-    /*
-	{
-		A3D::SurfaceChartEntity* test = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
-		A3D::Map autoUpMap;
-		bool ret = true;
-		ret      = ret && autoUpMap.setAxis(A3D::D_X_Axis, { 0, 10, 15, 20, 30, 40, 50, 75, 100 });
-		ret      = ret && autoUpMap.setFixedAxis(A3D::D_Z_Axis, { "1to2", "2to3", "3to4", "4to5", "5to6" });
-		ret      = ret && autoUpMap.setLinearAxis(A3D::D_Y_Axis, 1500, 7000, 10);
-		ret      = ret
-              && autoUpMap.setData({
-                  1800, 2000, 2300, 2500, 2900, 3900, 4100, 4900, 5100, // 2
-                  1800, 2100, 2300, 3000, 3200, 3900, 4100, 4900, 5100, // 3
-                  1800, 2100, 2300, 3000, 3200, 3900, 4100, 4900, 5100, // 4
-                  1800, 2100, 2300, 3000, 3400, 3900, 4100, 4900, 5100, // 5
-                  1800, 2100, 2300, 3000, 3600, 4000, 4600, 5900, 6400, // 6
-              });
+	A3D::SurfaceChartEntity* torqueRestitutionChart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
 
-		if(!autoUpMap.isValid() || !ret) {
-			qDebug() << "Error map is not valid";
-			return 1;
-		}
-		test->setTickLength(1);
-		test->setMap(s->resourceManager(), autoUpMap);
-		test->setPosition(QVector3D(2, 0, 0));
-		test->setAxisName(A3D::D_X_Axis, "Gas");
-		test->setAxisName(A3D::D_Y_Axis, "Rpm");
-		test->setAxisName(A3D::D_Z_Axis, "Target Gear");
+	A3D::MapChart3D torqueRestitutionTimeMap;
+
+    {
+        A3D::ChartAxisData axis_Torque;
+        axis_Torque.setMinMax(-100, 500);
+        axis_Torque.addIndicators({ -100, 0, 50, 100, 200, 300, 400, 500 }, 0, A3D::CHAXIND_MAJOR_INDICATOR);
+		//axis_Torque.addEquidistantIndicatorsByStepSize(159.f, 450.f, 50.f, 0, A3D::CHAXIND_MINOR_INDICATOR);
+        axis_Torque.invert();
+        axis_Torque.setName("Torque");
+        torqueRestitutionTimeMap.setAxisData(A3D::AXIS_X, axis_Torque);
+
+        A3D::ChartAxisData axis_RPM;
+		axis_RPM.setMinMax(0,8000);
+        axis_RPM.addEquidistantIndicatorsByStepSize(0,8000,1000, 0, A3D::CHAXIND_MAJOR_INDICATOR);
+		//axis_RPM.addEquidistantIndicatorsByStepSize(500,7500,500, 0, A3D::CHAXIND_MAJOR_INDICATOR);
+        axis_RPM.invert();
+        axis_RPM.setName("RPM");
+        torqueRestitutionTimeMap.setAxisData(A3D::AXIS_Z, axis_RPM);
+
+        A3D::ChartAxisData axis_Time;
+        axis_Time.setMinMax(-100, 500);
+        axis_Time.addEquidistantIndicatorsByStepSize(-100.f,500.f, 50.f, 0, A3D::CHAXIND_MAJOR_INDICATOR);
+        axis_Time.setName("Restitution Time");
+        torqueRestitutionTimeMap.setAxisData(A3D::AXIS_Y, axis_Time);
+    }
+
+    torqueRestitutionTimeMap.setChartPoints(
+        { -100, 0, 50, 100, 200, 300, 400, 500 }, { 1000,2000,3000,4000,5000,6000,7000,8000 },
+        {
+            500,500,450,400,250,100,0,-10, // 1
+			500,500,400,400,250,100,0,-30, // 2
+			450,400,350,350,250,100,0,-45, // 3
+			400,400,350,250,250,100,0,-65, // 4
+			250,250,250,250,100,0,0,-70, // 5
+			100,100,250,100,0,0,0,-75, // 6
+			0  ,50  ,100,0,0,0,-75,-100, // 7
+			-10,-30,-45,-65,-70,-75,-100,-100, // 8
+
+        }
+    );
+
+    if(!torqueRestitutionTimeMap.isValid()) {
+        qDebug() << "TorqueResitution Map is not valid!";
+		return 1;
 	}
 
-	{
-		A3D::Map gaussMatrixMap;
-		A3D::SurfaceChartEntity* gauss = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
-		static const size_t size       = 143;
+    torqueRestitutionChart->setChart(torqueRestitutionTimeMap);
+    torqueRestitutionChart->setLabelDistances(QVector3D(0.1f, 0.1f, 0.1f));
+	torqueRestitutionChart->setIndicatorsColor(QVector4D(0,0,0.8,1));
+	torqueRestitutionChart->setLabelFont(QFont("Helvetica [Cronyx]", 64));
+	torqueRestitutionChart->setPosition(QVector3D(2,0,0));
+	
 
-		std::vector<float> gaussMatrix     = generateGaussianKernel(size, 30.f);
-		std::vector<float> edgeGuassMatrix = generateGaussianEdgeKernel(size, 5.f);
-		for(int i = 0; i < gaussMatrix.size(); i++) {
-			gaussMatrix[i] += edgeGuassMatrix[i] * 0.5;
-		}
-
-		gauss->setTickLength(1);
-        gaussMatrixMap.setLinearAxis(A3D::D_X_Axis, 1, 0, 143, 5);
-		gaussMatrixMap.setFixedAxis(A3D::D_Y_Axis, { "Low", "High" });
-        gaussMatrixMap.setLinearAxis(A3D::D_Z_Axis, 1, 0, 143, 5);
-
-		gaussMatrixMap.setData(gaussMatrix);
-
-		gauss->setMap(s->resourceManager(), gaussMatrixMap);
-
-		gauss->setPosition(QVector3D(0, 0, 2));
-	}
-*/
 
 	A3D::View* v = new A3D::View(&w);
 	v->camera().setPosition(QVector3D(2.f, 2.f, 2.f));
@@ -163,19 +169,19 @@ int main(int argc, char* argv[]) {
 			if(res->m_resultingEntity) {
 				qDebug() << "Entity:" << res->m_resultingEntity;
 
-                if(res->m_resultingEntity == chart) {
-                    chart->setMarker(QVector2D(res->m_groupLocalHitPoint.x(), res->m_groupLocalHitPoint.z()));
+                if(res->m_resultingEntity == autoUpChart) {
+                    autoUpChart->setMarker(QVector2D(res->m_groupLocalHitPoint.x(), res->m_groupLocalHitPoint.z()));
                     v->update();
 
-                    QVector3D const value = chart->mapChart().getValueFromMesh(chart->marker());
+                    QVector3D const value = autoUpChart->mapChart().getValueFromMesh(autoUpChart->marker());
 
                     for(std::size_t i = 0; i < A3D::AXIS_COUNT; ++i) {
                         A3D::Axis3D const axis = static_cast<A3D::Axis3D>(i);
-                        if(chart->mapChart().axisData(axis).type() == A3D::CHAXIS_ENUMERATED)
-                            qDebug() << chart->mapChart().axisData(axis).name() << ": "
-                                     << chart->mapChart().axisData(axis).getEnumerationName(static_cast<std::size_t>(A3D::getVectorAxis(value, axis) + 0.1));
+                        if(autoUpChart->mapChart().axisData(axis).type() == A3D::CHAXIS_ENUMERATED)
+                            qDebug() << autoUpChart->mapChart().axisData(axis).name() << ": "
+                                     << autoUpChart->mapChart().axisData(axis).getEnumerationName(static_cast<std::size_t>(A3D::getVectorAxis(value, axis) + 0.1));
                         else
-                            qDebug() << chart->mapChart().axisData(axis).name() << ": " << A3D::getVectorAxis(value, axis);
+                            qDebug() << autoUpChart->mapChart().axisData(axis).name() << ": " << A3D::getVectorAxis(value, axis);
                     }
                 }
 			}
