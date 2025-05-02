@@ -2,11 +2,22 @@
 
 namespace A3D {
 
-ChartAxisIndicator::ChartAxisIndicator(ChartAxisIndicatorType type, float value, float normalizedValue, QString label)
+ChartAxisIndicatorStyle::ChartAxisIndicatorStyle(QColor indicatorColor, QColor labelColor, QFont labelFont, float labelSize)
+    : m_indicatorColor(std::move(indicatorColor)),
+      m_labelColor(std::move(labelColor)),
+      m_labelFont(std::move(labelFont)),
+      m_labelSize(labelSize) {}
+
+ChartAxisIndicator::ChartAxisIndicator(ChartAxisIndicatorType type, float value, float normalizedValue, QString label, ChartAxisIndicatorStyle style)
     : m_type(type),
       m_value(value),
       m_normalizedValue(normalizedValue),
-      m_label(std::move(label)) {}
+      m_label(std::move(label)),
+      m_style(std::move(style)) {}
+
+ChartAxisStyledEnumeratedIndicatorData::ChartAxisStyledEnumeratedIndicatorData(QString label, ChartAxisIndicatorStyle style)
+    : m_label(std::move(label)),
+      m_style(std::move(style)) {}
 
 ChartAxisData::ChartAxisData()
     : m_type(CHAXIS_LINEAR_INTERPOLATED),
@@ -19,6 +30,14 @@ void ChartAxisData::setName(QString name) {
 
 QString ChartAxisData::name() const {
     return m_name;
+}
+
+void ChartAxisData::setDefaultIndicatorStyle(ChartAxisIndicatorStyle style) {
+    m_defaultStyle = std::move(style);
+}
+
+ChartAxisIndicatorStyle ChartAxisData::defaultIndicatorStyle() const {
+    return m_defaultStyle;
 }
 
 void ChartAxisData::removeAllIndicators() {
@@ -57,7 +76,26 @@ void ChartAxisData::setIndicators(QStringList enumeratedPoints, ChartAxisIndicat
     m_axisMinimumValue = 0.f;
     m_axisMaximumValue = static_cast<float>(enumeratedPoints.size() - 1);
     for(std::size_t i = 0; i < enumeratedPoints.size(); ++i) {
-        m_indicators.push_back(ChartAxisIndicator(indicatorType, static_cast<float>(i), static_cast<float>(i) / m_axisMaximumValue, std::move(enumeratedPoints[i])));
+        m_indicators.push_back(ChartAxisIndicator(indicatorType, static_cast<float>(i), static_cast<float>(i) / m_axisMaximumValue, std::move(enumeratedPoints[i]), m_defaultStyle)
+        );
+    }
+}
+
+void ChartAxisData::setIndicators(std::vector<ChartAxisStyledEnumeratedIndicatorData> styledEnumeratedPoints, ChartAxisIndicatorType indicatorType) {
+    if(styledEnumeratedPoints.empty())
+        return;
+
+    m_type = CHAXIS_ENUMERATED;
+    m_indicators.clear();
+    m_indicators.reserve(styledEnumeratedPoints.size());
+
+    m_axisMinimumValue = 0.f;
+    m_axisMaximumValue = static_cast<float>(styledEnumeratedPoints.size() - 1);
+    for(std::size_t i = 0; i < styledEnumeratedPoints.size(); ++i) {
+        m_indicators.push_back(ChartAxisIndicator(
+            indicatorType, static_cast<float>(i), static_cast<float>(i) / m_axisMaximumValue, std::move(styledEnumeratedPoints[i].m_label),
+            std::move(styledEnumeratedPoints[i].m_style)
+        ));
     }
 }
 
@@ -67,7 +105,7 @@ void ChartAxisData::addIndicators(std::vector<float> const& points, int toString
     m_indicators.reserve(m_indicators.size() + points.size());
 
     for(float const& val: points)
-        m_indicators.push_back(ChartAxisIndicator(indicatorType, val, normalizedIndicatorValue(val), QString::number(val, 'f', toStringPrecision)));
+        m_indicators.push_back(ChartAxisIndicator(indicatorType, val, normalizedIndicatorValue(val), QString::number(val, 'f', toStringPrecision), m_defaultStyle));
 }
 
 void ChartAxisData::addEquidistantIndicatorsByIndicatorCount(float from, float to, size_t indicatorCount, int toStringPrecision, ChartAxisIndicatorType indicatorType) {
@@ -79,7 +117,7 @@ void ChartAxisData::addEquidistantIndicatorsByIndicatorCount(float from, float t
     float fInverseIndicatorCount = 1.f / static_cast<float>(indicatorCount - 1);
     for(size_t i = 0; i < indicatorCount; ++i) {
         float const val = from + ((to - from) * fInverseIndicatorCount * static_cast<float>(i));
-        m_indicators.push_back(ChartAxisIndicator(indicatorType, val, normalizedIndicatorValue(val), QString::number(val, 'f', toStringPrecision)));
+        m_indicators.push_back(ChartAxisIndicator(indicatorType, val, normalizedIndicatorValue(val), QString::number(val, 'f', toStringPrecision), m_defaultStyle));
     }
 }
 
@@ -99,11 +137,11 @@ void ChartAxisData::addEquidistantIndicatorsByStepSize(float from, float to, flo
 
     for(size_t i = 0; i < indicatorCount; ++i) {
         float const val = from + stepSize * static_cast<float>(i);
-        m_indicators.push_back(ChartAxisIndicator(indicatorType, val, normalizedIndicatorValue(val), QString::number(val, 'f', toStringPrecision)));
+        m_indicators.push_back(ChartAxisIndicator(indicatorType, val, normalizedIndicatorValue(val), QString::number(val, 'f', toStringPrecision), m_defaultStyle));
     }
 
     float const val = to;
-    m_indicators.push_back(ChartAxisIndicator(indicatorType, val, normalizedIndicatorValue(val), QString::number(val, 'f', toStringPrecision)));
+    m_indicators.push_back(ChartAxisIndicator(indicatorType, val, normalizedIndicatorValue(val), QString::number(val, 'f', toStringPrecision), m_defaultStyle));
 }
 
 QString ChartAxisData::getEnumerationName(std::size_t index) const {

@@ -72,6 +72,23 @@ void normalize(std::vector<float>& data) {
     normalizeMinMax(data, *itMin, *itMax);
 }
 
+void setVectorAxis(QVector3D& vector, Axis3D axis, float value) {
+    if(axis < AXIS_COUNT)
+        vector[axis] = value;
+}
+
+float getVectorAxis(QVector3D const& vector, Axis3D axis) {
+    if(axis < AXIS_COUNT)
+        return vector[axis];
+
+    return 0.f;
+}
+
+QVector4D colorToVector(QColor color) {
+    return QVector4D(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+    ;
+}
+
 // Möller–Trumbore algorithm
 // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 bool intersectTriangle(
