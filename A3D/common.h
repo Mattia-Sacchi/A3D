@@ -66,19 +66,7 @@ void normalizeMinMax(std::vector<float>& data, float min, float max);
 void normalize(std::vector<float>& data);
 
 inline void setVectorAxis(QVector3D& vector, Axis3D axis, float value) {
-    switch(axis) {
-    case AXIS_X:
-        vector.setX(value);
-        break;
-    case AXIS_Y:
-        vector.setY(value);
-        break;
-    case AXIS_Z:
-        vector.setZ(value);
-        break;
-    default:
-        break;
-    }
+   vector[axis]= value;
 }
 
 inline float getVectorAxis(QVector3D const& vector, Axis3D axis) {
