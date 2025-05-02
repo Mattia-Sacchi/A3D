@@ -56,6 +56,14 @@ QMatrix4x4 Camera::orientation() const {
 QVector3D const& Camera::angle() const {
 	return m_angle;
 }
+void Camera::setAngle(QVector3D angle) {
+	normalizeAngleVector(angle);
+
+	if(m_angle == angle)
+		return;
+	m_angle             = angle;
+	m_viewMatrixIsDirty = true;
+}
 void Camera::setOrientationTarget(QVector3D const& target) {
 	if(target == m_position)
 		return;
@@ -159,6 +167,18 @@ QMatrix4x4 const& Camera::getProjection() const {
 		}
 	}
 	return m_projMatrix;
+}
+
+QVector3D Camera::unprojectPoint(QPointF xy, float z) const {
+    QMatrix4x4 invProj = getProjection().inverted();
+    QMatrix4x4 invView = getView().inverted();
+
+    QVector4D point = QVector4D((xy.x() * 2.f) - 1.f, (xy.y() * -2.f) + 1.f, z, 1.f);
+
+    QVector4D eye = invProj * point;
+    eye.setW(1.f);
+
+    return (invView * eye).toVector3D();
 }
 
 }

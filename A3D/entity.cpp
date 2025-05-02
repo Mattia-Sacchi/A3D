@@ -1,4 +1,5 @@
 #include "entity.h"
+#include "model.h"
 
 namespace A3D {
 
@@ -77,8 +78,8 @@ QMatrix4x4 const& Entity::entityMatrix() const {
 		m_matrixDirty = false;
 		m_matrix.setToIdentity();
 		m_matrix.rotate(m_rotation);
-		m_matrix.scale(m_scale);
 		m_matrix.translate(m_position);
+		m_matrix.scale(m_scale);
 	}
 	return m_matrix;
 }
@@ -117,6 +118,57 @@ bool Entity::updateEntity(std::chrono::milliseconds t) {
 	}
 
 	return hasChanges;
+}
+
+std::optional<IntersectionResult> Entity::intersect(QVector3D origin, QVector3D rayDirection) const {
+	// dobbiamo trasformare origin e rayDirection in base a entityMatrix()
+	QMatrix4x4 const worldToEntity = entityMatrix().inverted();
+    origin                         = worldToEntity.map(origin);
+	rayDirection                   = worldToEntity.mapVector(rayDirection).normalized();
+
+	for(auto it = m_entities.begin(); it != m_entities.end(); ++it) {
+		if(!*it)
+			continue;
+
+		auto result = (*it)->intersect(origin, rayDirection);
+		if(result) {
+            result->m_hitPoint = entityMatrix().map(result->m_hitPoint);
+			return std::move(result);
+		}
+	}
+
+	Model const* m = model();
+	if(!m)
+		return std::nullopt;
+
+	// dobbiamo trasformare origin e rayDirection in base a m->modelMatrix()
+	QMatrix4x4 const worldToModel = m->modelMatrix().inverted();
+    origin                        = worldToModel.map(origin);
+	rayDirection                  = worldToModel.mapVector(rayDirection).normalized();
+
+	std::map<QString, QPointer<Group>> const& groups = m->groups();
+	for(auto it = groups.begin(); it != groups.end(); ++it) {
+		QPointer<Group> const& g = it->second;
+		if(!g)
+			continue;
+
+		QMatrix4x4 const worldToGroup = g->groupMatrix().inverted();
+        QVector3D groupOrigin         = worldToGroup.map(origin);
+		QVector3D groupRayDirection   = worldToGroup.mapVector(rayDirection).normalized();
+
+		auto result = g->intersect(groupOrigin, groupRayDirection);
+		if(result) {
+			result->m_resultingModel  = const_cast<Model*>(m);
+			result->m_resultingEntity = const_cast<Entity*>(this);
+
+            result->m_hitPoint = g->groupMatrix().map(result->m_hitPoint);
+            result->m_hitPoint = m->modelMatrix().map(result->m_hitPoint);
+            result->m_hitPoint = entityMatrix().map(result->m_hitPoint);
+			return std::move(result);
+		}
+	}
+
+	return std::nullopt;
 }
 
 }

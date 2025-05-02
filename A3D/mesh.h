@@ -39,8 +39,6 @@ public:
 	};
 	static Mesh* standardMesh(StandardMesh);
 
-	static Mesh* generateSurfaceMesh(ResourceManager* parent, std::vector<float> horizontalAxis, std::vector<float> verticalAxis, std::vector<float> data);
-
 	enum DrawMode {
 		Triangles,
 		IndexedTriangles,
@@ -48,7 +46,7 @@ public:
 		IndexedTriangleStrips,
 	};
 
-	struct Vertex {
+    struct Vertex {
 		QVector2D Position2D;
 		QVector3D Position3D;
 		QVector2D TextureCoord2D;
@@ -89,6 +87,8 @@ public:
 	std::vector<std::uint32_t> const& indices() const;
 
 	void invalidateCache(std::uintptr_t rendererID = std::numeric_limits<std::uintptr_t>::max());
+
+	std::optional<QVector3D> intersect(QVector3D origin, QVector3D dir) const;
 
 	template <typename T>
 	T* getMeshCacheT(std::uintptr_t rendererID) const {

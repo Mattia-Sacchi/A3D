@@ -26,8 +26,75 @@
 #include <chrono>
 #include <stdexcept>
 #include <cstdint>
+#include <QPointF>
 
 namespace A3D {
+
+enum Direction3D {
+    D_PositiveX = 0,
+    D_PositiveY,
+    D_PositiveZ,
+    D_NegativeX,
+    D_NegativeY,
+    D_NegativeZ,
+    D_Count,
+};
+
+enum Axis3D {
+    AXIS_X,
+    AXIS_Y,
+    AXIS_Z,
+    AXIS_COUNT,
+};
+
+QVector3D axisVector(Axis3D axis);
+
+class Entity;
+class Model;
+class Group;
+class View;
+
+struct IntersectionResult {
+	Entity* m_resultingEntity;
+	Model* m_resultingModel;
+	Group* m_resultingGroup;
+	QVector3D m_groupLocalHitPoint;
+	QVector3D m_hitPoint;
+};
+
+void normalizeMinMax(std::vector<float>& data, float min, float max);
+void normalize(std::vector<float>& data);
+
+inline void setVectorAxis(QVector3D& vector, Axis3D axis, float value) {
+    switch(axis) {
+    case AXIS_X:
+        vector.setX(value);
+        break;
+    case AXIS_Y:
+        vector.setY(value);
+        break;
+    case AXIS_Z:
+        vector.setZ(value);
+        break;
+    default:
+        break;
+    }
+}
+
+inline float getVectorAxis(QVector3D const& vector, Axis3D axis) {
+    switch(axis) {
+    case AXIS_X:
+        return vector.x();
+    case AXIS_Y:
+        return vector.y();
+    case AXIS_Z:
+        return vector.z();
+    default:
+        return 0.f;
+    }
+}
+
+QPointF getCurrentNormalizedPos(View* v);
 
 enum LogChannel {
 	LC_Debug = 0,
@@ -79,6 +146,11 @@ inline QImage const* imageWithFormat(QImage::Format format, QImage const& base, 
 	storage = base.convertToFormat(format);
 	return &storage;
 }
+
+bool intersectTriangle(
+	QVector3D const& rayOrigin, QVector3D const& rayDirection, QVector3D const& triangle0, QVector3D const& triangle1, QVector3D const& triangle2, QVector3D& hitPoint,
+	float const tolerance = 1e-6
+);
 
 }
 
