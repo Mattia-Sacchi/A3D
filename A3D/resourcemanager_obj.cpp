@@ -352,7 +352,7 @@ Model* ResourceManager::loadModel_OBJ(OpenFileResult ofr) {
 
 		newGroup->setProperty("obj_Material", gi.material);
 
-		MaterialProperties* matProp                      = new MaterialProperties(this);
+		MaterialProperties* matProp = new MaterialProperties(this);
 		newGroup->setMaterialProperties(matProp);
 		newGroup->setMaterial(Material::standardMaterial(Material::PBRMaterial));
 

@@ -6,8 +6,8 @@
 namespace A3D {
 
 MaterialPropertiesCacheOGL::MaterialPropertiesCacheOGL(MaterialProperties* parent)
-    : MaterialPropertiesCache{ parent },
-      m_materialUBO(0) {
+	: MaterialPropertiesCache{ parent },
+	  m_materialUBO(0) {
 	log(LC_Debug, "Constructor: MaterialPropertiesCacheOGL");
 }
 MaterialPropertiesCacheOGL::~MaterialPropertiesCacheOGL() {

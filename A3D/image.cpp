@@ -17,12 +17,14 @@ Image::Image()
 	: Image(QImage()) {}
 
 Image::Image(QImage const& i)
-	: m_type(T_QIMAGE), m_transparent(TD_NOT_DONE_YET), m_qimage(i) {}
+	: m_type(T_QIMAGE),
+	  m_transparent(TD_NOT_DONE_YET),
+	  m_qimage(i) {}
 
 void Image::setFromQImage(QImage const& i) {
 	m_hdr.m_data.clear();
-	m_qimage = i;
-	m_type = T_QIMAGE;
+	m_qimage      = i;
+	m_type        = T_QIMAGE;
 	m_transparent = TD_NOT_DONE_YET;
 }
 
@@ -101,7 +103,7 @@ Image::HDRData const& Image::hdr() const {
 	return m_hdr;
 }
 
-Image& Image::operator= (QImage const& i) {
+Image& Image::operator=(QImage const& i) {
 	setFromQImage(i);
 	return *this;
 }
@@ -115,7 +117,6 @@ Image& Image::operator= (QImage const& i) {
 
 namespace A3D {
 
-
 static int cb_qt_read(void* user, char* data, int size) {
 	if(!user || size <= 0)
 		return 0;
@@ -126,7 +127,7 @@ static void cb_qt_skip(void* user, int n) {
 	if(!user || n == 0)
 		return;
 	QIODevice* d = reinterpret_cast<QIODevice*>(user);
-	d->seek( d->pos() + n );
+	d->seek(d->pos() + n);
 }
 static int cb_qt_eof(void* user) {
 	if(!user)
@@ -152,22 +153,18 @@ void Image::saveToFile(QIODevice& dest) {
 }
 
 void Image::setFromHDR(HDRData data) {
-	m_hdr = std::move(data);
-	m_type = T_HDRDATA;
+	m_hdr         = std::move(data);
+	m_type        = T_HDRDATA;
 	m_transparent = TD_NOT_DONE_YET;
 }
 
 void Image::setFromHDR(QIODevice& d) {
-	stbi_io_callbacks callbacks = {
-		cb_qt_read,
-		cb_qt_skip,
-		cb_qt_eof
-	};
+	stbi_io_callbacks callbacks = { cb_qt_read, cb_qt_skip, cb_qt_eof };
 
 	int const requiredComponents = 0;
 
-	int dstX = 0;
-	int dstY = 0;
+	int dstX    = 0;
+	int dstY    = 0;
 	int dstComp = 0;
 	float* data = stbi_loadf_from_callbacks(&callbacks, reinterpret_cast<void*>(&d), &dstX, &dstY, &dstComp, requiredComponents);
 
@@ -183,18 +180,18 @@ void Image::setFromHDR(QIODevice& d) {
 				m_hdr.m_data[i] = 65000.f;
 			}
 		}
-		m_hdr.w = static_cast<std::size_t>(dstX);
-		m_hdr.h = static_cast<std::size_t>(dstY);
+		m_hdr.w            = static_cast<std::size_t>(dstX);
+		m_hdr.h            = static_cast<std::size_t>(dstY);
 		m_hdr.nrComponents = static_cast<std::size_t>(dstComp);
 		stbi_image_free(data);
 	}
 	else {
 		m_hdr.m_data.clear();
-		m_hdr.w = 0;
-		m_hdr.h = 0;
+		m_hdr.w            = 0;
+		m_hdr.h            = 0;
 		m_hdr.nrComponents = 0;
 	}
-	m_type = T_HDRDATA;
+	m_type        = T_HDRDATA;
 	m_transparent = TD_NOT_DONE_YET;
 }
 

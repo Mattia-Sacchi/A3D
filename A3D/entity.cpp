@@ -123,7 +123,7 @@ bool Entity::updateEntity(std::chrono::milliseconds t) {
 std::optional<IntersectionResult> Entity::intersect(QVector3D origin, QVector3D rayDirection) const {
 	// dobbiamo trasformare origin e rayDirection in base a entityMatrix()
 	QMatrix4x4 const worldToEntity = entityMatrix().inverted();
-    origin                         = worldToEntity.map(origin);
+	origin                         = worldToEntity.map(origin);
 	rayDirection                   = worldToEntity.mapVector(rayDirection).normalized();
 
 	for(auto it = m_entities.begin(); it != m_entities.end(); ++it) {
@@ -132,7 +132,7 @@ std::optional<IntersectionResult> Entity::intersect(QVector3D origin, QVector3D 
 
 		auto result = (*it)->intersect(origin, rayDirection);
 		if(result) {
-            result->m_hitPoint = entityMatrix().map(result->m_hitPoint);
+			result->m_hitPoint = entityMatrix().map(result->m_hitPoint);
 			return std::move(result);
 		}
 	}
@@ -143,7 +143,7 @@ std::optional<IntersectionResult> Entity::intersect(QVector3D origin, QVector3D 
 
 	// dobbiamo trasformare origin e rayDirection in base a m->modelMatrix()
 	QMatrix4x4 const worldToModel = m->modelMatrix().inverted();
-    origin                        = worldToModel.map(origin);
+	origin                        = worldToModel.map(origin);
 	rayDirection                  = worldToModel.mapVector(rayDirection).normalized();
 
 	std::map<QString, QPointer<Group>> const& groups = m->groups();
@@ -153,7 +153,7 @@ std::optional<IntersectionResult> Entity::intersect(QVector3D origin, QVector3D 
 			continue;
 
 		QMatrix4x4 const worldToGroup = g->groupMatrix().inverted();
-        QVector3D groupOrigin         = worldToGroup.map(origin);
+		QVector3D groupOrigin         = worldToGroup.map(origin);
 		QVector3D groupRayDirection   = worldToGroup.mapVector(rayDirection).normalized();
 
 		auto result = g->intersect(groupOrigin, groupRayDirection);
@@ -161,9 +161,9 @@ std::optional<IntersectionResult> Entity::intersect(QVector3D origin, QVector3D 
 			result->m_resultingModel  = const_cast<Model*>(m);
 			result->m_resultingEntity = const_cast<Entity*>(this);
 
-            result->m_hitPoint = g->groupMatrix().map(result->m_hitPoint);
-            result->m_hitPoint = m->modelMatrix().map(result->m_hitPoint);
-            result->m_hitPoint = entityMatrix().map(result->m_hitPoint);
+			result->m_hitPoint = g->groupMatrix().map(result->m_hitPoint);
+			result->m_hitPoint = m->modelMatrix().map(result->m_hitPoint);
+			result->m_hitPoint = entityMatrix().map(result->m_hitPoint);
 			return std::move(result);
 		}
 	}

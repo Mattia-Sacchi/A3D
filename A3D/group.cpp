@@ -162,5 +162,4 @@ std::optional<IntersectionResult> Group::intersect(QVector3D origin, QVector3D d
 	return res;
 }
 
-
 }

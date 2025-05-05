@@ -159,7 +159,7 @@ void View::updateView() {
 }
 
 QPointF View::toNormalizedPoint(QPointF viewLocalCoordinate) const {
-    return QPointF(viewLocalCoordinate.x() / static_cast<float>(width()), viewLocalCoordinate.y() / static_cast<float>(height()));
+	return QPointF(viewLocalCoordinate.x() / static_cast<float>(width()), viewLocalCoordinate.y() / static_cast<float>(height()));
 }
 
 }

@@ -23,7 +23,7 @@ out vec3 Normal;
 out vec3 LocalPos;
 
 void main() {
-        LocalPos = inVertex;
+	LocalPos = inVertex;
 	WorldPos = vec3(mMatrix * vec4(inVertex, 1.0));
 	TexCoord = inTexCoord;
 	Normal = mat3(mNormalMatrix) * inNormal;
