@@ -17,7 +17,7 @@
         <file>A3D/LineMaterial.geom</file>
         <file>A3D/LineMaterial.frag</file>
         <file>A3D/LineMaterial.vert</file>
-        <file>A3D/ColoredSurfaceMaterial.frag</file>
-        <file>A3D/ColoredSurfaceMaterial.vert</file>
+        <file>A3D/MapChart3DMaterial.frag</file>
+        <file>A3D/MapChart3DMaterial.vert</file>
     </qresource>
 </RCC>

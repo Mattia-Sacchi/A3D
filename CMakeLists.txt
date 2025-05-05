@@ -57,6 +57,7 @@ set(SOURCES
     A3D/texturecacheogl.cpp
     A3D/chart.cpp
     A3D/view.cpp
+	keyeventmanager.cpp
 )
 
 set(INCPATHS
@@ -111,12 +112,17 @@ set(HEADERS
     A3D/view.h
     A3D/chart.h
     Dependencies/stb/stb_image.h
+	keyeventmanager.h
+)
+
+set(RESOURCES
+	A3D/A3D.qrc
+    A3D/SampleResources.qrc
 )
 
 qt_add_big_resources(
     COMPILED_RESOURCE_FILES
-    A3D/A3D.qrc
-    A3D/SampleResources.qrc
+	${RESOURCES}
 )
 
 # Create executable from these files...
@@ -124,8 +130,7 @@ qt_add_executable(${PROJECT_NAME}
     ${SOURCES}
     ${HEADERS}
     ${COMPILED_RESOURCE_FILES}
-    keyeventmanager.h
-    keyeventmanager.cpp
+	${RESOURCES}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

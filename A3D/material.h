@@ -25,16 +25,18 @@ public:
 	Q_DECLARE_FLAGS(RenderOptions, RenderOption)
 
 	enum StandardMaterial {
-		OITMaterial,
-		UnshadedMaterial,
-		BillboardMaterial,
-		PBRMaterial,
+		// Internally-used materials
 		SkyboxMaterial,
 		IrradianceMaterial,
 		PrefilterMaterial,
 		BRDFMaterial,
+
+		// General-purpose materials
+		MapChart3DMaterial,
+		UnshadedMaterial,
+		PBRMaterial,
+		BillboardMaterial,
 		LineMaterial,
-		ColoredSurfaceMaterial,
 	};
 	static Material* standardMaterial(StandardMaterial);
 
