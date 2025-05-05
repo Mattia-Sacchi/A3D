@@ -19,5 +19,11 @@
 			"*.luad": "lua",
 			"vector": "cpp"
 		}
+	},
+	"extensions": {
+		"recommendations": [
+			"kuba-p.glsl-lsp",
+			"theqtcompany.qt-cpp-pack"
+		]
 	}
 }
