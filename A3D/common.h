@@ -7,6 +7,7 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <QVector4D>
+#include <QPointF>
 #include <QPointer>
 #include <QtMath>
 #include <QString>
@@ -18,15 +19,8 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions_3_3_Core>
 
-#include <memory>
-#include <limits>
 #include <map>
 #include <vector>
-#include <list>
-#include <chrono>
-#include <stdexcept>
-#include <cstdint>
-#include <QPointF>
 
 namespace A3D {
 
@@ -65,22 +59,10 @@ struct IntersectionResult {
 void normalizeMinMax(std::vector<float>& data, float min, float max);
 void normalize(std::vector<float>& data);
 
-inline void setVectorAxis(QVector3D& vector, Axis3D axis, float value) {
-   vector[axis]= value;
-}
+void setVectorAxis(QVector3D& vector, Axis3D axis, float value);
+float getVectorAxis(QVector3D const& vector, Axis3D axis);
 
-inline float getVectorAxis(QVector3D const& vector, Axis3D axis) {
-    switch(axis) {
-    case AXIS_X:
-        return vector.x();
-    case AXIS_Y:
-        return vector.y();
-    case AXIS_Z:
-        return vector.z();
-    default:
-        return 0.f;
-    }
-}
+QVector4D colorToVector(QColor color);
 
 QPointF getCurrentNormalizedPos(View* v);
 

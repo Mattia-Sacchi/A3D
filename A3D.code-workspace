@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"formatAll.includeFileExtensions": [
+			".cpp",
+			".hpp",
+			".frag",
+			".vert",
+			".geom"
+		],
+		"files.associations": {
+			"*.s": "arm",
+			"*.hpp": "cpp",
+			"*.cpp": "cpp",
+			"*.luad": "lua",
+			"vector": "cpp"
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"kuba-p.glsl-lsp",
+			"theqtcompany.qt-cpp-pack"
+		]
+	}
+}

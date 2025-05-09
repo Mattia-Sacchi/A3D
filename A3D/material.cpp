@@ -14,13 +14,9 @@ Material* Material::standardMaterial(StandardMaterial stdMat) {
 
 	Material& newMat = standardMaterials[stdMat];
 	switch(stdMat) {
-	case ColoredSurfaceMaterial:
-		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/ColoredSurfaceMaterial.vert");
-		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/ColoredSurfaceMaterial.frag");
-		break;
-	case OITMaterial:
-		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/OITMaterial.vert");
-		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/OITMaterial.frag");
+	case MapChart3DMaterial:
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/MapChart3DMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/MapChart3DMaterial.frag");
 		break;
 	case UnshadedMaterial:
 		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/UnshadedMaterial.vert");

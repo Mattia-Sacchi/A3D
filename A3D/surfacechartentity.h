@@ -10,7 +10,7 @@
 namespace A3D {
 
 class SurfaceChartEntity : public Entity {
-	Q_OBJECT
+    Q_OBJECT
 public:
     SurfaceChartEntity(Entity* parent = nullptr);
 
@@ -26,30 +26,21 @@ public:
     void setLabelDistances(QVector3D distance_x_y_z);
     QVector3D labelDistances() const;
 
-    
-
     void setMarker(QVector2D marker);
+    void unsetMarker();
+    bool hasMarker() const;
     QVector2D marker() const;
-
-    void setIndicatorsColor(QVector4D color);
-    QVector4D indicatorsColor() const;
-
-    void setLabelColor(QColor color);
-    QColor labelColor() const;
-
-    void setLabelFont(QFont font);
-    QFont labelFont() const;
+    void setMarkerColor(QColor markerColor);
+    QColor markerColor() const;
 
 private:
     void updateSurfaceMesh();
-    void updateAxesLines();
-    void updateIndicatorLines(Axis3D axis);
-    void updateAxesLabels();
-    void updateIndicatorLabels(Axis3D axis);
 
-    void updateIndicatorLinesColor(Axis3D axis);
-    void updateIndicatorLabelsColor(Axis3D axis);
-    void updateIndicatorLabelsFont(Axis3D axis);
+    void updateIndicatorLines();
+    void updateIndicatorLines(Axis3D onlyUpdateAxis);
+
+    void updateIndicatorLabels();
+    void updateIndicatorLabels(Axis3D onlyUpdateAxis);
 
     MapChart3D m_mapChart;
     float m_enumStripThicknessX;
@@ -60,13 +51,10 @@ private:
     QPointer<LineGroup> m_indicatorLines[AXIS_COUNT][CHAXIND_COUNT];
     std::vector<QPointer<TextBillboardEntity>> m_indicatorLabels[AXIS_COUNT];
 
+    bool m_hasMarker;
+    QColor m_markerColor;
     QVector2D m_marker;
     LineGroup* m_markerLineGroup;
-
-    QVector4D m_indicatorColor;
-    QColor m_labelColor;
-    QFont m_labelFont;
-
 };
 
 }

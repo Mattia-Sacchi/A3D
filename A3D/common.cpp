@@ -40,36 +40,53 @@ void log(LogChannel channel, QString text) {
 }
 
 QVector3D axisVector(Axis3D axis) {
-    static QVector3D axes[AXIS_COUNT + 1] = {
-        QVector3D(1.f, 0.f, 0.f),
-        QVector3D(0.f, 1.f, 0.f),
-        QVector3D(0.f, 0.f, 1.f),
-        QVector3D(0.f, 0.f, 0.f),
-    };
+	static QVector3D axes[AXIS_COUNT + 1] = {
+		QVector3D(1.f, 0.f, 0.f),
+		QVector3D(0.f, 1.f, 0.f),
+		QVector3D(0.f, 0.f, 1.f),
+		QVector3D(0.f, 0.f, 0.f),
+	};
 
-    if(axis < AXIS_COUNT)
-        return axes[axis];
+	if(axis < AXIS_COUNT)
+		return axes[axis];
 
-    return axes[AXIS_COUNT];
+	return axes[AXIS_COUNT];
 }
 
 void normalizeMinMax(std::vector<float>& data, float min, float max) {
-    float const fInvFactor = 1.f / (max - min);
+	float const fInvFactor = 1.f / (max - min);
 
-    for(float& val: data)
-        val = (val - min) * fInvFactor;
+	for(float& val: data)
+		val = (val - min) * fInvFactor;
 }
 
 void normalize(std::vector<float>& data) {
-    auto itMin = std::min_element(data.begin(), data.end());
-    if(itMin == data.end())
-        return;
+	auto itMin = std::min_element(data.begin(), data.end());
+	if(itMin == data.end())
+		return;
 
-    auto itMax = std::max_element(data.begin(), data.end());
-    if(itMax == data.end())
-        return;
+	auto itMax = std::max_element(data.begin(), data.end());
+	if(itMax == data.end())
+		return;
 
-    normalizeMinMax(data, *itMin, *itMax);
+	normalizeMinMax(data, *itMin, *itMax);
+}
+
+void setVectorAxis(QVector3D& vector, Axis3D axis, float value) {
+	if(axis < AXIS_COUNT)
+		vector[axis] = value;
+}
+
+float getVectorAxis(QVector3D const& vector, Axis3D axis) {
+	if(axis < AXIS_COUNT)
+		return vector[axis];
+
+	return 0.f;
+}
+
+QVector4D colorToVector(QColor color) {
+	return QVector4D(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+	;
 }
 
 // Möller–Trumbore algorithm
