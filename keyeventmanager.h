@@ -5,20 +5,22 @@
 #include <QEvent>
 #include <QObject>
 
+
+typedef std::function<void(QEvent::Type)> EmFunctor;
 class KeyEventManager : public QObject {
     Q_OBJECT
 public:
     KeyEventManager(QObject* parent = nullptr);
 
-    void setBinding(Qt::Key key, std::function<void()> callback);
-    void setBinding(Qt::MouseButton button, std::function<void()> callback);
+    void setBinding(Qt::Key key, EmFunctor callback);
+    void setBinding(Qt::MouseButton button, EmFunctor callback);
 
     virtual bool eventFilter(QObject*, QEvent*) override;
 
 private:
     struct Entry {
         bool m_wasPressed;
-        std::function<void()> m_callback;
+        EmFunctor m_callback;
     };
     std::map<Qt::Key, Entry> m_keyBindings;
     std::map<Qt::MouseButton, Entry> m_mouseBindings;

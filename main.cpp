@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QMainWindow>
+#include <QHBoxLayout>
 #include <QFile>
 #include <QDir>
 #include <QTimer>
@@ -151,57 +152,78 @@ int main(int argc, char* argv[]) {
 	QObject::connect(&t, &QTimer::timeout, v, &A3D::View::updateView);
 	QObject::connect(&t, &QTimer::timeout, s, &A3D::Scene::updateScene);
 
+    QVector3D * pressLocalPos = new QVector3D;
+
 	// Used just for testing
     KeyEventManager* kem = new KeyEventManager(v);
-    kem->setBinding(Qt::RightButton, [=]() {
+    kem->setBinding(Qt::RightButton, [=](QEvent::Type type) {
         A3D::View* view               = v;
         QPoint cursorPosition         = view->mapFromGlobal(QCursor::pos());
         QPointF normalizedPosition    = view->toNormalizedPoint(cursorPosition.toPointF());
         QVector3D unprojectedMousePos = view->camera().unprojectPoint(normalizedPosition);
-		unprojectedMousePos -= view->camera().position();
-		unprojectedMousePos *= view->camera().farPlane();
-		unprojectedMousePos += view->camera().position();
-		std::optional<A3D::IntersectionResult> res = s->intersect(view->camera().position(), unprojectedMousePos);
+        unprojectedMousePos -= view->camera().position();
+        unprojectedMousePos *= view->camera().farPlane();
+        unprojectedMousePos += view->camera().position();
 
-		if(res) {
-			qDebug() << "Intersection succeeded!";
+        if(type ==QEvent::MouseButtonPress){
+            
+            std::optional<A3D::IntersectionResult> res = s->intersect(view->camera().position(), unprojectedMousePos);
 
-			if(res->m_resultingEntity) {
-				qDebug() << "Entity:" << res->m_resultingEntity;
+            if(res) {
+                *pressLocalPos = res->m_groupLocalHitPoint;
+                qDebug() << "Intersection succeeded!";
 
-                if(res->m_resultingEntity == autoUpChart) {
-                    autoUpChart->setMarker(QVector2D(res->m_groupLocalHitPoint.x(), res->m_groupLocalHitPoint.z()));
-                    v->update();
+                if(res->m_resultingEntity) {
+                    qDebug() << "Entity:" << res->m_resultingEntity;
 
-                    QVector3D const value = autoUpChart->mapChart().getValueFromMesh(autoUpChart->marker());
+                    if(res->m_resultingEntity == autoUpChart) {
+                        autoUpChart->setMarker(QVector2D(res->m_groupLocalHitPoint.x(), res->m_groupLocalHitPoint.z()));
+                        v->update();
 
-                    for(std::size_t i = 0; i < A3D::AXIS_COUNT; ++i) {
-                        A3D::Axis3D const axis = static_cast<A3D::Axis3D>(i);
-                        if(autoUpChart->mapChart().axisData(axis).type() == A3D::CHAXIS_ENUMERATED)
-                            qDebug() << autoUpChart->mapChart().axisData(axis).name() << ": "
-                                     << autoUpChart->mapChart().axisData(axis).getEnumerationName(static_cast<std::size_t>(A3D::getVectorAxis(value, axis) + 0.1));
-                        else
-                            qDebug() << autoUpChart->mapChart().axisData(axis).name() << ": " << A3D::getVectorAxis(value, axis);
+                        QVector3D const value = autoUpChart->mapChart().getValueFromMesh(autoUpChart->marker());
+                        
+
+                        for(std::size_t i = 0; i < A3D::AXIS_COUNT; ++i) {
+                            A3D::Axis3D const axis = static_cast<A3D::Axis3D>(i);
+                            if(autoUpChart->mapChart().axisData(axis).type() == A3D::CHAXIS_ENUMERATED)
+                                qDebug() << autoUpChart->mapChart().axisData(axis).name() << ": "
+                                        << autoUpChart->mapChart().axisData(axis).getEnumerationName(static_cast<std::size_t>(A3D::getVectorAxis(value, axis) + 0.1));
+                            else
+                                qDebug() << autoUpChart->mapChart().axisData(axis).name() << ": " << A3D::getVectorAxis(value, axis);
+                        }
                     }
                 }
-			}
 
-			if(res->m_resultingModel)
-				qDebug() << "Model:" << res->m_resultingModel;
+                if(res->m_resultingModel)
+                    qDebug() << "Model:" << res->m_resultingModel;
 
-			if(res->m_resultingGroup)
-				qDebug() << "Group:" << res->m_resultingGroup;
+                if(res->m_resultingGroup)
+                    qDebug() << "Group:" << res->m_resultingGroup;
 
-			qDebug() << "Hit:" << res->m_groupLocalHitPoint;
-			qDebug() << "Global Coordinate:" << res->m_hitPoint;
-		}
-		else {
-			qDebug() << "No intersection!";
-		}
+                qDebug() << "Hit:" << res->m_groupLocalHitPoint;
+                qDebug() << "Global Coordinate:" << res->m_hitPoint;
+            }
+            else {
+                qDebug() << "No intersection!";
+            }
+        }
+        else if(type == QEvent::MouseMove)
+        {
+            if(pressLocalPos->isNull())
+                return;
+            std::optional<A3D::IntersectionResult> res = s->intersect(view->camera().position(), unprojectedMousePos);
+
+            if(res) {
+                QVector3D newHitPoint =res.value().m_groupLocalHitPoint;
+                qDebug() << *pressLocalPos << newHitPoint << " dy: " << pressLocalPos->y() - newHitPoint.y();
+            }
+        }
+        
     });
 
 	v->run();
 	s->run();
+
 
 	w.setCentralWidget(v);
 	w.show();
