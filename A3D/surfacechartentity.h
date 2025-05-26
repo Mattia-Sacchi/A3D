@@ -16,6 +16,11 @@ public:
 
 	void setChart(MapChart3D map);
 	MapChart3D const& mapChart() const;
+	MapChart3D& mapChart();
+
+	// (if editFilterMask & charteditorcontroller.editFilterMask) != 0 then it's editable
+	void setEditFilterMask(std::uint32_t mask);
+	std::uint32_t editFilterMask() const;
 
 	// Range: 0-1 -> 0-100%
 	void setEnumStripThickness(float xThickness, float zThickness);
@@ -32,6 +37,15 @@ public:
 	QVector2D marker() const;
 	void setMarkerColor(QColor markerColor);
 	QColor markerColor() const;
+
+protected:
+	/// @brief Updates Entity logic for a tick.
+	/// @param[in] deltaMs Delta time in milliseconds.
+	/// @return True if the Entity state changed and matrix must be updated.
+	virtual bool updateEntity(std::chrono::milliseconds deltaMs) override;
+
+signals:
+	void markerMoved();
 
 private:
 	void updateSurfaceMesh();
@@ -51,10 +65,12 @@ private:
 	QPointer<LineGroup> m_indicatorLines[AXIS_COUNT][CHAXIND_COUNT];
 	std::vector<QPointer<TextBillboardEntity>> m_indicatorLabels[AXIS_COUNT];
 
+	int m_chartSyncRevision;
 	bool m_hasMarker;
 	QColor m_markerColor;
 	QVector2D m_marker;
 	LineGroup* m_markerLineGroup;
+	std::uint32_t m_editFilterMask;
 };
 
 }

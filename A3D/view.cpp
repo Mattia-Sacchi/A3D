@@ -59,18 +59,50 @@ void View::setScene(Scene* newScene) {
 		m_sceneConnection = connect(m_scene, &Scene::sceneUpdated, this, &View::sceneChanged);
 }
 
-ViewController* View::controller() const {
-	return m_viewController;
+QMatrix4x4 View::calculateFullMatrix(Entity const* targetEntity, Model const* targetModel, Group const* targetGroup) const {
+	if(!scene() || !targetEntity)
+		return QMatrix4x4();
+
+	// Search for Scene within targetEntity's parents
+	std::list<Entity const*> entityTree;
+	do {
+		entityTree.push_front(targetEntity);
+		if(targetEntity == scene())
+			break;
+		targetEntity = targetEntity->parentEntity();
+	}
+	while(targetEntity);
+
+	QMatrix4x4 compositeMatrix;
+	for(auto it = entityTree.begin(); it != entityTree.end(); ++it) {
+		compositeMatrix *= ((*it)->entityMatrix());
+	}
+
+	if(targetModel)
+		compositeMatrix *= targetModel->modelMatrix();
+
+	if(targetGroup)
+		compositeMatrix *= targetGroup->groupMatrix();
+
+	return compositeMatrix;
 }
 
-void View::setController(ViewController* viewController) {
-	if(m_viewController)
-		removeEventFilter(m_viewController);
+void View::addController(ViewController* viewController) {
+	removeController(viewController);
 
-	m_viewController = viewController;
+	installEventFilter(viewController);
+	m_viewControllers.emplace_back(viewController);
+}
 
-	if(m_viewController)
-		installEventFilter(m_viewController);
+void View::removeController(ViewController* controller) {
+	removeEventFilter(controller);
+
+	for(auto it = m_viewControllers.begin(); it != m_viewControllers.end();) {
+		if(!*it || *it == controller)
+			it = m_viewControllers.erase(it);
+		else
+			++it;
+	}
 }
 
 bool View::isAutoRefreshEnabled() const {
@@ -141,7 +173,17 @@ void View::paintGL() {
 
 void View::updateView() {
 	std::chrono::milliseconds t = std::chrono::milliseconds(m_refreshTimer.restart());
-	bool hasChanges             = m_viewController->update(t);
+
+	bool hasChanges = false;
+	for(auto it = m_viewControllers.begin(); it != m_viewControllers.end();) {
+		if(!*it)
+			it = m_viewControllers.erase(it);
+		else {
+			hasChanges = (*it)->update(t) || hasChanges;
+			++it;
+		}
+	}
+
 	Q_UNUSED(hasChanges)
 
 	this->update(); // Redraw

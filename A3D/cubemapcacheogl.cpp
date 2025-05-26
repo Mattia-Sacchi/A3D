@@ -178,7 +178,7 @@ void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* r, CoreGLFunctio
 	if(c && c->isValid())
 		resolution = c->cubemapFace(Cubemap::CF_NEG_X).size().width();
 
-	matCache->applyUniform(r, "CubemapResolution", resolution);
+	matCache->applyUniform(r, gl, "CubemapResolution", resolution);
 
 	for(int i = maxMipLevels; i >= 1; --i) {
 		int const glMipLevel = maxMipLevels - i;
@@ -189,7 +189,7 @@ void CubemapCacheOGL::calcPrefilter(GLenum format, RendererOGL* r, CoreGLFunctio
 		gl->glViewport(0, 0, mipLevelSize.width(), mipLevelSize.height());
 
 		float roughness = static_cast<float>(i - 1) / static_cast<float>(maxMipLevels - 1);
-		matCache->applyUniform(r, "Roughness", roughness);
+		matCache->applyUniform(r, gl, "Roughness", roughness);
 
 		gl->glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(MaterialProperties::EnvironmentTextureSlot));
 		gl->glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap);

@@ -120,22 +120,25 @@ bool Entity::updateEntity(std::chrono::milliseconds t) {
 	return hasChanges;
 }
 
-std::optional<IntersectionResult> Entity::intersect(QVector3D origin, QVector3D rayDirection) const {
+std::optional<IntersectionResult> Entity::intersect(QVector3D rayOrigin, QVector3D rayDirection, Entity* filter) const {
 	// dobbiamo trasformare origin e rayDirection in base a entityMatrix()
 	QMatrix4x4 const worldToEntity = entityMatrix().inverted();
-	origin                         = worldToEntity.map(origin);
+	rayOrigin                      = worldToEntity.map(rayOrigin);
 	rayDirection                   = worldToEntity.mapVector(rayDirection).normalized();
 
 	for(auto it = m_entities.begin(); it != m_entities.end(); ++it) {
 		if(!*it)
 			continue;
 
-		auto result = (*it)->intersect(origin, rayDirection);
+		auto result = (*it)->intersect(rayOrigin, rayDirection, filter);
 		if(result) {
 			result->m_hitPoint = entityMatrix().map(result->m_hitPoint);
 			return std::move(result);
 		}
 	}
+
+	if(filter && filter != this)
+		return std::nullopt;
 
 	Model const* m = model();
 	if(!m)
@@ -143,7 +146,7 @@ std::optional<IntersectionResult> Entity::intersect(QVector3D origin, QVector3D 
 
 	// dobbiamo trasformare origin e rayDirection in base a m->modelMatrix()
 	QMatrix4x4 const worldToModel = m->modelMatrix().inverted();
-	origin                        = worldToModel.map(origin);
+	rayOrigin                     = worldToModel.map(rayOrigin);
 	rayDirection                  = worldToModel.mapVector(rayDirection).normalized();
 
 	std::map<QString, QPointer<Group>> const& groups = m->groups();
@@ -153,7 +156,7 @@ std::optional<IntersectionResult> Entity::intersect(QVector3D origin, QVector3D 
 			continue;
 
 		QMatrix4x4 const worldToGroup = g->groupMatrix().inverted();
-		QVector3D groupOrigin         = worldToGroup.map(origin);
+		QVector3D groupOrigin         = worldToGroup.map(rayOrigin);
 		QVector3D groupRayDirection   = worldToGroup.mapVector(rayDirection).normalized();
 
 		auto result = g->intersect(groupOrigin, groupRayDirection);
@@ -170,5 +173,4 @@ std::optional<IntersectionResult> Entity::intersect(QVector3D origin, QVector3D 
 
 	return std::nullopt;
 }
-
 }

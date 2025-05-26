@@ -141,10 +141,24 @@ public:
 	std::vector<std::uint32_t> const& indices() const;
 
 	/// @brief Performs ray intersection test against mesh triangles.
-	/// @param[in] origin Ray origin in world coordinates.
-	/// @param[in] dir Ray direction vector.
+	/// @param[in] rayOrigin Ray origin in world coordinates.
+	/// @param[in] rayDirection Ray direction vector.
 	/// @return Intersection point if hit; std::nullopt otherwise.
-	std::optional<QVector3D> intersect(QVector3D origin, QVector3D dir) const;
+	std::optional<QVector3D> intersect(QVector3D rayOrigin, QVector3D rayDirection) const;
+
+	/// @brief Returns the low-value bounding box.
+	/// @return The low-value bounding box.
+	QVector3D minBoundingBox() const;
+
+	/// @brief Returns the high-value bounding box.
+	/// @return The high-value bounding box.
+	QVector3D maxBoundingBox() const;
+
+	/// @brief Performs bounding box ray intersection test.
+	/// @param[in] rayOrigin World-space ray origin.
+	/// @param[in] rayDirection World-space ray direction.
+	/// @return true if hit, false otherwise.
+	bool intersectBoundingBox(QVector3D rayOrigin, QVector3D rayDirection) const;
 
 	/// @brief Invalidates renderer-specific cache entries.
 	/// @param[in] rendererID Renderer identifier to invalidate (default all).
@@ -189,10 +203,16 @@ public:
 	static std::size_t packedVertexSize(Contents contents);
 
 private:
+	void refreshBoundingBoxes() const;
+
 	DrawMode m_drawMode;                  ///< Current draw topology mode
 	std::vector<Vertex> m_vertices;       ///< Vertex buffer data
 	std::vector<std::uint32_t> m_indices; ///< Index buffer data
 	RenderOptions m_renderOptions;        ///< Material rendering flags
+
+	mutable bool m_boundingBoxesComputed; ///< True if the bounding boxes are up to date.
+	mutable QVector3D m_boundingBoxMin;   ///< Low-value bounding box.
+	mutable QVector3D m_boundingBoxMax;   ///< High-value bounding box.
 
 	//std::map<QString, std::size_t> m_bones;
 	//std::vector<QMatrix4x4> m_boneTransforms;

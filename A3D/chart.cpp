@@ -182,6 +182,25 @@ float ChartAxisData::denormalizeValue(float normalizedValue) const {
 	return 0.f;
 }
 
+float ChartAxisData::normalizeValue(float denormalizedValue) const {
+	if(m_type == CHAXIS_LINEAR_INTERPOLATED) {
+		return (denormalizedValue - m_axisMinimumValue) / (m_axisMaximumValue - m_axisMinimumValue);
+	}
+	else if(m_type == CHAXIS_ENUMERATED) {
+		float range = (m_axisMaximumValue - m_axisMinimumValue);
+
+		if(range >= 0) {
+			//range -= 1.f;
+			return (std::floor(denormalizedValue) - m_axisMinimumValue) / range;
+		}
+		else {
+			//range += 1.f;
+			return (std::ceil(denormalizedValue) - m_axisMinimumValue) / range;
+		}
+	}
+	return 0.f;
+}
+
 void ChartAxisData::setMinMax(float minimum, float maximum) {
 	if(m_type != CHAXIS_LINEAR_INTERPOLATED)
 		return;
@@ -228,10 +247,15 @@ void ChartAxisData::normalizeIndicatorValues() {
 }
 
 MapChart3D::MapChart3D()
-	: m_isValid(false) {}
+	: m_isValid(false),
+	  m_revision(0) {}
 
 bool MapChart3D::isValid() const {
 	return m_isValid;
+}
+
+int MapChart3D::revision() const {
+	return m_revision;
 }
 
 void MapChart3D::setAxisData(Axis3D axis, ChartAxisData data) {
@@ -239,6 +263,28 @@ void MapChart3D::setAxisData(Axis3D axis, ChartAxisData data) {
 		return;
 	m_axes[axis] = std::move(data);
 	normalizeAxisPoints(axis);
+	++m_revision;
+}
+
+void MapChart3D::offsetY(std::vector<Chart3DSearchResult>& points, float offset, bool clamp) {
+	float const fZeroOffset = m_axes[AXIS_Y].minimum();
+	float const fInvDelta   = 1.f / (m_axes[AXIS_Y].maximum() - m_axes[AXIS_Y].minimum());
+
+	for(auto it = points.begin(); it != points.end(); ++it) {
+		if(it->m_index >= m_values[AXIS_Y].size())
+			continue;
+
+		float newValue = m_values[AXIS_Y][it->m_index] + (offset * it->m_weight);
+		if(clamp)
+			newValue = std::clamp(newValue, m_axes[AXIS_Y].minimum(), m_axes[AXIS_Y].maximum());
+
+		m_values[AXIS_Y][it->m_index] = newValue;
+		it->m_value                   = newValue;
+
+		float& val = m_normalized_values[AXIS_Y][it->m_index];
+		val        = (newValue - fZeroOffset) * fInvDelta;
+	}
+	++m_revision;
 }
 
 ChartAxisData const& MapChart3D::axisData(Axis3D axis) const {
@@ -262,6 +308,7 @@ void MapChart3D::setChartPoints(std::vector<float> x_input_positions, std::vecto
 	normalizeAxisPoints(AXIS_Z);
 
 	m_isValid = true;
+	++m_revision;
 }
 
 std::vector<float> const& MapChart3D::valuesForAxis(Axis3D axis) const {
@@ -279,30 +326,76 @@ std::vector<float> const& MapChart3D::normalizedValuesForAxis(Axis3D axis) const
 	return invalid;
 }
 
-QVector3D MapChart3D::getValueFromMesh(QVector2D const& meshCoordinate) const {
+QVector3D MapChart3D::meshCoordinateToAxisCoordinate(QVector3D const& meshCoordinate) const {
 	if(!isValid())
 		return QVector3D();
 
-	QVector2D localCoordinate = QVector2D(m_axes[AXIS_X].denormalizeValue(meshCoordinate.x()), m_axes[AXIS_Z].denormalizeValue(meshCoordinate.y()));
-
-	return getValueFromInput(localCoordinate);
+	return QVector3D(m_axes[AXIS_X].denormalizeValue(meshCoordinate.x()), m_axes[AXIS_Y].denormalizeValue(meshCoordinate.y()), m_axes[AXIS_Z].denormalizeValue(meshCoordinate.z()));
 }
 
-QVector3D MapChart3D::getValueFromInput(QVector2D const& localCoordinate) const {
+QVector2D MapChart3D::meshCoordinateToAxisCoordinate(QVector2D const& meshCoordinate) const {
+	if(!isValid())
+		return QVector2D();
+
+	return QVector2D(m_axes[AXIS_X].denormalizeValue(meshCoordinate.x()), m_axes[AXIS_Z].denormalizeValue(meshCoordinate.y()));
+}
+
+QVector3D MapChart3D::axisCoordinateToMeshCoordinate(QVector3D const& axisCoordinate) const {
 	if(!isValid())
 		return QVector3D();
+
+	return QVector3D(m_axes[AXIS_X].normalizeValue(axisCoordinate.x()), m_axes[AXIS_Y].normalizeValue(axisCoordinate.y()), m_axes[AXIS_Z].normalizeValue(axisCoordinate.z()));
+}
+
+QVector2D MapChart3D::axisCoordinateToMeshCoordinate(QVector2D const& axisCoordinate) const {
+	if(!isValid())
+		return QVector2D();
+
+	return QVector2D(m_axes[AXIS_X].normalizeValue(axisCoordinate.x()), m_axes[AXIS_Z].normalizeValue(axisCoordinate.y()));
+}
+
+QVector3D MapChart3D::getValueFromAxisCoordinate(QVector2D const& axisCoordinate) const {
+	if(!isValid())
+		return QVector3D();
+
+	std::vector<Chart3DSearchResult> result = searchNearestPointsToAxisCoordinate(axisCoordinate);
+
+	float sumY = 0.f;
+
+	for(auto it = result.begin(); it != result.end(); ++it) {
+		sumY += (it->m_value * it->m_weight);
+	}
+
+	return QVector3D(axisCoordinate.x(), sumY, axisCoordinate.y());
+}
+
+QVector3D MapChart3D::getValueFromSearchResult(std::vector<Chart3DSearchResult> const& searchResult) const {
+	QVector3D sum = QVector3D(0.f, 0.f, 0.f);
+
+	for(auto it = searchResult.begin(); it != searchResult.end(); ++it) {
+		sum += QVector3D(it->m_coordinate.x(), it->m_value, it->m_coordinate.y()) * it->m_weight;
+	}
+
+	return sum;
+}
+
+std::vector<Chart3DSearchResult> MapChart3D::searchNearestPointsToAxisCoordinate(QVector2D const& axisCoordinate) const {
+	std::vector<Chart3DSearchResult> result;
+
+	if(!isValid())
+		return result;
 
 	int leftX_index    = -1;
 	int rightX_index   = -1;
 	float leftX_weight = 0.f;
 
 	for(std::size_t iX = 0; iX < m_values[AXIS_X].size(); ++iX) {
-		if(m_values[AXIS_X][iX] == localCoordinate.x()) {
+		if(m_values[AXIS_X][iX] == axisCoordinate.x()) {
 			leftX_index  = static_cast<int>(iX);
 			leftX_weight = 1.f;
 			break;
 		}
-		else if(m_values[AXIS_X][iX] > localCoordinate.x()) {
+		else if(m_values[AXIS_X][iX] > axisCoordinate.x()) {
 			if(iX == 0) {
 				leftX_index  = static_cast<int>(iX);
 				leftX_weight = 1.f;
@@ -313,7 +406,7 @@ QVector3D MapChart3D::getValueFromInput(QVector2D const& localCoordinate) const 
 				rightX_index = static_cast<int>(iX);
 
 				float range      = m_values[AXIS_X][iX] - m_values[AXIS_X][iX - 1];
-				float posInRange = localCoordinate.x() - m_values[AXIS_X][iX - 1];
+				float posInRange = axisCoordinate.x() - m_values[AXIS_X][iX - 1];
 
 				leftX_weight = 1.f - (static_cast<float>(posInRange) / static_cast<float>(range));
 				break;
@@ -331,12 +424,12 @@ QVector3D MapChart3D::getValueFromInput(QVector2D const& localCoordinate) const 
 	float leftZ_weight = 0.f;
 
 	for(std::size_t iZ = 1; iZ < m_values[AXIS_Z].size(); ++iZ) {
-		if(m_values[AXIS_Z][iZ] == localCoordinate.y()) {
+		if(m_values[AXIS_Z][iZ] == axisCoordinate.y()) {
 			leftZ_index  = static_cast<int>(iZ);
 			leftZ_weight = 1.f;
 			break;
 		}
-		else if(m_values[AXIS_Z][iZ] > localCoordinate.y()) {
+		else if(m_values[AXIS_Z][iZ] > axisCoordinate.y()) {
 			if(iZ == 0) {
 				leftZ_index  = static_cast<int>(iZ);
 				leftZ_weight = 1.f;
@@ -347,7 +440,7 @@ QVector3D MapChart3D::getValueFromInput(QVector2D const& localCoordinate) const 
 				rightZ_index = static_cast<int>(iZ);
 
 				float range      = m_values[AXIS_Z][iZ] - m_values[AXIS_Z][iZ - 1];
-				float posInRange = localCoordinate.y() - m_values[AXIS_Z][iZ - 1];
+				float posInRange = axisCoordinate.y() - m_values[AXIS_Z][iZ - 1];
 
 				leftZ_weight = 1.f - (static_cast<float>(posInRange) / static_cast<float>(range));
 				break;
@@ -362,21 +455,131 @@ QVector3D MapChart3D::getValueFromInput(QVector2D const& localCoordinate) const 
 
 	// Calculate matrix
 
-	float const rightX_weight = 1.f - leftX_weight;
-	float const rightZ_weight = 1.f - leftZ_weight;
+	float rightX_weight = 1.f - leftX_weight;
+	float rightZ_weight = 1.f - leftZ_weight;
 
-	float fMatrixResult = m_values[AXIS_Y][leftX_index + (leftZ_index * m_values[AXIS_X].size())] * leftX_weight * leftZ_weight;
+	if(axisData(AXIS_X).type() == CHAXIS_ENUMERATED) {
+		if(leftX_weight < rightX_weight)
+			std::swap(leftX_index, rightX_index);
 
-	if(rightX_index >= 0)
-		fMatrixResult += m_values[AXIS_Y][rightX_index + (leftZ_index * m_values[AXIS_X].size())] * rightX_weight * leftZ_weight;
+		leftX_weight  = 1.f;
+		rightX_weight = 0.f;
+		rightX_index  = -1;
+	}
 
-	if(rightZ_index >= 0)
-		fMatrixResult += m_values[AXIS_Y][leftX_index + (rightZ_index * m_values[AXIS_X].size())] * leftX_weight * rightZ_weight;
+	if(axisData(AXIS_Z).type() == CHAXIS_ENUMERATED) {
+		if(leftZ_weight < rightZ_weight)
+			std::swap(leftZ_index, rightZ_index);
 
-	if(rightX_index >= 0 && rightZ_index >= 0)
-		fMatrixResult += m_values[AXIS_Y][rightX_index + (rightZ_index * m_values[AXIS_X].size())] * rightX_weight * rightZ_weight;
+		leftZ_weight  = 1.f;
+		rightZ_weight = 0.f;
+		rightZ_index  = -1;
+	}
 
-	return QVector3D(localCoordinate.x(), fMatrixResult, localCoordinate.y());
+	// Top-Left
+	{
+		Chart3DSearchResult& xLow_zLow = result.emplace_back();
+
+		xLow_zLow.m_coordinate = QVector2D(m_values[AXIS_X][leftX_index], m_values[AXIS_Z][leftZ_index]);
+		xLow_zLow.m_index      = (leftX_index + (leftZ_index * m_values[AXIS_X].size()));
+		xLow_zLow.m_value      = m_values[AXIS_Y][xLow_zLow.m_index];
+		xLow_zLow.m_weight     = leftX_weight * leftZ_weight;
+	}
+
+	// Top-Right (if exists)
+	if(rightZ_index >= 0) {
+		Chart3DSearchResult& xLow_zHigh = result.emplace_back();
+
+		xLow_zHigh.m_coordinate = QVector2D(m_values[AXIS_X][leftX_index], m_values[AXIS_Z][rightZ_index]);
+		xLow_zHigh.m_index      = (leftX_index + (rightZ_index * m_values[AXIS_X].size()));
+		xLow_zHigh.m_value      = m_values[AXIS_Y][xLow_zHigh.m_index];
+		xLow_zHigh.m_weight     = leftX_weight * rightZ_weight;
+	}
+
+	// Bottom-Left (if exists)
+	if(rightX_index >= 0) {
+		Chart3DSearchResult& xHigh_zLow = result.emplace_back();
+
+		xHigh_zLow.m_coordinate = QVector2D(m_values[AXIS_X][rightX_index], m_values[AXIS_Z][leftZ_index]);
+		xHigh_zLow.m_index      = (rightX_index + (leftZ_index * m_values[AXIS_X].size()));
+		xHigh_zLow.m_value      = m_values[AXIS_Y][xHigh_zLow.m_index];
+		xHigh_zLow.m_weight     = rightX_weight * leftZ_weight;
+	}
+
+	// Bottom-Right (if exists)
+	if(rightX_index >= 0 && rightZ_index >= 0) {
+		Chart3DSearchResult& xHigh_zHigh = result.emplace_back();
+
+		xHigh_zHigh.m_coordinate = QVector2D(m_values[AXIS_X][rightX_index], m_values[AXIS_Z][rightZ_index]);
+		xHigh_zHigh.m_index      = (rightX_index + (rightZ_index * m_values[AXIS_X].size()));
+		xHigh_zHigh.m_value      = m_values[AXIS_Y][xHigh_zHigh.m_index];
+		xHigh_zHigh.m_weight     = rightX_weight * rightZ_weight;
+	}
+
+	// Sort results by weight
+	std::sort(result.begin(), result.end(), [](Chart3DSearchResult const& a, Chart3DSearchResult const& b) -> bool {
+		return a.m_weight > b.m_weight;
+	});
+
+	return std::move(result);
+}
+
+std::vector<Chart3DSearchResult> MapChart3D::searchNearestPointsToAxisCoordinate(QVector2D const& axisCoordinate, QVector2D const& radius) const {
+	std::vector<Chart3DSearchResult> result;
+
+	if(!isValid() || radius.x() < std::numeric_limits<float>::min() || radius.y() < std::numeric_limits<float>::min())
+		return result;
+
+	auto xBeginIt = std::lower_bound(m_values[AXIS_X].begin(), m_values[AXIS_X].end(), axisCoordinate.x() - radius.x());
+	auto xEndIt   = std::upper_bound(xBeginIt, m_values[AXIS_X].end(), axisCoordinate.x() + radius.x());
+	auto zBeginIt = std::lower_bound(m_values[AXIS_Z].begin(), m_values[AXIS_Z].end(), axisCoordinate.y() - radius.y());
+	auto zEndIt   = std::upper_bound(zBeginIt, m_values[AXIS_Z].end(), axisCoordinate.y() + radius.y());
+
+	if(xBeginIt == m_values[AXIS_X].end())
+		return result;
+	if(zBeginIt == m_values[AXIS_Z].end())
+		return result;
+
+	// xEndIt / yEndIt can be end: it's okay.
+
+	result.reserve(std::distance(xBeginIt, xEndIt) * std::distance(zBeginIt, zEndIt));
+
+	QVector2D const inverseRadius = QVector2D(1.f, 1.f) / radius;
+	std::ptrdiff_t const xIxStart = std::distance(m_values[AXIS_X].begin(), xBeginIt);
+	std::ptrdiff_t zIx            = std::distance(m_values[AXIS_Z].begin(), zBeginIt);
+	float totalWeight             = 0.f;
+
+	for(auto zIt = zBeginIt; zIt != zEndIt; ++zIt, ++zIx) {
+		float const zD     = ((*zIt) - axisCoordinate.y()) * inverseRadius.y();
+		std::ptrdiff_t xIx = xIxStart;
+
+		for(auto xIt = xBeginIt; xIt != xEndIt; ++xIt, ++xIx) {
+			float const xD = ((*xIt) - axisCoordinate.x()) * inverseRadius.x();
+
+			float d2 = (xD * xD) + (zD * zD);
+
+			if(d2 <= 1.f) {
+				Chart3DSearchResult& newResult = result.emplace_back();
+				newResult.m_weight             = qSqrt(1.f - d2);
+				newResult.m_coordinate         = QVector2D(*xIt, *zIt);
+				newResult.m_index              = (zIx * m_values[AXIS_X].size()) + xIx;
+				newResult.m_value              = m_values[AXIS_Y][newResult.m_index];
+				totalWeight += newResult.m_weight;
+			}
+		}
+	}
+
+	if(totalWeight > 0.f) {
+		float const inverseWeight = 1.f / totalWeight;
+		for(auto it = result.begin(); it != result.end(); ++it) {
+			it->m_weight *= inverseWeight;
+		}
+	}
+	else {
+		result.clear();
+	}
+
+	return std::move(result);
 }
 
 void MapChart3D::normalizeAxisPoints(Axis3D axis) {

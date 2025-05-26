@@ -46,9 +46,13 @@ public:
 	/// @return Pointer to the ViewController, or nullptr if none is set.
 	ViewController* controller() const;
 
-	/// @brief Sets the view controller responsible for updating the view.
-	/// @param[in] controller Pointer to the ViewController.
-	void setController(ViewController* controller);
+	/// @brief Adds a view controller responsible for updating the view.
+	/// @param[in] controller Pointer to the ViewController to be added.
+	void addController(ViewController* controller);
+
+	/// @brief Removes the view controller from the view.
+	/// @param[in] controller Pointer to the ViewController to be removed.
+	void removeController(ViewController* controller);
 
 	/// @brief Checks if automatic view refreshing is enabled.
 	/// @return True if auto-refresh is active; false otherwise.
@@ -76,6 +80,13 @@ public:
 	/// @remark Use mapFromGlobal to convert global coordinates to local
 	QPointF toNormalizedPoint(QPointF viewLocalCoordinate) const;
 
+	/// @brief Calculates a matrix that reaches up until a specific entity in the scene tree.
+	/// @param[in] targetEntity Entity to look up for
+	/// @param[in] targetModel Model to look up for
+	/// @param[in] targetGroup Group to look up for
+	/// @return Composite entity-model-group matrix
+	QMatrix4x4 calculateFullMatrix(Entity const* targetEntity, Model const* targetModel, Group const* targetGroup) const;
+
 public slots:
 	/// @brief Slot to trigger a view update and repaint.
 	void updateView();
@@ -101,13 +112,13 @@ private slots:
 	void sceneChanged();
 
 private:
-	bool m_initDoneGL;                         ///< True if GL initialization is complete.
-	QElapsedTimer m_refreshTimer;              ///< Timer tracking elapsed time for auto-refresh scheduling.
-	QPointer<ViewController> m_viewController; ///< Weak pointer to the view controller.
-	Camera m_camera;                           ///< Camera used to view the scene.
-	std::unique_ptr<RendererOGL> m_renderer;   ///< OpenGL renderer instance.
-	QPointer<Scene> m_scene;                   ///< Weak pointer to the current scene.
-	QMetaObject::Connection m_sceneConnection; ///< Connection handle for scene change signals.
+	bool m_initDoneGL;                                       ///< True if GL initialization is complete.
+	QElapsedTimer m_refreshTimer;                            ///< Timer tracking elapsed time for auto-refresh scheduling.
+	std::vector<QPointer<ViewController>> m_viewControllers; ///< Weak pointer to the view controller.
+	Camera m_camera;                                         ///< Camera used to view the scene.
+	std::unique_ptr<RendererOGL> m_renderer;                 ///< OpenGL renderer instance.
+	QPointer<Scene> m_scene;                                 ///< Weak pointer to the current scene.
+	QMetaObject::Connection m_sceneConnection;               ///< Connection handle for scene change signals.
 };
 
 }

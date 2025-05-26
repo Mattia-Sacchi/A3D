@@ -2,6 +2,7 @@
 #include "mesh.h"
 #include "material.h"
 #include "texture.h"
+#include "cubemap.h"
 #include "model.h"
 
 #include <QFile>

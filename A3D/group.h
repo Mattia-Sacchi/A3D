@@ -113,10 +113,10 @@ public:
 	void setMaterialProperties(MaterialProperties* materialProperties);
 
 	/// @brief Performs ray intersection test.
-	/// @param[in] origin World-space ray origin.
+	/// @param[in] rayOrigin World-space ray origin.
 	/// @param[in] rayDirection World-space ray direction.
 	/// @return IntersectionResult if hit; std::nullopt otherwise.
-	std::optional<IntersectionResult> intersect(QVector3D origin, QVector3D rayDirection) const;
+	std::optional<IntersectionResult> intersect(QVector3D rayOrigin, QVector3D rayDirection) const;
 
 private:
 	RenderOptions m_renderOptions; ///< Rendering flags for this Group.

@@ -27,7 +27,7 @@ public:
 	/// @brief Advances the controller's state by a time delta.
 	/// @param[in] deltaT Time elapsed since last update, in milliseconds.
 	/// @return true if the view or underlying state changed; false otherwise.
-	virtual bool update(std::chrono::milliseconds deltaT) = 0;
+	virtual bool update(std::chrono::milliseconds deltaT);
 
 protected:
 	/// @brief Retrieves the controlled view.

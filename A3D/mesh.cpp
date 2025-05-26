@@ -134,7 +134,8 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 Mesh::Mesh(ResourceManager* resourceManager)
 	: Resource{ resourceManager },
 	  m_drawMode(Triangles),
-	  m_renderOptions(NoOptions) {
+	  m_renderOptions(NoOptions),
+	  m_boundingBoxesComputed(false) {
 	log(LC_Debug, u"Constructor: Mesh");
 }
 
@@ -156,13 +157,16 @@ Mesh::~Mesh() {
 }
 
 Mesh* Mesh::clone() const {
-	Mesh* newMesh            = new Mesh(resourceManager());
-	newMesh->m_drawMode      = m_drawMode;
-	newMesh->m_vertices      = m_vertices;
-	newMesh->m_indices       = m_indices;
-	newMesh->m_renderOptions = m_renderOptions;
-	newMesh->m_contents      = m_contents;
-	newMesh->m_packedData    = m_packedData;
+	Mesh* newMesh                    = new Mesh(resourceManager());
+	newMesh->m_drawMode              = m_drawMode;
+	newMesh->m_vertices              = m_vertices;
+	newMesh->m_indices               = m_indices;
+	newMesh->m_renderOptions         = m_renderOptions;
+	newMesh->m_contents              = m_contents;
+	newMesh->m_packedData            = m_packedData;
+	newMesh->m_boundingBoxesComputed = m_boundingBoxesComputed;
+	newMesh->m_boundingBoxMin        = m_boundingBoxMin;
+	newMesh->m_boundingBoxMax        = m_boundingBoxMax;
 	return newMesh;
 }
 
@@ -187,7 +191,92 @@ Mesh::Contents Mesh::contents() const {
 	return m_contents;
 }
 
-std::optional<QVector3D> Mesh::intersect(QVector3D origin, QVector3D dir) const {
+QVector3D Mesh::minBoundingBox() const {
+	refreshBoundingBoxes();
+	return m_boundingBoxMin;
+}
+
+QVector3D Mesh::maxBoundingBox() const {
+	refreshBoundingBoxes();
+	return m_boundingBoxMax;
+}
+
+void Mesh::refreshBoundingBoxes() const {
+	if(m_boundingBoxesComputed)
+		return;
+
+	m_boundingBoxMin = QVector3D(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+	m_boundingBoxMax = QVector3D(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
+
+	if(m_contents & Position3D) {
+		for(auto it = m_vertices.begin(); it != m_vertices.end(); ++it) {
+			Vertex const& v = *it;
+
+			m_boundingBoxMin.setX(std::min(m_boundingBoxMin.x(), v.Position3D.x()));
+			m_boundingBoxMin.setY(std::min(m_boundingBoxMin.y(), v.Position3D.y()));
+			m_boundingBoxMin.setZ(std::min(m_boundingBoxMin.z(), v.Position3D.z()));
+
+			m_boundingBoxMax.setX(std::max(m_boundingBoxMax.x(), v.Position3D.x()));
+			m_boundingBoxMax.setY(std::max(m_boundingBoxMax.y(), v.Position3D.y()));
+			m_boundingBoxMax.setZ(std::max(m_boundingBoxMax.z(), v.Position3D.z()));
+		}
+	}
+	else if(m_contents & Position2D) {
+		m_boundingBoxMin.setZ(0.f);
+		m_boundingBoxMax.setZ(0.f);
+
+		for(auto it = m_vertices.begin(); it != m_vertices.end(); ++it) {
+			Vertex const& v = *it;
+
+			m_boundingBoxMin.setX(std::min(m_boundingBoxMin.x(), v.Position2D.x()));
+			m_boundingBoxMin.setY(std::min(m_boundingBoxMin.y(), v.Position2D.y()));
+
+			m_boundingBoxMax.setX(std::max(m_boundingBoxMax.x(), v.Position2D.x()));
+			m_boundingBoxMax.setY(std::max(m_boundingBoxMax.y(), v.Position2D.y()));
+		}
+	}
+
+	m_boundingBoxesComputed = true;
+}
+
+bool Mesh::intersectBoundingBox(QVector3D rayOrigin, QVector3D rayDirection) const {
+	float tMin = std::numeric_limits<float>::lowest();
+	float tMax = std::numeric_limits<float>::max();
+
+	for(std::size_t i = 0; i < AXIS_COUNT; ++i) {
+		Axis3D const axis = static_cast<Axis3D>(i);
+
+		float const origin    = getVectorAxis(rayOrigin, axis);
+		float const direction = getVectorAxis(rayDirection, axis);
+
+		float const minB = getVectorAxis(m_boundingBoxMin, axis);
+		float const maxB = getVectorAxis(m_boundingBoxMax, axis);
+
+		if(std::abs(direction) < std::numeric_limits<float>::min()) {
+			// Ray is parallel to BB.
+			// Hit is only true if origin is inside the AABB.
+			if(origin < minB || origin > maxB)
+				return false;
+			continue;
+		}
+
+		float t1 = (minB - origin) / direction;
+		float t2 = (maxB - origin) / direction;
+
+		if(t1 > t2)
+			std::swap(t1, t2);
+
+		tMin = std::min(tMin, t1);
+		tMax = std::max(tMax, t2);
+
+		if(tMin > tMax)
+			return false;
+	}
+
+	return true;
+}
+
+std::optional<QVector3D> Mesh::intersect(QVector3D rayOrigin, QVector3D rayDirection) const {
 	if((contents() & Position3D) != Position3D)
 		return std::nullopt;
 
@@ -204,8 +293,8 @@ std::optional<QVector3D> Mesh::intersect(QVector3D origin, QVector3D dir) const 
 			QVector3D const& v1 = m_vertices[i + 1].Position3D;
 			QVector3D const& v2 = m_vertices[i + 2].Position3D;
 
-			if(intersectTriangle(origin, dir, v0, v1, v2, hit)) {
-				double currentDistance = origin.distanceToPoint(hit);
+			if(intersectTriangle(rayOrigin, rayDirection, v0, v1, v2, hit)) {
+				double currentDistance = rayOrigin.distanceToPoint(hit);
 				if(nearestHitDistance < 0.0 || currentDistance < nearestHitDistance) {
 					nearestHitDistance = currentDistance;
 					nearestHit         = hit;
@@ -220,8 +309,8 @@ std::optional<QVector3D> Mesh::intersect(QVector3D origin, QVector3D dir) const 
 			QVector3D const& v1 = m_vertices[m_indices[i + 1]].Position3D;
 			QVector3D const& v2 = m_vertices[m_indices[i + 2]].Position3D;
 
-			if(intersectTriangle(origin, dir, v0, v1, v2, hit)) {
-				double currentDistance = origin.distanceToPoint(hit);
+			if(intersectTriangle(rayOrigin, rayDirection, v0, v1, v2, hit)) {
+				double currentDistance = rayOrigin.distanceToPoint(hit);
 				if(nearestHitDistance < 0.0 || currentDistance < nearestHitDistance) {
 					nearestHitDistance = currentDistance;
 					nearestHit         = hit;
@@ -237,8 +326,8 @@ std::optional<QVector3D> Mesh::intersect(QVector3D origin, QVector3D dir) const 
 			QVector3D v2 = m_vertices[i].Position3D;
 
 			QVector3D hit;
-			if(intersectTriangle(origin, dir, v0, v1, v2, hit)) {
-				double currentDistance = origin.distanceToPoint(hit);
+			if(intersectTriangle(rayOrigin, rayDirection, v0, v1, v2, hit)) {
+				double currentDistance = rayOrigin.distanceToPoint(hit);
 				if(nearestHitDistance < 0.0 || currentDistance < nearestHitDistance) {
 					nearestHitDistance = currentDistance;
 					nearestHit         = hit;
@@ -254,8 +343,8 @@ std::optional<QVector3D> Mesh::intersect(QVector3D origin, QVector3D dir) const 
 			QVector3D v2 = m_vertices[m_indices[i]].Position3D;
 
 			QVector3D hit;
-			if(intersectTriangle(origin, dir, v0, v1, v2, hit)) {
-				double currentDistance = origin.distanceToPoint(hit);
+			if(intersectTriangle(rayOrigin, rayDirection, v0, v1, v2, hit)) {
+				double currentDistance = rayOrigin.distanceToPoint(hit);
 				if(nearestHitDistance < 0.0 || currentDistance < nearestHitDistance) {
 					nearestHitDistance = currentDistance;
 					nearestHit         = hit;
@@ -424,6 +513,7 @@ std::vector<std::uint32_t> const& Mesh::indices() const {
 }
 
 void Mesh::invalidateCache(std::uintptr_t rendererID) {
+	m_boundingBoxesComputed = false;
 	m_packedData.clear();
 	if(rendererID == std::numeric_limits<std::uintptr_t>::max()) {
 		m_packedData.clear();

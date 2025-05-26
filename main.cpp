@@ -8,6 +8,7 @@
 #include "A3D/keyboardcameracontroller.h"
 #include "A3D/surfacechartentity.h"
 #include "A3D/chart.h"
+#include "A3D/charteditorcontroller.h"
 
 // #include "mathfunctions.h"
 #include "keyeventmanager.h"
@@ -168,12 +169,10 @@ int main(int argc, char* argv[]) {
 
 	A3D::KeyboardCameraController* keyCamController = new A3D::KeyboardCameraController(v);
 	keyCamController->setBaseMovementSpeed(QVector3D(9.f, 9.f, 9.f));
-	keyCamController->setKeyBinding(Qt::Key_Space, A3D::KeyboardCameraController::ACT_MOVE_UPWARD);
-	keyCamController->setKeyBinding(Qt::Key_Shift, A3D::KeyboardCameraController::ACT_MOVE_DOWNWARD);
-	//keyCamController->setButtonBinding(Qt::LeftButton, A3D::KeyCameraController::ACT_LOOK_TOWARDS_MOUSE_POSITION);
-	//keyCamController->setButtonBinding(Qt::RightButton, A3D::KeyCameraController::ACT_SHOOT_RAY_MOUSE_POSITION);
-	//keyCamController->setKeyBinding(Qt::Key_J, A3D::KeyCameraController::ACT_SHOOT_RAY);
-	v->setController(keyCamController);
+	keyCamController->addKeyBinding(Qt::Key_Space, A3D::KeyboardCameraController::ACT_MOVE_UPWARD);
+	keyCamController->addKeyBinding(Qt::Key_Shift, A3D::KeyboardCameraController::ACT_MOVE_DOWNWARD);
+
+	new A3D::ChartEditorController(v);
 
 	QTimer t;
 	if(v->format().swapInterval() > 0)
@@ -185,54 +184,87 @@ int main(int argc, char* argv[]) {
 	QObject::connect(&t, &QTimer::timeout, v, &A3D::View::updateView);
 	QObject::connect(&t, &QTimer::timeout, s, &A3D::Scene::updateScene);
 
+#if 0
+	QVector3D* pressLocalPos = new QVector3D;
 	// Used just for testing
+
 	KeyEventManager* kem = new KeyEventManager(v);
-	kem->setBinding(Qt::RightButton, [=]() {
+	kem->setBinding(Qt::RightButton, [=](QEvent::Type type) {
 		A3D::View* view               = v;
 		QPoint cursorPosition         = view->mapFromGlobal(QCursor::pos());
 		QPointF normalizedPosition    = view->toNormalizedPoint(cursorPosition.toPointF());
 		QVector3D unprojectedMousePos = view->camera().unprojectPoint(normalizedPosition);
-		unprojectedMousePos -= view->camera().position();
-		unprojectedMousePos *= view->camera().farPlane();
-		unprojectedMousePos += view->camera().position();
-		std::optional<A3D::IntersectionResult> res = s->intersect(view->camera().position(), unprojectedMousePos);
+		// unprojectedMousePos -= view->camera().position();
+		// unprojectedMousePos *= view->camera().farPlane();
+		// unprojectedMousePos += view->camera().position();
 
-		if(res) {
-			qDebug() << "Intersection succeeded!";
+		if(type == QEvent::MouseMove) {
+			if(pressLocalPos->isNull())
+				return;
+			std::optional<A3D::IntersectionResult> res = s->intersect(view->camera().position(), unprojectedMousePos);
 
-			if(res->m_resultingEntity) {
-				qDebug() << "Entity:" << res->m_resultingEntity;
-
-				if(res->m_resultingEntity == autoUpChart) {
-					autoUpChart->setMarker(QVector2D(res->m_groupLocalHitPoint.x(), res->m_groupLocalHitPoint.z()));
-					v->update();
-
-					QVector3D const value = autoUpChart->mapChart().getValueFromMesh(autoUpChart->marker());
-
-					for(std::size_t i = 0; i < A3D::AXIS_COUNT; ++i) {
-						A3D::Axis3D const axis = static_cast<A3D::Axis3D>(i);
-						if(autoUpChart->mapChart().axisData(axis).type() == A3D::CHAXIS_ENUMERATED)
-							qDebug() << autoUpChart->mapChart().axisData(axis).name() << ": "
-									 << autoUpChart->mapChart().axisData(axis).getEnumerationName(static_cast<std::size_t>(A3D::getVectorAxis(value, axis) + 0.1));
-						else
-							qDebug() << autoUpChart->mapChart().axisData(axis).name() << ": " << A3D::getVectorAxis(value, axis);
-					}
-				}
+			if(res) {
+				QVector3D newHitPoint = res.value().m_groupLocalHitPoint;
+				qDebug() << *pressLocalPos << newHitPoint << " dy: " << pressLocalPos->y() - newHitPoint.y();
 			}
 
-			if(res->m_resultingModel)
-				qDebug() << "Model:" << res->m_resultingModel;
+			QVector3D localCameraDirection = autoUpChart->model()->modelMatrix().map(unprojectedMousePos);
+			localCameraDirection           = autoUpChart->model()->getGroup("Marker")->groupMatrix().map(localCameraDirection);
 
-			if(res->m_resultingGroup)
-				qDebug() << "Group:" << res->m_resultingGroup;
+			QVector3D localCameraPosition = autoUpChart->model()->modelMatrix().map(v->camera().position());
+			localCameraPosition           = autoUpChart->model()->getGroup("Marker")->groupMatrix().map(localCameraPosition);
 
-			qDebug() << "Hit:" << res->m_groupLocalHitPoint;
-			qDebug() << "Global Coordinate:" << res->m_hitPoint;
-		}
-		else {
-			qDebug() << "No intersection!";
+			QVector2D const markerXY = autoUpChart->marker();
+			QVector3D const markerA  = QVector3D(markerXY.x(), 0.f, markerXY.y());
+			QVector3D const markerB  = QVector3D(markerXY.x(), 1.f, markerXY.y());
+
+			// punto e direzione retta 1
+			QVector3D p1 = markerA;
+			QVector3D d1 = markerB - markerA;
+
+			// punto e direzione retta 2
+			QVector3D p2 = localCameraPosition;
+			QVector3D d2 = localCameraPosition - localCameraDirection;
+
+			QVector3D w0 = p1 - p2;
+			float a      = QVector3D::dotProduct(d1, d1);
+			float b      = QVector3D::dotProduct(d1, d2);
+			float c      = QVector3D::dotProduct(d2, d2);
+			float d      = QVector3D::dotProduct(d1, w0);
+			float e      = QVector3D::dotProduct(d2, w0);
+
+			float denom = a * c - b * b;
+
+			float t = (b * e - c * d) / denom;
+			float s = (a * e - b * d) / denom;
+			t       = std::clamp(t, 0.f, 1.f);
+
+			QVector3D closestPointOnLine1 = p1 + d1 * t;
+			QVector3D closestPointOnLine2 = p2 + d2 * s;
+			A3D::LineGroup::Vertex pointA;
+			A3D::LineGroup::Vertex pointB;
+			pointA.Color4D = QVector4D(0, 1, 0, 1);
+			pointB.Color4D = QVector4D(0, 1, 0, 1);
+
+			pointA.Position3D = closestPointOnLine1;
+			pointB.Position3D = closestPointOnLine2;
+
+			A3D::Group* altMarkerGroup = autoUpChart->model()->getOrAddGroup("MarkerTest");
+			if(!altMarkerGroup->lineGroup()) {
+				altMarkerGroup->setLineGroup(new A3D::LineGroup);
+				altMarkerGroup->lineGroup()->setThickness(0.01);
+				altMarkerGroup->lineGroup()->setContents(A3D::LineGroup::Position3D | A3D::LineGroup::Color4D);
+			}
+
+			altMarkerGroup->lineGroup()->vertices().clear();
+			altMarkerGroup->lineGroup()->vertices().push_back(pointA);
+			altMarkerGroup->lineGroup()->vertices().push_back(pointB);
+			altMarkerGroup->lineGroup()->invalidateCache();
+
+			// float distance                = (closestPointOnLine1 - closestPointOnLine2).length();
 		}
 	});
+#endif
 
 	v->setAutoRefreshEnabled(true);
 	s->run();

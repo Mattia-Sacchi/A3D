@@ -100,10 +100,14 @@ public:
 	QMatrix4x4 const& entityMatrix() const;
 
 	/// @brief Performs a ray intersection test against this Entity's model.
-	/// @param[in] origin Ray origin in world space.
+	/// @param[in] rayOrigin Ray origin in world space.
 	/// @param[in] rayDirection Ray direction vector.
+	/// @param[in] filter The entity to focus the intersection on.
 	/// @return Intersection result if hit; std::nullopt otherwise.
-	std::optional<IntersectionResult> intersect(QVector3D origin, QVector3D rayDirection) const;
+	/// @remark scene()->intersect(origin, rayDirection, filter) differs from
+	/// filter->intersect(origin, rayDirection, nullptr) as the result will
+	/// be in different world-spaces.
+	std::optional<IntersectionResult> intersect(QVector3D rayOrigin, QVector3D rayDirection, Entity* filter) const;
 
 	/// @brief Adds an EntityController to this Entity.
 	/// @param[in] controller Pointer to the controller to add.

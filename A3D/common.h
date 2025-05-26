@@ -24,6 +24,7 @@
 
 #include <map>
 #include <vector>
+#include <stdexcept>
 
 /// @namespace A3D
 /// @brief Root namespace for the A3D engine, providing foundational types, utilities, and interfaces.
@@ -118,11 +119,11 @@ class View;
 /// @struct IntersectionResult
 /// @brief Contains the results of a ray-scene intersection.
 struct IntersectionResult {
-	Entity* m_resultingEntity;      ///< The intersected entity, or nullptr if none
-	Model* m_resultingModel;        ///< The specific model intersected within the entity
-	Group* m_resultingGroup;        ///< The group owning the hit geometry
-	QVector3D m_groupLocalHitPoint; ///< Intersection point in group-local coordinates
-	QVector3D m_hitPoint;           ///< Intersection point in world coordinates
+	QPointer<Entity> m_resultingEntity; ///< The intersected entity, or nullptr if none
+	QPointer<Model> m_resultingModel;   ///< The specific model intersected within the entity
+	QPointer<Group> m_resultingGroup;   ///< The group owning the hit geometry
+	QVector3D m_groupLocalHitPoint;     ///< Intersection point in group-local coordinates
+	QVector3D m_hitPoint;               ///< Intersection point in world coordinates
 };
 
 /// @brief Linearly maps values in `data` to the range [0,1] based on expected bounds.
@@ -206,6 +207,19 @@ bool intersectTriangle(
 	QVector3D const& rayOrigin, QVector3D const& rayDirection, QVector3D const& triangle0, QVector3D const& triangle1, QVector3D const& triangle2, QVector3D& hitPoint,
 	float const tolerance = 1e-6
 );
+
+/// @brief Returns the two shortest points along two lines
+/// @param[in] positionA1 The origin of the first line
+/// @param[in] positionA2 The end ot the first line
+/// @param[in] positionB1 The origin of the second line
+/// @param[in] positionB2 The end of the second line
+/// @param[in] clampA True if the result on the first line must be within the line itself, false if it can be further along an infinite line.
+/// @param[in] clampB True if the result on the second line must be within the line itself, false if it can be further along an infinite line.
+/// @return A pair of QVector3D.
+/// The first one is the point along the first line that's closest to the second line.
+/// The second one is the point along the second line that's closest to the first line.
+std::pair<QVector3D, QVector3D>
+getClosestLinePoints(QVector3D positionA1, QVector3D positionA2, QVector3D positionB1, QVector3D positionB2, bool clampA = true, bool clampB = true);
 
 }
 

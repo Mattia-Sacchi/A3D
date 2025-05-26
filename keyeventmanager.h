@@ -5,23 +5,27 @@
 #include <QEvent>
 #include <QObject>
 
-class KeyEventManager : public QObject {
-    Q_OBJECT
+#include "A3D/viewcontroller.h"
+
+class KeyEventManager : public A3D::ViewController {
+	Q_OBJECT
 public:
-    KeyEventManager(QObject* parent = nullptr);
+	typedef std::function<void(QEvent::Type)> EventFunctor;
 
-    void setBinding(Qt::Key key, std::function<void()> callback);
-    void setBinding(Qt::MouseButton button, std::function<void()> callback);
+	explicit KeyEventManager(A3D::View* parent);
 
-    virtual bool eventFilter(QObject*, QEvent*) override;
+	void setBinding(Qt::Key key, EventFunctor callback);
+	void setBinding(Qt::MouseButton button, EventFunctor callback);
+
+	virtual bool eventFilter(QObject*, QEvent*) override;
 
 private:
-    struct Entry {
-        bool m_wasPressed;
-        std::function<void()> m_callback;
-    };
-    std::map<Qt::Key, Entry> m_keyBindings;
-    std::map<Qt::MouseButton, Entry> m_mouseBindings;
+	struct Entry {
+		bool m_wasPressed;
+		EventFunctor m_callback;
+	};
+	std::map<Qt::Key, Entry> m_keyBindings;
+	std::map<Qt::MouseButton, Entry> m_mouseBindings;
 };
 
 #endif // KEYEVENTMANAGER_H

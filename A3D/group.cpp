@@ -144,18 +144,19 @@ void Group::setLineGroup(LineGroup* lineGroup) {
 	m_lineGroup = lineGroup;
 }
 
-std::optional<IntersectionResult> Group::intersect(QVector3D origin, QVector3D dir) const {
+std::optional<IntersectionResult> Group::intersect(QVector3D rayOrigin, QVector3D rayDirection) const {
 	if(!mesh())
 		return std::nullopt;
 
-	std::optional<QVector3D> result = mesh()->intersect(origin, dir);
+	if(!mesh()->intersectBoundingBox(rayOrigin, rayDirection))
+		return std::nullopt;
+
+	std::optional<QVector3D> result = mesh()->intersect(rayOrigin, rayDirection);
 
 	if(!result)
 		return std::nullopt;
 
 	IntersectionResult res;
-	res.m_resultingEntity    = nullptr;
-	res.m_resultingModel     = nullptr;
 	res.m_resultingGroup     = const_cast<Group*>(this);
 	res.m_groupLocalHitPoint = *result;
 	res.m_hitPoint           = *result;

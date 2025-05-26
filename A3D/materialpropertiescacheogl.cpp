@@ -28,7 +28,7 @@ void MaterialPropertiesCacheOGL::install(RendererOGL* r, CoreGLFunctions* gl, Ma
 
 	MaterialProperties* matProp = materialProperties();
 	if(matProp && materialCache) {
-		materialCache->applyUniforms(r, matProp->rawValues());
+		materialCache->applyUniforms(r, gl ,matProp->rawValues());
 	}
 
 	gl->glBindBufferBase(GL_UNIFORM_BUFFER, RendererOGL::UBO_MaterialPropertiesBinding, m_materialUBO);

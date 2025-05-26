@@ -5,7 +5,8 @@ namespace A3D {
 SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
 	: Entity(parent),
 	  m_enumStripThicknessX(0.8f),
-	  m_enumStripThicknessZ(0.8f) {
+	  m_enumStripThicknessZ(0.8f),
+	  m_editFilterMask(0xFFFFFFFF) {
 
 	A3D::Model* m = new A3D::Model(this);
 	setModel(m);
@@ -48,10 +49,23 @@ void SurfaceChartEntity::setChart(MapChart3D map) {
 	updateSurfaceMesh();
 	updateIndicatorLines();
 	updateIndicatorLabels();
+	m_chartSyncRevision = m_mapChart.revision();
 }
 
 MapChart3D const& SurfaceChartEntity::mapChart() const {
 	return m_mapChart;
+}
+
+MapChart3D& SurfaceChartEntity::mapChart() {
+	return m_mapChart;
+}
+
+void SurfaceChartEntity::setEditFilterMask(std::uint32_t mask) {
+	m_editFilterMask = mask;
+}
+
+std::uint32_t SurfaceChartEntity::editFilterMask() const {
+	return m_editFilterMask;
 }
 
 void SurfaceChartEntity::setEnumStripThickness(float xThickness, float zThickness) {
@@ -404,6 +418,8 @@ void SurfaceChartEntity::setMarker(QVector2D marker) {
 	m_markerLineGroup->vertices().push_back(start);
 	m_markerLineGroup->vertices().push_back(end);
 	m_markerLineGroup->invalidateCache();
+
+	emit markerMoved();
 }
 
 void SurfaceChartEntity::unsetMarker() {
@@ -437,6 +453,15 @@ void SurfaceChartEntity::setMarkerColor(QColor markerColor) {
 
 QColor SurfaceChartEntity::markerColor() const {
 	return m_markerColor;
+}
+
+bool SurfaceChartEntity::updateEntity(std::chrono::milliseconds deltaMs) {
+	if(m_chartSyncRevision != m_mapChart.revision()) {
+		updateSurfaceMesh();
+		m_chartSyncRevision = m_mapChart.revision();
+	}
+
+	return Entity::updateEntity(deltaMs);
 }
 
 }

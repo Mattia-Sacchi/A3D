@@ -184,6 +184,11 @@ public:
 	/// @return Corresponding axis value or enumeration mapping.
 	float denormalizeValue(float normalizedValue) const;
 
+	/// @brief Convert axis value to normalized [0,1] value.
+	/// @param[in] denormalizedValue Value between minimum() and maximum().
+	/// @return Corresponding normalized value or enumeration index.
+	float normalizeValue(float denormalizedValue) const;
+
 	/// @brief Invert the axis direction.
 	void invert();
 
@@ -223,29 +228,15 @@ private:
 };
 
 /// @struct Chart3DSearchResult
-/// @brief Result of a nearest-value search on a 3D axis.
+/// @brief Result of a point search on a 3D axis.
 struct Chart3DSearchResult {
-	float m_interpolatedValue;  ///< Interpolated value at the queried coordinate.
-	float m_closestValue;       ///< Closest raw data value.
-	std::size_t m_closestIndex; ///< Index of the closest data point.
+	std::size_t m_index;    ///< Index of the data point.
+	QVector2D m_coordinate; ///< Axis coordinate of the data point.
+	float m_value;          ///< Raw data value.
+	float m_weight;         ///< Weight of this point in relation to the returned dataset.
 };
 
-/// @struct Chart3DRadiusSearchResult
-/// @brief Nearest-value search results including radius-weighted points.
-struct Chart3DRadiusSearchResult {
-	Chart3DSearchResult m_searchResult; ///< Single-point search result.
-
-	/// @struct Point
-	/// @brief Weighted point within search radius.
-	struct Point {
-		std::size_t m_index; ///< Index of the data point.
-		float m_weight;      ///< Weight contribution of this point.
-	};
-
-	std::vector<Point> m_points; ///< All points (incl. closest) within the search radius.
-};
-
-/// @brief 3D chart representation with axes and mesh coordinates.
+/// @brief 3D chart representation with axes and mesh coordinates (think Heightmap).
 class MapChart3D {
 public:
 	/// @brief Construct an empty, invalid 3D map chart.
@@ -259,10 +250,23 @@ public:
 	/// @return True if valid data is set, false otherwise.
 	bool isValid() const;
 
+	/// @brief Returns the revision ID of this chart.
+	///
+	/// The revision ID is automatically increased when the map is changed.
+	/// By looking at the revision ID, an Entity can tell if it needs to be refreshed.
+	/// @return The revision ID of this chart.
+	int revision() const;
+
 	/// @brief Set axis metadata and indicators.
 	/// @param[in] axis Identifier for the 3D axis.
 	/// @param[in] data Axis data and indicators.
 	void setAxisData(Axis3D axis, ChartAxisData data);
+
+	/// @brief Adds an offset to the Y axis on selected values, with a weight.
+	/// @param[in] points The list of points, possibly returned by a search function.
+	/// @param[in] offset The Y offset to apply to those points, in a weighted fashion.
+	/// @param[in] clamp If true, clamps the result within the axis's min/max.
+	void offsetY(std::vector<Chart3DSearchResult>& points, float offset, bool clamp);
 
 	/// @brief Retrieve axis data for given axis.
 	/// @param[in] axis Identifier for the 3D axis.
@@ -271,8 +275,8 @@ public:
 
 	/// @brief Set the 3D point values for X, Z positions and Y heights.
 	/// @details y_values size must equal x*z, row-major by X then Z.
-	/// @param[in] x_input_positions Vector of X coordinates.
-	/// @param[in] z_input_positions Vector of Z coordinates.
+	/// @param[in] x_input_positions Vector of X axis-coordinates.
+	/// @param[in] z_input_positions Vector of Z axis-coordinates.
 	/// @param[in] y_values Height values in a flattened grid.
 	void setChartPoints(std::vector<float> x_input_positions, std::vector<float> z_input_positions, std::vector<float> y_values);
 
@@ -286,27 +290,47 @@ public:
 	/// @return Vector of normalized values.
 	std::vector<float> const& normalizedValuesForAxis(Axis3D axis) const;
 
-	/// @brief Map from mesh coordinate to data value.
-	/// @param[in] meshCoordinate 2D coordinate on the mesh grid.
+	/// @brief Map from mesh-coordinates to axis-coordinates.
+	/// @param[in] meshCoordinate The input mesh-coordinate to convert.
+	/// @return The equivalent axis-coordinate.
+	QVector2D meshCoordinateToAxisCoordinate(QVector2D const& meshCoordinate) const;
+
+	/// @brief Map from mesh-coordinates to axis-coordinates.
+	/// @param[in] meshCoordinate The input mesh-coordinate to convert.
+	/// @return The equivalent axis-coordinate.
+	QVector3D meshCoordinateToAxisCoordinate(QVector3D const& meshCoordinate) const;
+
+	/// @brief Map from axis-coordinates to mesh-coordinates.
+	/// @param[in] axisCoordinate The input axis-coordinate to convert.
+	/// @return The equivalent mesh-coordinate.
+	QVector2D axisCoordinateToMeshCoordinate(QVector2D const& axisCoordinate) const;
+
+	/// @brief Map from axis-coordinates to mesh-coordinates.
+	/// @param[in] axisCoordinate The input axis-coordinate to convert.
+	/// @return The equivalent mesh-coordinate.
+	QVector3D axisCoordinateToMeshCoordinate(QVector3D const& axisCoordinate) const;
+
+	/// @brief Completes an axis-coordinate with the resulting Y value.
+	/// @param[in] axisCoordinate 2D axis-coordinate to retrieve the Y value for.
 	/// @return 3D data value at that location.
-	QVector3D getValueFromMesh(QVector2D const& meshCoordinate) const;
+	/// @remark X/Z coordinates in the returned values are copied from X/Y of axisCoordinate.
+	QVector3D getValueFromAxisCoordinate(QVector2D const& axisCoordinate) const;
 
-	/// @brief Map from input (data) coordinate to data value.
-	/// @param[in] inputCoordinate 2D input coordinate.
-	/// @return 3D data value at that location.
-	/// @remark X/Z coordinates in the returned values are copied from X/Y of inputCoordinate.
-	QVector3D getValueFromInput(QVector2D const& inputCoordinate) const;
+	/// @brief Computes the 3D axis-coordinate from a Search Result.
+	/// @param[in] searchResult array of Chart3DSearchResult
+	/// @return Resulting 3D data value.
+	QVector3D getValueFromSearchResult(std::vector<Chart3DSearchResult> const& searchResult) const;
 
-	/// @brief Find nearest data point to a given local coordinate.
-	/// @param[in] localCoordinate 3D coordinate in chart space.
-	/// @return Search result with closest index and interpolated value.
-	Chart3DSearchResult getNearestIndex(QVector3D const& localCoordinate) const;
+	/// @brief Finds the neighboring data points to a given axis-coordinate.
+	/// @param[in] axisCoordinate 2D axis-coordinate to retrieve the points for.
+	/// @return A weight-sorted vector of all the points that contribute to the axisCoordinate's resulting value.
+	std::vector<Chart3DSearchResult> searchNearestPointsToAxisCoordinate(QVector2D const& axisCoordinate) const;
 
-	/// @brief Find all data points within a search radius.
-	/// @param[in] localCoordinate Center coordinate in chart space.
-	/// @param[in] radius Search radius distance.
-	/// @return Radius-based search result with weighted points.
-	Chart3DRadiusSearchResult getNearestIndicesWithRadius(QVector3D const& localCoordinate, float radius) const;
+	/// @brief Finds the neighboring data points to a given axis-coordinate, with a specific radius.
+	/// @param[in] axisCoordinate 2D axis-coordinate to retrieve the points for.
+	/// @param[in] radius 2D axis-coordinate radius of the circle.
+	/// @return A weight-sorted vector of all the points that match this search, spherically weighted.
+	std::vector<Chart3DSearchResult> searchNearestPointsToAxisCoordinate(QVector2D const& axisCoordinate, QVector2D const& radius) const;
 
 private:
 	/// @brief Normalize axis values for mesh coordinate mapping.
@@ -317,6 +341,7 @@ private:
 	ChartAxisData m_axes[AXIS_COUNT];                   ///< Axis data for each dimension.
 	std::vector<float> m_values[AXIS_COUNT];            ///< Raw input values per axis.
 	std::vector<float> m_normalized_values[AXIS_COUNT]; ///< Normalized values per axis.
+	int m_revision;                                     ///< Current map revision index.
 };
 
 }

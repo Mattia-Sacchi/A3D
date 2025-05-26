@@ -127,13 +127,14 @@ bool intersectTriangle(
 	float inverseDeterminant = 1.0 / determinant;
 	QVector3D s              = orig - v0;
 	float u                  = inverseDeterminant * QVector3D::dotProduct(s, h);
-	if(u < 0.0 || u > 1.0)
+
+	if((u < 0.f) || (u > 1.f))
 		return false;
 
 	QVector3D q = QVector3D::crossProduct(s, edge1);
 	// Vertices u and v, the sum must be not negative and the must be around 1
 	float v = inverseDeterminant * QVector3D::dotProduct(dir, q);
-	if(v < 0.0 || u + v > 1.0)
+	if(v < 0.f || (u + v > 1.f))
 		return false;
 
 	float t = inverseDeterminant * QVector3D::dotProduct(edge2, q);
@@ -143,6 +144,34 @@ bool intersectTriangle(
 		hitPoint = orig + dir * t;
 
 	return ret;
+}
+
+std::pair<QVector3D, QVector3D> getClosestLinePoints(QVector3D positionA1, QVector3D positionA2, QVector3D positionB1, QVector3D positionB2, bool clampA, bool clampB) {
+	QVector3D const p1 = positionA1;
+	QVector3D const d1 = positionA2 - positionA1;
+
+	QVector3D const p2 = positionB1;
+	QVector3D const d2 = positionB2 - positionB1;
+
+	QVector3D const w0 = (p1 - p2);
+
+	float const a = QVector3D::dotProduct(d1, d1);
+	float const b = QVector3D::dotProduct(d1, d2);
+	float const c = QVector3D::dotProduct(d2, d2);
+	float const d = QVector3D::dotProduct(d1, w0);
+	float const e = QVector3D::dotProduct(d2, w0);
+
+	float const invDenom = 1.f / ((a * c) - (b * b));
+
+	float t = ((b * e) - (c * d)) * invDenom;
+	float s = ((a * e) - (b * d)) * invDenom;
+
+	if(clampA)
+		t = std::clamp(t, 0.f, 1.f);
+	if(clampB)
+		s = std::clamp(s, 0.f, 1.f);
+
+	return std::make_pair(p1 + (d1 * t), p2 + (d2 * s));
 }
 
 }

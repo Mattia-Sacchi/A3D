@@ -2,18 +2,16 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 
-KeyEventManager::KeyEventManager(QObject* parent)
-	: QObject(parent),
+KeyEventManager::KeyEventManager(A3D::View* parent)
+	: A3D::ViewController(parent),
 	  m_keyBindings({}),
-	  m_mouseBindings({}) {
-	parent->installEventFilter(this);
-}
+	  m_mouseBindings({}) {}
 
-void KeyEventManager::setBinding(Qt::Key key, std::function<void()> callback) {
+void KeyEventManager::setBinding(Qt::Key key, EventFunctor callback) {
 	m_keyBindings[key] = Entry{ false, callback };
 }
 
-void KeyEventManager::setBinding(Qt::MouseButton button, std::function<void()> callback) {
+void KeyEventManager::setBinding(Qt::MouseButton button, EventFunctor callback) {
 	m_mouseBindings[button] = Entry{ false, callback };
 }
 
@@ -31,7 +29,7 @@ bool KeyEventManager::eventFilter(QObject* o, QEvent* e) {
 
 		if(eType == QEvent::KeyPress && !itFunctor->second.m_wasPressed) {
 			itFunctor->second.m_wasPressed = true;
-			itFunctor->second.m_callback();
+			itFunctor->second.m_callback(eType);
 		}
 		else {
 			itFunctor->second.m_wasPressed = false;
@@ -49,10 +47,16 @@ bool KeyEventManager::eventFilter(QObject* o, QEvent* e) {
 
 		if(eType == QEvent::MouseButtonPress && !itFunctor->second.m_wasPressed) {
 			itFunctor->second.m_wasPressed = true;
-			itFunctor->second.m_callback();
+			itFunctor->second.m_callback(eType);
 		}
 		else {
 			itFunctor->second.m_wasPressed = false;
+		}
+	}
+	else if(eType == QEvent::MouseMove) {
+		for(std::pair<Qt::MouseButton, Entry>&& i: m_mouseBindings) {
+			if(i.second.m_wasPressed)
+				i.second.m_callback(eType);
 		}
 	}
 

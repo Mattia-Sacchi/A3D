@@ -8,6 +8,7 @@
 #include "common.h"
 #include "linegroupcache.h"
 #include "resource.h"
+#include <stdexcept>
 
 namespace A3D {
 

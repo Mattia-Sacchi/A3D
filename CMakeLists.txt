@@ -131,6 +131,8 @@ qt_add_executable(${PROJECT_NAME}
     ${HEADERS}
     ${COMPILED_RESOURCE_FILES}
 	${RESOURCES}
+    A3D/charteditorcontroller.cpp
+    A3D/charteditorcontroller.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
