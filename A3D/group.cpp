@@ -92,9 +92,9 @@ QMatrix4x4 const& Group::groupMatrix() const {
 	if(m_matrixDirty) {
 		m_matrixDirty = false;
 		m_matrix.setToIdentity();
+		m_matrix.translate(m_position);
 		m_matrix.rotate(m_rotation);
 		m_matrix.scale(m_scale);
-		m_matrix.translate(m_position);
 	}
 	return m_matrix;
 }
@@ -148,6 +148,10 @@ std::optional<IntersectionResult> Group::intersect(QVector3D rayOrigin, QVector3
 	if(!mesh())
 		return std::nullopt;
 
+	QMatrix4x4 const inverted = groupMatrix().inverted();
+	rayOrigin                 = inverted.map(rayOrigin);
+	rayDirection              = inverted.mapVector(rayDirection).normalized();
+
 	if(!mesh()->intersectBoundingBox(rayOrigin, rayDirection))
 		return std::nullopt;
 
@@ -159,7 +163,7 @@ std::optional<IntersectionResult> Group::intersect(QVector3D rayOrigin, QVector3
 	IntersectionResult res;
 	res.m_resultingGroup     = const_cast<Group*>(this);
 	res.m_groupLocalHitPoint = *result;
-	res.m_hitPoint           = *result;
+	res.m_hitPoint           = groupMatrix().map(*result);
 	return res;
 }
 

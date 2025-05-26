@@ -107,7 +107,8 @@ public:
 	/// @remark scene()->intersect(origin, rayDirection, filter) differs from
 	/// filter->intersect(origin, rayDirection, nullptr) as the result will
 	/// be in different world-spaces.
-	std::optional<IntersectionResult> intersect(QVector3D rayOrigin, QVector3D rayDirection, Entity* filter) const;
+	std::optional<IntersectionResult>
+	intersect(QVector3D rayOrigin, QVector3D rayDirection, std::function<bool(Entity const*)> filter = std::function<bool(Entity const*)>()) const;
 
 	/// @brief Adds an EntityController to this Entity.
 	/// @param[in] controller Pointer to the controller to add.

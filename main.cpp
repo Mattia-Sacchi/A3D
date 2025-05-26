@@ -24,6 +24,7 @@ int main(int argc, char* argv[]) {
 	l.color                = QVector4D(1.f, 1.f, 1.f, 500.f);
 
 	A3D::SurfaceChartEntity* autoUpChart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
+	autoUpChart->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
 
 	A3D::MapChart3D autoUpMap;
 
@@ -111,6 +112,7 @@ int main(int argc, char* argv[]) {
 	autoUpChart->setLabelDistances(QVector3D(0.1f, 0.1f, 0.1f));
 
 	A3D::SurfaceChartEntity* torqueRestitutionChart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
+	torqueRestitutionChart->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
 
 	A3D::MapChart3D torqueRestitutionTimeMap;
 
@@ -161,6 +163,93 @@ int main(int argc, char* argv[]) {
 	torqueRestitutionChart->setChart(torqueRestitutionTimeMap);
 	torqueRestitutionChart->setLabelDistances(QVector3D(0.1f, 0.1f, 0.1f));
 	torqueRestitutionChart->setPosition(QVector3D(2, 0, 0));
+
+	A3D::SurfaceChartEntity* histoChart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
+	histoChart->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
+	histoChart->setPosition(QVector3D(0, 2, 0));
+
+	A3D::MapChart3D histoMap;
+
+	{
+		A3D::ChartAxisIndicatorStyle majorStyle;
+		majorStyle.m_indicatorColor = Qt::blue;
+		majorStyle.m_labelColor     = Qt::yellow;
+		majorStyle.m_labelFont      = QFont("Helvetica [Cronyx]", 64);
+
+		A3D::ChartAxisIndicatorStyle minorStyle = majorStyle;
+		minorStyle.m_indicatorColor.setAlphaF(0.8f);
+
+		A3D::ChartAxisData axis_Iso;
+		axis_Iso.setDefaultIndicatorStyle(majorStyle);
+		{
+			std::vector<A3D::ChartAxisStyledEnumeratedIndicatorData> isos;
+			isos.resize(2);
+
+			isos[0].m_label                  = "Current";
+			isos[0].m_style                  = majorStyle;
+			isos[0].m_style.m_indicatorColor = QColor(124, 179, 66);
+
+			isos[1].m_label                  = "Reference";
+			isos[1].m_style                  = majorStyle;
+			isos[1].m_style.m_indicatorColor = QColor(205, 220, 57);
+			axis_Iso.setIndicators(std::move(isos));
+		}
+		axis_Iso.setName("ISO");
+		histoMap.setAxisData(A3D::AXIS_Z, axis_Iso);
+
+		A3D::ChartAxisData axis_Gear;
+		{
+			std::vector<A3D::ChartAxisStyledEnumeratedIndicatorData> gears;
+			gears.resize(5);
+
+			gears[0].m_label                  = "Up";
+			gears[0].m_style                  = majorStyle;
+			gears[0].m_style.m_indicatorColor = QColor(124, 179, 66);
+
+			gears[1].m_label                  = "Half Up";
+			gears[1].m_style                  = majorStyle;
+			gears[1].m_style.m_indicatorColor = QColor(205, 220, 57);
+
+			gears[2].m_label                  = "Center";
+			gears[2].m_style                  = majorStyle;
+			gears[2].m_style.m_indicatorColor = QColor(255, 235, 59);
+
+			gears[3].m_label                  = "Half Down";
+			gears[3].m_style                  = majorStyle;
+			gears[3].m_style.m_indicatorColor = QColor(255, 152, 0);
+
+			gears[4].m_label                  = "Down";
+			gears[4].m_style                  = majorStyle;
+			gears[4].m_style.m_indicatorColor = QColor(255, 87, 34);
+
+			axis_Gear.setIndicators(std::move(gears));
+		}
+		axis_Gear.setName("Gear");
+		histoMap.setAxisData(A3D::AXIS_X, axis_Gear);
+
+		majorStyle.m_indicatorColor = Qt::darkGreen;
+		minorStyle.m_indicatorColor = Qt::darkGreen;
+		minorStyle.m_indicatorColor.setAlphaF(0.8f);
+
+		A3D::ChartAxisData axis_TargetPositions;
+		axis_TargetPositions.setDefaultIndicatorStyle(majorStyle);
+		axis_TargetPositions.setMinMax(-50.f, 50.f);
+		axis_TargetPositions.addEquidistantIndicatorsByStepSize(-50.f, 50.f, 10.f, 0, A3D::CHAXIND_MAJOR_INDICATOR);
+		axis_TargetPositions.setDefaultIndicatorStyle(minorStyle);
+
+		axis_TargetPositions.setName("Target positions");
+		histoMap.setAxisData(A3D::AXIS_Y, axis_TargetPositions);
+	}
+
+	histoMap.setChartPoints({ 0, 1, 2, 3, 4 }, { 0, 1 }, { -32, -10, 0, 10, 32, 21, 15, 0, -15, -21 });
+
+	if(!histoMap.isValid()) {
+		qDebug() << "AutoUp Map is not valid!";
+		return 1;
+	}
+
+	histoChart->setChart(histoMap);
+	histoChart->setLabelDistances(QVector3D(0.1f, 0.1f, 0.1f));
 
 	A3D::View* v = new A3D::View(&w);
 	v->camera().setPosition(QVector3D(2.f, 2.f, 2.f));

@@ -185,9 +185,14 @@ public:
 	float denormalizeValue(float normalizedValue) const;
 
 	/// @brief Convert axis value to normalized [0,1] value.
-	/// @param[in] denormalizedValue Value between minimum() and maximum().
+	/// @param[in] denormalizedValue Value between minimum() and maximum() while keeping eventual value inversions.
 	/// @return Corresponding normalized value or enumeration index.
 	float normalizeValue(float denormalizedValue) const;
+
+	/// @brief Convert axis value to normalized [0,1] value.
+	/// @param[in] denormalizedValue Value between minimum() and maximum().
+	/// @return Corresponding normalized value or enumeration index.
+	float normalizeDelta(float denormalizedDelta) const;
 
 	/// @brief Invert the axis direction.
 	void invert();
@@ -236,6 +241,22 @@ struct Chart3DSearchResult {
 	float m_weight;         ///< Weight of this point in relation to the returned dataset.
 };
 
+/// @enum ClampType
+/// @brief Determines the rule for value clamping
+enum ClampType {
+	CT_NONE = 0, ///< Perform no clamping checks
+
+	/// @brief Clamp the values to ensure that no sample goes past the axis' min/max range.
+	///
+	/// Useful to "splat" all values towards an end point.
+	CT_CLAMP_VALUE,
+
+	/// @brief Clamp the offset to ensure that no sample goes past the axis' min/max range.
+	///
+	/// Useful to vertically translate all values without the "splatting" effect.
+	CT_CLAMP_OFFSET,
+};
+
 /// @brief 3D chart representation with axes and mesh coordinates (think Heightmap).
 class MapChart3D {
 public:
@@ -265,8 +286,8 @@ public:
 	/// @brief Adds an offset to the Y axis on selected values, with a weight.
 	/// @param[in] points The list of points, possibly returned by a search function.
 	/// @param[in] offset The Y offset to apply to those points, in a weighted fashion.
-	/// @param[in] clamp If true, clamps the result within the axis's min/max.
-	void offsetY(std::vector<Chart3DSearchResult>& points, float offset, bool clamp);
+	/// @param[in] clampType The clamping algorithm to apply.
+	void offsetY(std::vector<Chart3DSearchResult>& points, float offset, ClampType clampType);
 
 	/// @brief Retrieve axis data for given axis.
 	/// @param[in] axis Identifier for the 3D axis.
@@ -309,6 +330,16 @@ public:
 	/// @param[in] axisCoordinate The input axis-coordinate to convert.
 	/// @return The equivalent mesh-coordinate.
 	QVector3D axisCoordinateToMeshCoordinate(QVector3D const& axisCoordinate) const;
+
+	/// @brief Map from axis-delta-coordinates to mesh-delta-coordinates.
+	/// @param[in] axisCoordinate The input axis-delta-coordinate to convert.
+	/// @return The equivalent mesh-delta-coordinate.
+	QVector2D axisDeltaCoordinateToMeshDeltaCoordinate(QVector2D const& axisCoordinate) const;
+
+	/// @brief Map from axis-delta-coordinates to mesh-delta-coordinates.
+	/// @param[in] axisCoordinate The input axis-delta-coordinate to convert.
+	/// @return The equivalent mesh-delta-coordinate.
+	QVector3D axisDeltaCoordinateToMeshDeltaCoordinate(QVector3D const& axisCoordinate) const;
 
 	/// @brief Completes an axis-coordinate with the resulting Y value.
 	/// @param[in] axisCoordinate 2D axis-coordinate to retrieve the Y value for.

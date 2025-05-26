@@ -4,6 +4,7 @@ namespace A3D {
 
 SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
 	: Entity(parent),
+	  m_renderVariants(RV_NONE),
 	  m_enumStripThicknessX(0.8f),
 	  m_enumStripThicknessZ(0.8f),
 	  m_editFilterMask(0xFFFFFFFF) {
@@ -58,6 +59,17 @@ MapChart3D const& SurfaceChartEntity::mapChart() const {
 
 MapChart3D& SurfaceChartEntity::mapChart() {
 	return m_mapChart;
+}
+
+void SurfaceChartEntity::setRenderVariants(RenderVariants variants) {
+	if(m_renderVariants != variants) {
+		m_renderVariants = variants;
+		updateSurfaceMesh();
+	}
+}
+
+SurfaceChartEntity::RenderVariants SurfaceChartEntity::renderVariants() const {
+	return m_renderVariants;
 }
 
 void SurfaceChartEntity::setEditFilterMask(std::uint32_t mask) {
@@ -163,18 +175,50 @@ void SurfaceChartEntity::updateSurfaceMesh() {
 		TRI_4_VERTICES,
 	};
 
+	bool const drawAsHistogram = (m_renderVariants & RV_HISTOGRAM_ENUMERATIONS) == RV_HISTOGRAM_ENUMERATIONS;
+	float const yHistogramRoot = 0.f;
+
 	TriangulationType triangulationType = TRI_5_VERTICES;
-	if(xAxisType == CHAXIS_ENUMERATED && zAxisType == CHAXIS_ENUMERATED)
+	if(xAxisType == CHAXIS_ENUMERATED || zAxisType == CHAXIS_ENUMERATED)
 		triangulationType = TRI_4_VERTICES;
+
+	std::size_t targetTriangleCount = 0;
 
 	switch(triangulationType) {
 	case TRI_4_VERTICES:
-		vertices.reserve(zIterations * xIterations * 6);
+		targetTriangleCount = zIterations * xIterations * 2;
 		break;
 	case TRI_5_VERTICES:
-		vertices.reserve(zIterations * xIterations * 12);
+		targetTriangleCount = zIterations * xIterations * 4;
 		break;
 	}
+
+	if(drawAsHistogram) {
+		if(xAxisType == CHAXIS_ENUMERATED || zAxisType == CHAXIS_ENUMERATED)
+			targetTriangleCount += 2;
+		if(xAxisType == CHAXIS_ENUMERATED)
+			targetTriangleCount += 4;
+		if(zAxisType == CHAXIS_ENUMERATED)
+			targetTriangleCount += 4;
+	}
+
+	vertices.reserve(targetTriangleCount * 3);
+	bool const swapVertexOrder = (xAxisType == CHAXIS_ENUMERATED) != (zAxisType == CHAXIS_ENUMERATED);
+
+	auto addTriangle = [&](A3D::Mesh::Vertex& a, A3D::Mesh::Vertex& b, A3D::Mesh::Vertex& c) {
+		if(swapVertexOrder) {
+			generateNormal(b, a, c);
+			vertices.push_back(b);
+			vertices.push_back(a);
+			vertices.push_back(c);
+		}
+		else {
+			generateNormal(a, b, c);
+			vertices.push_back(a);
+			vertices.push_back(b);
+			vertices.push_back(c);
+		}
+	};
 
 	for(size_t z = 0; z < zIterations; ++z) {
 		for(size_t x = 0; x < xIterations; ++x) {
@@ -220,15 +264,8 @@ void SurfaceChartEntity::updateSurfaceMesh() {
 
 			if(triangulationType == TRI_4_VERTICES) {
 				// X or Z is enumerated: No need to generate the central vertex, the 2-triangle approximation is more than enough.
-				generateNormal(xHigh_zLow, xLow_zLow, xLow_zHigh);
-				vertices.push_back(xHigh_zLow);
-				vertices.push_back(xLow_zLow);
-				vertices.push_back(xLow_zHigh);
-
-				generateNormal(xLow_zHigh, xHigh_zHigh, xHigh_zLow);
-				vertices.push_back(xLow_zHigh);
-				vertices.push_back(xHigh_zHigh);
-				vertices.push_back(xHigh_zLow);
+				addTriangle(xLow_zLow, xLow_zHigh, xHigh_zHigh);
+				addTriangle(xLow_zLow, xHigh_zHigh, xHigh_zLow);
 			}
 			else {
 				// Both X and Z are interpolated: We need the center vertex too.
@@ -239,25 +276,75 @@ void SurfaceChartEntity::updateSurfaceMesh() {
 				center.Color3D        = (xLow_zLow.Color3D + xHigh_zLow.Color3D + xLow_zHigh.Color3D + xHigh_zHigh.Color3D) * 0.25f;
 				center.Color4D        = (xLow_zLow.Color4D + xHigh_zLow.Color4D + xLow_zHigh.Color4D + xHigh_zHigh.Color4D) * 0.25f;
 
-				generateNormal(xHigh_zLow, xLow_zLow, center);
-				vertices.push_back(xHigh_zLow);
-				vertices.push_back(xLow_zLow);
-				vertices.push_back(center);
+				addTriangle(xLow_zLow, xLow_zHigh, center);
+				addTriangle(xLow_zHigh, xHigh_zHigh, center);
+				addTriangle(xHigh_zHigh, xHigh_zLow, center);
+				addTriangle(xHigh_zLow, xLow_zLow, center);
+			}
 
-				generateNormal(xLow_zLow, xLow_zHigh, center);
-				vertices.push_back(xLow_zLow);
-				vertices.push_back(xLow_zHigh);
-				vertices.push_back(center);
+			if(drawAsHistogram) {
+				A3D::Mesh::Vertex xLow_zLow_yRoot   = xLow_zLow;
+				A3D::Mesh::Vertex xHigh_zLow_yRoot  = xHigh_zLow;
+				A3D::Mesh::Vertex xLow_zHigh_yRoot  = xLow_zHigh;
+				A3D::Mesh::Vertex xHigh_zHigh_yRoot = xHigh_zHigh;
 
-				generateNormal(xLow_zHigh, xHigh_zHigh, center);
-				vertices.push_back(xLow_zHigh);
-				vertices.push_back(xHigh_zHigh);
-				vertices.push_back(center);
+				xLow_zLow_yRoot.Position3D.setY(yHistogramRoot);
+				xHigh_zLow_yRoot.Position3D.setY(yHistogramRoot);
+				xLow_zHigh_yRoot.Position3D.setY(yHistogramRoot);
+				xHigh_zHigh_yRoot.Position3D.setY(yHistogramRoot);
 
-				generateNormal(xHigh_zHigh, xHigh_zLow, center);
-				vertices.push_back(xHigh_zHigh);
-				vertices.push_back(xHigh_zLow);
-				vertices.push_back(center);
+				if(xAxisType == CHAXIS_ENUMERATED || zAxisType == CHAXIS_ENUMERATED) {
+					// Bottom square
+					addTriangle(xLow_zHigh_yRoot, xLow_zLow_yRoot, xHigh_zLow_yRoot);
+					addTriangle(xLow_zHigh_yRoot, xHigh_zLow_yRoot, xHigh_zHigh_yRoot);
+				}
+
+				if(xAxisType == CHAXIS_ENUMERATED) {
+					// Left square
+					addTriangle(xLow_zLow, xLow_zLow_yRoot, xLow_zHigh_yRoot);
+					addTriangle(xLow_zLow, xLow_zHigh_yRoot, xLow_zHigh);
+
+					// Right square
+					addTriangle(xHigh_zHigh, xHigh_zHigh_yRoot, xHigh_zLow_yRoot);
+					addTriangle(xHigh_zHigh, xHigh_zLow_yRoot, xHigh_zLow);
+				}
+
+				if(zAxisType == CHAXIS_ENUMERATED) {
+					// Front square
+					addTriangle(xLow_zHigh, xLow_zHigh_yRoot, xHigh_zHigh_yRoot);
+					addTriangle(xLow_zHigh, xHigh_zHigh_yRoot, xHigh_zHigh);
+
+					// Back square
+					addTriangle(xHigh_zLow, xHigh_zLow_yRoot, xLow_zLow_yRoot);
+					addTriangle(xHigh_zLow, xLow_zLow_yRoot, xLow_zLow);
+				}
+
+				// End caps...
+				if(xAxisType != CHAXIS_ENUMERATED) {
+					if(x == 0) {
+						// Left square
+						addTriangle(xLow_zLow, xLow_zLow_yRoot, xLow_zHigh_yRoot);
+						addTriangle(xLow_zLow, xLow_zHigh_yRoot, xLow_zHigh);
+					}
+					else if(x == (xIterations - 1)) {
+						// Right square
+						addTriangle(xHigh_zHigh, xHigh_zHigh_yRoot, xHigh_zLow_yRoot);
+						addTriangle(xHigh_zHigh, xHigh_zLow_yRoot, xHigh_zLow);
+					}
+				}
+
+				if(zAxisType != CHAXIS_ENUMERATED) {
+					if(z == 0) {
+						// Back square
+						addTriangle(xHigh_zLow, xHigh_zLow_yRoot, xLow_zLow_yRoot);
+						addTriangle(xHigh_zLow, xLow_zLow_yRoot, xLow_zLow);
+					}
+					else if(z == (zIterations - 1)) {
+						// Front square
+						addTriangle(xLow_zHigh, xLow_zHigh_yRoot, xHigh_zHigh_yRoot);
+						addTriangle(xLow_zHigh, xHigh_zHigh_yRoot, xHigh_zHigh);
+					}
+				}
 			}
 		}
 	}

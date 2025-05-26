@@ -183,22 +183,20 @@ float ChartAxisData::denormalizeValue(float normalizedValue) const {
 }
 
 float ChartAxisData::normalizeValue(float denormalizedValue) const {
-	if(m_type == CHAXIS_LINEAR_INTERPOLATED) {
-		return (denormalizedValue - m_axisMinimumValue) / (m_axisMaximumValue - m_axisMinimumValue);
-	}
-	else if(m_type == CHAXIS_ENUMERATED) {
-		float range = (m_axisMaximumValue - m_axisMinimumValue);
+	float const fZeroOffset = minimum();
+	float const fInvDelta   = 1.f / (maximum() - minimum());
 
-		if(range >= 0) {
-			//range -= 1.f;
-			return (std::floor(denormalizedValue) - m_axisMinimumValue) / range;
-		}
-		else {
-			//range += 1.f;
-			return (std::ceil(denormalizedValue) - m_axisMinimumValue) / range;
-		}
-	}
-	return 0.f;
+	return (denormalizedValue - fZeroOffset) * fInvDelta;
+}
+
+float ChartAxisData::normalizeDelta(float denormalizedValue) const {
+	float const fMin = std::min(minimum(), maximum());
+	float const fMax = std::max(minimum(), maximum());
+
+	float const fZeroOffset = fMin;
+	float const fInvDelta   = 1.f / (fMax - fMin);
+
+	return (denormalizedValue - fZeroOffset) * fInvDelta;
 }
 
 void ChartAxisData::setMinMax(float minimum, float maximum) {
@@ -266,16 +264,40 @@ void MapChart3D::setAxisData(Axis3D axis, ChartAxisData data) {
 	++m_revision;
 }
 
-void MapChart3D::offsetY(std::vector<Chart3DSearchResult>& points, float offset, bool clamp) {
+void MapChart3D::offsetY(std::vector<Chart3DSearchResult>& points, float offset, ClampType clamp) {
 	float const fZeroOffset = m_axes[AXIS_Y].minimum();
 	float const fInvDelta   = 1.f / (m_axes[AXIS_Y].maximum() - m_axes[AXIS_Y].minimum());
+
+	float const fLowest  = std::min(m_axes[AXIS_Y].minimum(), m_axes[AXIS_Y].maximum());
+	float const fHighest = std::max(m_axes[AXIS_Y].minimum(), m_axes[AXIS_Y].maximum());
+
+	if(clamp == CT_CLAMP_OFFSET) {
+		for(auto it = points.begin(); it != points.end(); ++it) {
+			if(it->m_index >= m_values[AXIS_Y].size() || it->m_weight < std::numeric_limits<float>::min())
+				continue;
+
+			float const expectedRealOffset = offset * it->m_weight;
+
+			// What's the highest point we can reach, with that weight scale?
+			if(offset > 0.f && m_values[AXIS_Y][it->m_index] + expectedRealOffset > fHighest) {
+				offset = (fHighest - m_values[AXIS_Y][it->m_index]) / it->m_weight;
+			}
+			else if(offset < 0.f && m_values[AXIS_Y][it->m_index] + expectedRealOffset < fLowest) {
+				offset = (fLowest - m_values[AXIS_Y][it->m_index]) / it->m_weight;
+			}
+
+			// Offset can't be applied at all; Stop early.
+			if(std::abs(offset) < std::numeric_limits<float>::min())
+				return;
+		}
+	}
 
 	for(auto it = points.begin(); it != points.end(); ++it) {
 		if(it->m_index >= m_values[AXIS_Y].size())
 			continue;
 
 		float newValue = m_values[AXIS_Y][it->m_index] + (offset * it->m_weight);
-		if(clamp)
+		if(clamp == CT_CLAMP_VALUE)
 			newValue = std::clamp(newValue, m_axes[AXIS_Y].minimum(), m_axes[AXIS_Y].maximum());
 
 		m_values[AXIS_Y][it->m_index] = newValue;
@@ -352,6 +374,20 @@ QVector2D MapChart3D::axisCoordinateToMeshCoordinate(QVector2D const& axisCoordi
 		return QVector2D();
 
 	return QVector2D(m_axes[AXIS_X].normalizeValue(axisCoordinate.x()), m_axes[AXIS_Z].normalizeValue(axisCoordinate.y()));
+}
+
+QVector3D MapChart3D::axisDeltaCoordinateToMeshDeltaCoordinate(QVector3D const& axisCoordinate) const {
+	if(!isValid())
+		return QVector3D();
+
+	return QVector3D(m_axes[AXIS_X].normalizeDelta(axisCoordinate.x()), m_axes[AXIS_Y].normalizeDelta(axisCoordinate.y()), m_axes[AXIS_Z].normalizeDelta(axisCoordinate.z()));
+}
+
+QVector2D MapChart3D::axisDeltaCoordinateToMeshDeltaCoordinate(QVector2D const& axisCoordinate) const {
+	if(!isValid())
+		return QVector2D();
+
+	return QVector2D(m_axes[AXIS_X].normalizeDelta(axisCoordinate.x()), m_axes[AXIS_Z].normalizeDelta(axisCoordinate.y()));
 }
 
 QVector3D MapChart3D::getValueFromAxisCoordinate(QVector2D const& axisCoordinate) const {
@@ -559,12 +595,16 @@ std::vector<Chart3DSearchResult> MapChart3D::searchNearestPointsToAxisCoordinate
 			float d2 = (xD * xD) + (zD * zD);
 
 			if(d2 <= 1.f) {
-				Chart3DSearchResult& newResult = result.emplace_back();
-				newResult.m_weight             = qSqrt(1.f - d2);
-				newResult.m_coordinate         = QVector2D(*xIt, *zIt);
-				newResult.m_index              = (zIx * m_values[AXIS_X].size()) + xIx;
-				newResult.m_value              = m_values[AXIS_Y][newResult.m_index];
-				totalWeight += newResult.m_weight;
+				float const fWeight = qSqrt(1.f - d2);
+
+				if(fWeight > std::numeric_limits<float>::min()) {
+					Chart3DSearchResult& newResult = result.emplace_back();
+					newResult.m_weight             = fWeight;
+					newResult.m_coordinate         = QVector2D(*xIt, *zIt);
+					newResult.m_index              = (zIx * m_values[AXIS_X].size()) + xIx;
+					newResult.m_value              = m_values[AXIS_Y][newResult.m_index];
+					totalWeight += newResult.m_weight;
+				}
 			}
 		}
 	}
@@ -574,9 +614,19 @@ std::vector<Chart3DSearchResult> MapChart3D::searchNearestPointsToAxisCoordinate
 		for(auto it = result.begin(); it != result.end(); ++it) {
 			it->m_weight *= inverseWeight;
 		}
+
+		// Sort results by weight
+		std::sort(result.begin(), result.end(), [](Chart3DSearchResult const& a, Chart3DSearchResult const& b) -> bool {
+			return a.m_weight > b.m_weight;
+		});
 	}
 	else {
 		result.clear();
+	}
+
+	// Attempt to return a meaningful set of samples...
+	if(result.empty()) {
+		return searchNearestPointsToAxisCoordinate(axisCoordinate);
 	}
 
 	return std::move(result);

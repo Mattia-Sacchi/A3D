@@ -39,17 +39,22 @@ protected:
 
 private:
 	/// @brief Updates the selected entity and marker based on the mouse-clicked/dragged position
-	bool updateSelectionFromMouse(QPointF mouseViewPos, Qt::KeyboardModifiers modifiers, Entity* filterEntity);
+	bool updateSelectionFromMouse(QPointF mouseViewPos, Qt::KeyboardModifiers modifiers);
 
 	/// @brief Updates the currently selected entity based on the mouse-clicked/dragged position
 	bool updateOperationFromMouse(QPointF mouseViewPos, Qt::KeyboardModifiers modifiers);
 
-	std::optional<IntersectionResult> m_selectionResult;
-	QPointer<SurfaceChartEntity> m_selectedSurface;
-	std::vector<Chart3DSearchResult> m_selectedPoints;
-	QPointF m_selectedSurfacePoint;
-	float m_editInitialDragValue;
+	struct SurfaceChartEditInfo {
+		QPointer<SurfaceChartEntity> m_surface;
+		std::optional<IntersectionResult> m_selectionResult;
+		std::vector<Chart3DSearchResult> m_selectedPoints;
+		QVector2D m_selectionRadius;
+	};
 
+	std::list<SurfaceChartEditInfo> m_surfaceChartsDetected;
+	std::list<SurfaceChartEditInfo>::iterator m_currentSurfaceChart;
+
+	float m_editInitialDragValue;
 	std::uint32_t m_editFilterMask;
 
 	enum DragMode {

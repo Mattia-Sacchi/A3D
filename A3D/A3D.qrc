@@ -19,5 +19,7 @@
         <file>A3D/LineMaterial.vert</file>
         <file>A3D/MapChart3DMaterial.frag</file>
         <file>A3D/MapChart3DMaterial.vert</file>
+        <file>A3D/WireframeMaterial.frag</file>
+        <file>A3D/WireframeMaterial.vert</file>
     </qresource>
 </RCC>

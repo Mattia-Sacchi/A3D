@@ -12,11 +12,20 @@ namespace A3D {
 class SurfaceChartEntity : public Entity {
 	Q_OBJECT
 public:
+	enum RenderVariant {
+		RV_NONE                   = 0,
+		RV_HISTOGRAM_ENUMERATIONS = 0x1,
+	};
+	Q_DECLARE_FLAGS(RenderVariants, RenderVariant)
+
 	SurfaceChartEntity(Entity* parent = nullptr);
 
 	void setChart(MapChart3D map);
 	MapChart3D const& mapChart() const;
 	MapChart3D& mapChart();
+
+	void setRenderVariants(RenderVariants);
+	RenderVariants renderVariants() const;
 
 	// (if editFilterMask & charteditorcontroller.editFilterMask) != 0 then it's editable
 	void setEditFilterMask(std::uint32_t mask);
@@ -56,6 +65,7 @@ private:
 	void updateIndicatorLabels();
 	void updateIndicatorLabels(Axis3D onlyUpdateAxis);
 
+	RenderVariants m_renderVariants;
 	MapChart3D m_mapChart;
 	float m_enumStripThicknessX;
 	float m_enumStripThicknessZ;

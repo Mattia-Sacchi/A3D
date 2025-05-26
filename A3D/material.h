@@ -36,7 +36,8 @@ public:
 		UnshadedMaterial,   ///< Material without lighting
 		PBRMaterial,        ///< Physically based rendering material
 		BillboardMaterial,  ///< Material for billboards
-		LineMaterial        ///< Material for lines
+		LineMaterial,       ///< Material for lines
+		WireframeMaterial,  ///< Material for wireframe display
 	};
 
 	/// Shader language modes supported.

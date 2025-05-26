@@ -104,9 +104,9 @@ QMatrix4x4 const& Model::modelMatrix() const {
 	if(m_matrixDirty) {
 		m_matrixDirty = false;
 		m_matrix.setToIdentity();
+		m_matrix.translate(m_position);
 		m_matrix.rotate(m_rotation);
 		m_matrix.scale(m_scale);
-		m_matrix.translate(m_position);
 	}
 	return m_matrix;
 }

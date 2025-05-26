@@ -39,10 +39,11 @@ public:
 
 	/// Standard built-in meshes.
 	enum StandardMesh {
-		Triangle2DMesh, ///< Simple 2D triangle
-		ScreenQuadMesh, ///< Fullscreen quad
-		UnitQuadMesh,   ///< Unit square quad
-		CubeIndexedMesh ///< Indexed cube
+		Triangle2DMesh,  ///< Simple 2D triangle
+		ScreenQuadMesh,  ///< Fullscreen quad
+		UnitQuadMesh,    ///< Unit square quad
+		CubeIndexedMesh, ///< Indexed cube
+		SphereMesh,      ///< Sphere mesh
 	};
 
 	/// @brief Retrieves a built-in standard mesh.

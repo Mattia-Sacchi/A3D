@@ -52,6 +52,11 @@ Material* Material::standardMaterial(StandardMaterial stdMat) {
 		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/LineMaterial.frag");
 		newMat.setRenderOptions(Material::Translucent);
 		break;
+	case WireframeMaterial:
+		newMat.setShaderFile(GLSL, VertexShader, ":/A3D/WireframeMaterial.vert");
+		newMat.setShaderFile(GLSL, FragmentShader, ":/A3D/WireframeMaterial.frag");
+		newMat.setRenderOptions(Material::Translucent);
+		break;
 	}
 	newMat.invalidateCache();
 	return &newMat;

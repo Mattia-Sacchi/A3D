@@ -77,8 +77,8 @@ QMatrix4x4 const& Entity::entityMatrix() const {
 	if(m_matrixDirty) {
 		m_matrixDirty = false;
 		m_matrix.setToIdentity();
-		m_matrix.rotate(m_rotation);
 		m_matrix.translate(m_position);
+		m_matrix.rotate(m_rotation);
 		m_matrix.scale(m_scale);
 	}
 	return m_matrix;
@@ -120,7 +120,7 @@ bool Entity::updateEntity(std::chrono::milliseconds t) {
 	return hasChanges;
 }
 
-std::optional<IntersectionResult> Entity::intersect(QVector3D rayOrigin, QVector3D rayDirection, Entity* filter) const {
+std::optional<IntersectionResult> Entity::intersect(QVector3D rayOrigin, QVector3D rayDirection, std::function<bool(Entity const*)> filter) const {
 	// dobbiamo trasformare origin e rayDirection in base a entityMatrix()
 	QMatrix4x4 const worldToEntity = entityMatrix().inverted();
 	rayOrigin                      = worldToEntity.map(rayOrigin);
@@ -137,7 +137,7 @@ std::optional<IntersectionResult> Entity::intersect(QVector3D rayOrigin, QVector
 		}
 	}
 
-	if(filter && filter != this)
+	if(filter && !filter(this))
 		return std::nullopt;
 
 	Model const* m = model();
@@ -155,11 +155,7 @@ std::optional<IntersectionResult> Entity::intersect(QVector3D rayOrigin, QVector
 		if(!g)
 			continue;
 
-		QMatrix4x4 const worldToGroup = g->groupMatrix().inverted();
-		QVector3D groupOrigin         = worldToGroup.map(rayOrigin);
-		QVector3D groupRayDirection   = worldToGroup.mapVector(rayDirection).normalized();
-
-		auto result = g->intersect(groupOrigin, groupRayDirection);
+		auto result = g->intersect(rayOrigin, rayDirection);
 		if(result) {
 			result->m_resultingModel  = const_cast<Model*>(m);
 			result->m_resultingEntity = const_cast<Entity*>(this);
