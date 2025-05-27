@@ -60,6 +60,7 @@ set(SOURCES
     A3D/charteditorcontroller.cpp
     Widgets/calibrationwidget.cpp
     Widgets/chartaxissettings.cpp
+    Widgets/chartaxisgeneralsettings.cpp
     Widgets/settingsdialog.cpp
     Widgets/chartwidget.cpp
 	keyeventmanager.cpp
@@ -119,6 +120,7 @@ set(HEADERS
     A3D/charteditorcontroller.h
     Widgets/calibrationwidget.h
     Widgets/chartaxissettings.h
+    Widgets/chartaxisgeneralsettings.h
     Widgets/settingsdialog.h
     Widgets/chartwidget.h
     Dependencies/stb/stb_image.h
@@ -133,6 +135,7 @@ set(RESOURCES
 set(UI_FILES
     Widgets/calibrationwidget.ui
     Widgets/chartaxissettings.ui
+    Widgets/chartaxisgeneralsettings.ui
     Widgets/settingsdialog.ui
 )
  
@@ -148,7 +151,9 @@ qt_add_executable(${PROJECT_NAME}
     ${COMPILED_RESOURCE_FILES}
 	${RESOURCES}
 )
- 
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Widgets)
+
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${INCPATHS}
 )

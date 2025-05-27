@@ -12,9 +12,11 @@
 
 // #include "mathfunctions.h"
 #include "keyeventmanager.h"
+#include "calibrationwidget.h"
+
 
 int main(int argc, char* argv[]) {
-
+	qputenv("QT_QPA_PLATFORM", QByteArray("xcb"));
 	QApplication a(argc, argv);
 	QMainWindow w;
 
@@ -359,7 +361,13 @@ int main(int argc, char* argv[]) {
 	s->run();
 
 	w.setCentralWidget(v);
+
+	CalibrationWidget cal;
+	cal.setWindowFlags(Qt::Window);
+	cal.show();
 	w.show();
+	
 	int rv = a.exec();
 	return rv;
+
 }
