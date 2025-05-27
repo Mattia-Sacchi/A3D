@@ -68,43 +68,45 @@ Mesh* Mesh::standardMesh(StandardMesh stdMesh) {
 		newMesh.setDrawMode(IndexedTriangles);
 
 		{
-			int const stacks = 16;
-			int const slices = 32;
+			int const stacks = 4;
+			int const slices = 4;
 
 			for(int stack = 0; stack <= stacks; ++stack) {
 				float const v = static_cast<float>(stack);
 				float phi     = v * M_PI;
 
+				float const y = qCos(phi);
+				float const r = qSin(phi);
+
 				for(int slice = 0; slice <= slices; ++slice) {
 					float const u = static_cast<float>(slice);
 					float theta   = u * 2.f * M_PI;
 
-					float const qsin_phi = qSin(phi);
-
-					float x = qsin_phi * qCos(theta);
-					float y = qCos(phi);
-					float z = qsin_phi * qSin(theta);
+					float const x = r * qCos(theta);
+					float const z = r * qSin(theta);
 
 					A3D::Mesh::Vertex& newVertex = newMesh.vertices().emplace_back();
+					newVertex.Position3D         = QVector3D(x, y, z);
 					newVertex.Normal3D           = QVector3D(x, y, z);
 					newVertex.TextureCoord2D     = QVector2D(u, 1.f - v);
-					newVertex.Position3D         = newVertex.Normal3D;
 				}
 			}
 
+			const int vertsPerRow = slices + 1;
+
 			for(int stack = 0; stack < stacks; ++stack) {
 				for(int slice = 0; slice < slices; ++slice) {
-					int i0 = stack * (slices + 1) + slice;
+					int i0 = (stack * vertsPerRow) + slice;
 					int i1 = i0 + 1;
-					int i2 = i0 + (slices + 1);
+					int i2 = ((stack + 1) * vertsPerRow) + slice;
 					int i3 = i2 + 1;
 
-					newMesh.indices().push_back(i2);
 					newMesh.indices().push_back(i0);
+					newMesh.indices().push_back(i2);
 					newMesh.indices().push_back(i1);
 
-					newMesh.indices().push_back(i2);
 					newMesh.indices().push_back(i1);
+					newMesh.indices().push_back(i2);
 					newMesh.indices().push_back(i3);
 				}
 			}

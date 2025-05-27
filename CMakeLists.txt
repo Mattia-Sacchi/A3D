@@ -57,6 +57,11 @@ set(SOURCES
     A3D/texturecacheogl.cpp
     A3D/chart.cpp
     A3D/view.cpp
+    A3D/charteditorcontroller.cpp
+    Widgets/calibrationwidget.cpp
+    Widgets/chartaxissettings.cpp
+    Widgets/settingsdialog.cpp
+    Widgets/chartwidget.cpp
 	keyeventmanager.cpp
 )
 
@@ -111,6 +116,11 @@ set(HEADERS
     A3D/texturecacheogl.h
     A3D/view.h
     A3D/chart.h
+    A3D/charteditorcontroller.h
+    Widgets/calibrationwidget.h
+    Widgets/chartaxissettings.h
+    Widgets/settingsdialog.h
+    Widgets/chartwidget.h
     Dependencies/stb/stb_image.h
 	keyeventmanager.h
 )
@@ -120,6 +130,12 @@ set(RESOURCES
     A3D/SampleResources.qrc
 )
 
+set(UI_FILES
+    Widgets/calibrationwidget.ui
+    Widgets/chartaxissettings.ui
+    Widgets/settingsdialog.ui
+)
+ 
 qt_add_big_resources(
     COMPILED_RESOURCE_FILES
 	${RESOURCES}
@@ -131,10 +147,8 @@ qt_add_executable(${PROJECT_NAME}
     ${HEADERS}
     ${COMPILED_RESOURCE_FILES}
 	${RESOURCES}
-    A3D/charteditorcontroller.cpp
-    A3D/charteditorcontroller.h
 )
-
+ 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${INCPATHS}
 )

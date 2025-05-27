@@ -1,6 +1,14 @@
 #include "rendererogl.h"
 #include <cstddef>
 
+#ifdef Q_OS_WIN64
+// Tell Nvidia/AMD to prefer the high‐performance GPU
+extern "C" {
+__declspec(dllexport) unsigned long NvOptimusEnablement        = 0x00000001;
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#endif
+
 namespace A3D {
 
 RendererOGL::RendererOGL(QOpenGLContext* ctx, CoreGLFunctions* gl)

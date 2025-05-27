@@ -220,6 +220,33 @@ void SurfaceChartEntity::updateSurfaceMesh() {
 		}
 	};
 
+	auto addTriangleWithTexCoordOffset = [&](A3D::Mesh::Vertex a, A3D::Mesh::Vertex b, A3D::Mesh::Vertex c) {
+		if(swapVertexOrder) {
+			generateNormal(b, a, c);
+		}
+		else {
+			generateNormal(a, b, c);
+		}
+
+		a.TextureCoord2D.setX(a.TextureCoord2D.x() - a.Normal3D.x() * 0.1f);
+		a.TextureCoord2D.setY(a.TextureCoord2D.y() - a.Normal3D.z() * 0.1f);
+		b.TextureCoord2D.setX(b.TextureCoord2D.x() - b.Normal3D.x() * 0.1f);
+		b.TextureCoord2D.setY(b.TextureCoord2D.y() - b.Normal3D.z() * 0.1f);
+		c.TextureCoord2D.setX(c.TextureCoord2D.x() - c.Normal3D.x() * 0.1f);
+		c.TextureCoord2D.setY(c.TextureCoord2D.y() - c.Normal3D.z() * 0.1f);
+
+		if(swapVertexOrder) {
+			vertices.push_back(b);
+			vertices.push_back(a);
+			vertices.push_back(c);
+		}
+		else {
+			vertices.push_back(a);
+			vertices.push_back(b);
+			vertices.push_back(c);
+		}
+	};
+
 	for(size_t z = 0; z < zIterations; ++z) {
 		for(size_t x = 0; x < xIterations; ++x) {
 			A3D::Mesh::Vertex xLow_zLow;   // Top Left
@@ -250,6 +277,15 @@ void SurfaceChartEntity::updateSurfaceMesh() {
 				xLow_zHigh.Position3D.setX(xLow_zHigh.Position3D.x() - beforeThickness);
 				xHigh_zLow.Position3D.setX(xHigh_zLow.Position3D.x() + afterThickness);
 				xHigh_zHigh.Position3D.setX(xHigh_zHigh.Position3D.x() + afterThickness);
+
+				float const xBase = xLow_zLow.TextureCoord2D.x();
+				float const xLow  = xBase;
+				float const xHigh = xBase + 1.f;
+
+				xLow_zLow.TextureCoord2D.setX(xLow);
+				xLow_zHigh.TextureCoord2D.setX(xLow);
+				xHigh_zLow.TextureCoord2D.setX(xHigh);
+				xHigh_zHigh.TextureCoord2D.setX(xHigh);
 			}
 
 			if(zAxisType == CHAXIS_ENUMERATED) {
@@ -260,6 +296,15 @@ void SurfaceChartEntity::updateSurfaceMesh() {
 				xHigh_zLow.Position3D.setZ(xHigh_zLow.Position3D.z() - beforeThickness);
 				xLow_zHigh.Position3D.setZ(xLow_zHigh.Position3D.z() + afterThickness);
 				xHigh_zHigh.Position3D.setZ(xHigh_zHigh.Position3D.z() + afterThickness);
+
+				float const zBase = xLow_zLow.TextureCoord2D.y();
+				float const zLow  = zBase;
+				float const zHigh = zBase + 1.f;
+
+				xLow_zLow.TextureCoord2D.setY(zLow);
+				xHigh_zLow.TextureCoord2D.setY(zLow);
+				xLow_zHigh.TextureCoord2D.setY(zHigh);
+				xHigh_zHigh.TextureCoord2D.setY(zHigh);
 			}
 
 			if(triangulationType == TRI_4_VERTICES) {
@@ -283,6 +328,13 @@ void SurfaceChartEntity::updateSurfaceMesh() {
 			}
 
 			if(drawAsHistogram) {
+				if(xAxisType == CHAXIS_LINEAR_INTERPOLATED || zAxisType == CHAXIS_LINEAR_INTERPOLATED) {
+					xLow_zLow.TextureCoord2D   = QVector2D(0.05f, 0.05f);
+					xHigh_zLow.TextureCoord2D  = QVector2D(0.95f, 0.05f);
+					xLow_zHigh.TextureCoord2D  = QVector2D(0.05f, 0.95f);
+					xHigh_zHigh.TextureCoord2D = QVector2D(0.95f, 0.95f);
+				}
+
 				A3D::Mesh::Vertex xLow_zLow_yRoot   = xLow_zLow;
 				A3D::Mesh::Vertex xHigh_zLow_yRoot  = xHigh_zLow;
 				A3D::Mesh::Vertex xLow_zHigh_yRoot  = xLow_zHigh;
@@ -301,48 +353,48 @@ void SurfaceChartEntity::updateSurfaceMesh() {
 
 				if(xAxisType == CHAXIS_ENUMERATED) {
 					// Left square
-					addTriangle(xLow_zLow, xLow_zLow_yRoot, xLow_zHigh_yRoot);
-					addTriangle(xLow_zLow, xLow_zHigh_yRoot, xLow_zHigh);
+					addTriangleWithTexCoordOffset(xLow_zLow, xLow_zLow_yRoot, xLow_zHigh_yRoot);
+					addTriangleWithTexCoordOffset(xLow_zLow, xLow_zHigh_yRoot, xLow_zHigh);
 
 					// Right square
-					addTriangle(xHigh_zHigh, xHigh_zHigh_yRoot, xHigh_zLow_yRoot);
-					addTriangle(xHigh_zHigh, xHigh_zLow_yRoot, xHigh_zLow);
+					addTriangleWithTexCoordOffset(xHigh_zHigh, xHigh_zHigh_yRoot, xHigh_zLow_yRoot);
+					addTriangleWithTexCoordOffset(xHigh_zHigh, xHigh_zLow_yRoot, xHigh_zLow);
 				}
 
 				if(zAxisType == CHAXIS_ENUMERATED) {
 					// Front square
-					addTriangle(xLow_zHigh, xLow_zHigh_yRoot, xHigh_zHigh_yRoot);
-					addTriangle(xLow_zHigh, xHigh_zHigh_yRoot, xHigh_zHigh);
+					addTriangleWithTexCoordOffset(xLow_zHigh, xLow_zHigh_yRoot, xHigh_zHigh_yRoot);
+					addTriangleWithTexCoordOffset(xLow_zHigh, xHigh_zHigh_yRoot, xHigh_zHigh);
 
 					// Back square
-					addTriangle(xHigh_zLow, xHigh_zLow_yRoot, xLow_zLow_yRoot);
-					addTriangle(xHigh_zLow, xLow_zLow_yRoot, xLow_zLow);
+					addTriangleWithTexCoordOffset(xHigh_zLow, xHigh_zLow_yRoot, xLow_zLow_yRoot);
+					addTriangleWithTexCoordOffset(xHigh_zLow, xLow_zLow_yRoot, xLow_zLow);
 				}
 
 				// End caps...
 				if(xAxisType != CHAXIS_ENUMERATED) {
 					if(x == 0) {
 						// Left square
-						addTriangle(xLow_zLow, xLow_zLow_yRoot, xLow_zHigh_yRoot);
-						addTriangle(xLow_zLow, xLow_zHigh_yRoot, xLow_zHigh);
+						addTriangleWithTexCoordOffset(xLow_zLow, xLow_zLow_yRoot, xLow_zHigh_yRoot);
+						addTriangleWithTexCoordOffset(xLow_zLow, xLow_zHigh_yRoot, xLow_zHigh);
 					}
 					else if(x == (xIterations - 1)) {
 						// Right square
-						addTriangle(xHigh_zHigh, xHigh_zHigh_yRoot, xHigh_zLow_yRoot);
-						addTriangle(xHigh_zHigh, xHigh_zLow_yRoot, xHigh_zLow);
+						addTriangleWithTexCoordOffset(xHigh_zHigh, xHigh_zHigh_yRoot, xHigh_zLow_yRoot);
+						addTriangleWithTexCoordOffset(xHigh_zHigh, xHigh_zLow_yRoot, xHigh_zLow);
 					}
 				}
 
 				if(zAxisType != CHAXIS_ENUMERATED) {
 					if(z == 0) {
 						// Back square
-						addTriangle(xHigh_zLow, xHigh_zLow_yRoot, xLow_zLow_yRoot);
-						addTriangle(xHigh_zLow, xLow_zLow_yRoot, xLow_zLow);
+						addTriangleWithTexCoordOffset(xHigh_zLow, xHigh_zLow_yRoot, xLow_zLow_yRoot);
+						addTriangleWithTexCoordOffset(xHigh_zLow, xLow_zLow_yRoot, xLow_zLow);
 					}
 					else if(z == (zIterations - 1)) {
 						// Front square
-						addTriangle(xLow_zHigh, xLow_zHigh_yRoot, xHigh_zHigh_yRoot);
-						addTriangle(xLow_zHigh, xHigh_zHigh_yRoot, xHigh_zHigh);
+						addTriangleWithTexCoordOffset(xLow_zHigh, xLow_zHigh_yRoot, xHigh_zHigh_yRoot);
+						addTriangleWithTexCoordOffset(xLow_zHigh, xHigh_zHigh_yRoot, xHigh_zHigh);
 					}
 				}
 			}

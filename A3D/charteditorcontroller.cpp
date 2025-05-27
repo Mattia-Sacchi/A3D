@@ -244,7 +244,7 @@ bool ChartEditorController::updateSelectionFromMouse(QPointF mouseViewPos, Qt::K
 	g->setRenderOptions(Group::Hidden);
 
 	if(!g->materialProperties()) {
-		g->setMesh(Mesh::standardMesh(Mesh::CubeIndexedMesh));
+		g->setMesh(Mesh::standardMesh(Mesh::SphereMesh));
 		g->setMaterial(Material::standardMaterial(Material::WireframeMaterial));
 		g->setMaterialProperties(new MaterialProperties());
 	}

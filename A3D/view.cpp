@@ -3,6 +3,10 @@
 #include <QTimer>
 #include <QKeyEvent>
 
+#ifdef _DEBUG
+#	include <QOpenGLDebugLogger>
+#endif
+
 namespace A3D {
 
 View::View(QWidget* parent)
@@ -24,6 +28,9 @@ View::View(QWidget* parent)
 	fmt.setAlphaBufferSize(8);
 	fmt.setSwapInterval(1);
 	fmt.setSwapBehavior(QSurfaceFormat::TripleBuffer);
+#ifdef _DEBUG
+	fmt.setOption(QSurfaceFormat::DebugContext);
+#endif
 	setFormat(fmt);
 }
 
@@ -136,6 +143,14 @@ void View::initializeGL() {
 		log(LC_Fatal, u"OpenGL 3.3 Core is required to run this software.");
 		return;
 	}
+
+#ifdef _DEBUG
+	QOpenGLDebugLogger* logger = new QOpenGLDebugLogger(this);
+	connect(logger, &QOpenGLDebugLogger::messageLogged, this, [](const QOpenGLDebugMessage& msg) {
+		qWarning() << msg;
+	});
+	logger->initialize(); // starts logging
+#endif
 
 	m_renderer   = std::make_unique<RendererOGL>(context(), this);
 	m_initDoneGL = true;

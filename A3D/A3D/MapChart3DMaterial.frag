@@ -26,15 +26,26 @@ vec3 interpolateColor(float value) {
 }
 
 void main() {
-	vec2 InputCoordinate = TexCoord;
+	vec3 baseColor = interpolateColor(LocalPos.y);
+	vec2 InputCoordinate = fract(TexCoord);
 
-	float stepN = 0.98;
-	float intensityX = step(stepN, mod(InputCoordinate.x, 1.0)) * 1.0;
-	float intensityZ = step(stepN, mod(InputCoordinate.y, 1.0)) * 1.0;
+	float lineWidthStart = 0.97;
+	float lineWidthEnd = 0.98;
 
-	vec3 gridColor = vec3(intensityX * 0.5, 0.0, intensityZ * 0.5);
+	float intensityX = 1.0 - min(InputCoordinate.x, 1.0 - InputCoordinate.x);
+	float intensityY = 1.0 - min(InputCoordinate.y, 1.0 - InputCoordinate.y);
 
-	vec3 color = mix(interpolateColor(LocalPos.y), gridColor, min(intensityX + intensityZ, 1.0));
+	intensityX = smoothstep(lineWidthStart, lineWidthEnd, intensityX);
+	intensityY = smoothstep(lineWidthStart, lineWidthEnd, intensityY);
+	float alpha = max(intensityX, intensityY);
 
+	float gridColorIntensity = mix(0.4, 0.6, LocalPos.y);
+	
+	gridColorIntensity += smoothstep(0.99, 1.0,     LocalPos.y) * 0.4;
+	gridColorIntensity -= smoothstep(0.99, 1.0, 1.0-LocalPos.y) * 0.4;
+	
+	vec3 gridColor = vec3(intensityX, 0.0, intensityY) * gridColorIntensity;
+
+	vec3 color = mix(gridColor, baseColor, 1.0 - alpha);
 	fragColor = vec4(color, 1.0);
 }
