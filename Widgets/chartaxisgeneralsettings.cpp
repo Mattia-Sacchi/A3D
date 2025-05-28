@@ -9,18 +9,23 @@ ChartAxisGeneralSettings::ChartAxisGeneralSettings(QWidget* parent)
 	ui.setupUi(this);
 	ui.indicatorColorWidget->setAutoFillBackground(true);
 
-	connect(ui.changeIndicatorColorButton,&QPushButton::clicked,this, &ChartAxisGeneralSettings::onChangeIndicatorColorButtonClicked);
+    ui.scaleValueLabel->setMinimumWidth(ui.scaleValueLabel->fontMetrics().boundingRect("1,00").width());
 
-    connect(ui.changeLabelColorButton,&QPushButton::clicked,this, &ChartAxisGeneralSettings::onChangeLabelColorButtonClicked);
+    connect(ui.changeIndicatorColorButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onChangeIndicatorColorButtonClicked);
 
-    connect(ui.changeFontButton,&QPushButton::clicked,this, &ChartAxisGeneralSettings::onChangeFontButtonClicked);
+    connect(ui.changeLabelColorButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onChangeLabelColorButtonClicked);
 
-    connect(ui.highResolutionRadioButton,&QRadioButton::clicked,this, &ChartAxisGeneralSettings::onHighResolutionRadioButtonClicked);
+    connect(ui.changeFontButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onChangeFontButtonClicked);
 
-    connect(ui.mediumResolutionRadioButton,&QRadioButton::clicked,this, &ChartAxisGeneralSettings::onMediumResolutionRadioButtonClicked);
+    connect(ui.highResolutionRadioButton, &QRadioButton::clicked, this, &ChartAxisGeneralSettings::onHighResolutionRadioButtonClicked);
 
-    connect(ui.changeFontButton,&QRadioButton::clicked,this, &ChartAxisGeneralSettings::onLowResolutionRadioButtonClicked);
-	
+    connect(ui.mediumResolutionRadioButton, &QRadioButton::clicked, this, &ChartAxisGeneralSettings::onMediumResolutionRadioButtonClicked);
+
+    connect(ui.lowResolutionRadioButton, &QRadioButton::clicked, this, &ChartAxisGeneralSettings::onLowResolutionRadioButtonClicked);
+
+    connect(ui.resetButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onResetButtonClicked);
+
+    connect(ui.scaleSlider, &QSlider::valueChanged, this, &ChartAxisGeneralSettings::onScaleSliderValueChanged);
 }
 
 void ChartAxisGeneralSettings::onChangeIndicatorColorButtonClicked() {
@@ -79,4 +84,12 @@ void ChartAxisGeneralSettings::onMediumResolutionRadioButtonClicked() {
 
 void ChartAxisGeneralSettings::onLowResolutionRadioButtonClicked() {
 	setResoulution(FR_Low);
+}
+
+void ChartAxisGeneralSettings::onResetButtonClicked() {
+    ui.scaleSlider->setValue(100);
+}
+
+void ChartAxisGeneralSettings::onScaleSliderValueChanged(int value) {
+    ui.scaleValueLabel->setText(QString::number(value / 100.f, 'g', 2));
 }

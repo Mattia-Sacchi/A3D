@@ -14,9 +14,7 @@
 #include "keyeventmanager.h"
 #include "calibrationwidget.h"
 
-
 int main(int argc, char* argv[]) {
-	qputenv("QT_QPA_PLATFORM", QByteArray("xcb"));
 	QApplication a(argc, argv);
 	QMainWindow w;
 
@@ -275,99 +273,16 @@ int main(int argc, char* argv[]) {
 	QObject::connect(&t, &QTimer::timeout, v, &A3D::View::updateView);
 	QObject::connect(&t, &QTimer::timeout, s, &A3D::Scene::updateScene);
 
-#if 0
-	QVector3D* pressLocalPos = new QVector3D;
-	// Used just for testing
+    v->setAutoRefreshEnabled(true);
+    s->run();
 
-	KeyEventManager* kem = new KeyEventManager(v);
-	kem->setBinding(Qt::RightButton, [=](QEvent::Type type) {
-		A3D::View* view               = v;
-		QPoint cursorPosition         = view->mapFromGlobal(QCursor::pos());
-		QPointF normalizedPosition    = view->toNormalizedPoint(cursorPosition.toPointF());
-		QVector3D unprojectedMousePos = view->camera().unprojectPoint(normalizedPosition);
-		// unprojectedMousePos -= view->camera().position();
-		// unprojectedMousePos *= view->camera().farPlane();
-		// unprojectedMousePos += view->camera().position();
+    w.setCentralWidget(v);
 
-		if(type == QEvent::MouseMove) {
-			if(pressLocalPos->isNull())
-				return;
-			std::optional<A3D::IntersectionResult> res = s->intersect(view->camera().position(), unprojectedMousePos);
-
-			if(res) {
-				QVector3D newHitPoint = res.value().m_groupLocalHitPoint;
-				qDebug() << *pressLocalPos << newHitPoint << " dy: " << pressLocalPos->y() - newHitPoint.y();
-			}
-
-			QVector3D localCameraDirection = autoUpChart->model()->modelMatrix().map(unprojectedMousePos);
-			localCameraDirection           = autoUpChart->model()->getGroup("Marker")->groupMatrix().map(localCameraDirection);
-
-			QVector3D localCameraPosition = autoUpChart->model()->modelMatrix().map(v->camera().position());
-			localCameraPosition           = autoUpChart->model()->getGroup("Marker")->groupMatrix().map(localCameraPosition);
-
-			QVector2D const markerXY = autoUpChart->marker();
-			QVector3D const markerA  = QVector3D(markerXY.x(), 0.f, markerXY.y());
-			QVector3D const markerB  = QVector3D(markerXY.x(), 1.f, markerXY.y());
-
-			// punto e direzione retta 1
-			QVector3D p1 = markerA;
-			QVector3D d1 = markerB - markerA;
-
-			// punto e direzione retta 2
-			QVector3D p2 = localCameraPosition;
-			QVector3D d2 = localCameraPosition - localCameraDirection;
-
-			QVector3D w0 = p1 - p2;
-			float a      = QVector3D::dotProduct(d1, d1);
-			float b      = QVector3D::dotProduct(d1, d2);
-			float c      = QVector3D::dotProduct(d2, d2);
-			float d      = QVector3D::dotProduct(d1, w0);
-			float e      = QVector3D::dotProduct(d2, w0);
-
-			float denom = a * c - b * b;
-
-			float t = (b * e - c * d) / denom;
-			float s = (a * e - b * d) / denom;
-			t       = std::clamp(t, 0.f, 1.f);
-
-			QVector3D closestPointOnLine1 = p1 + d1 * t;
-			QVector3D closestPointOnLine2 = p2 + d2 * s;
-			A3D::LineGroup::Vertex pointA;
-			A3D::LineGroup::Vertex pointB;
-			pointA.Color4D = QVector4D(0, 1, 0, 1);
-			pointB.Color4D = QVector4D(0, 1, 0, 1);
-
-			pointA.Position3D = closestPointOnLine1;
-			pointB.Position3D = closestPointOnLine2;
-
-			A3D::Group* altMarkerGroup = autoUpChart->model()->getOrAddGroup("MarkerTest");
-			if(!altMarkerGroup->lineGroup()) {
-				altMarkerGroup->setLineGroup(new A3D::LineGroup);
-				altMarkerGroup->lineGroup()->setThickness(0.01);
-				altMarkerGroup->lineGroup()->setContents(A3D::LineGroup::Position3D | A3D::LineGroup::Color4D);
-			}
-
-			altMarkerGroup->lineGroup()->vertices().clear();
-			altMarkerGroup->lineGroup()->vertices().push_back(pointA);
-			altMarkerGroup->lineGroup()->vertices().push_back(pointB);
-			altMarkerGroup->lineGroup()->invalidateCache();
-
-			// float distance                = (closestPointOnLine1 - closestPointOnLine2).length();
-		}
-	});
-#endif
-
-	v->setAutoRefreshEnabled(true);
-	s->run();
-
-	w.setCentralWidget(v);
-
-	CalibrationWidget cal;
+    CalibrationWidget cal;
 	cal.setWindowFlags(Qt::Window);
 	cal.show();
 	w.show();
-	
+
 	int rv = a.exec();
 	return rv;
-
 }
