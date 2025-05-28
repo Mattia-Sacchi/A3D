@@ -15,39 +15,58 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="xAxisGroupBox">
-     <property name="title">
-      <string>X Axis Settings</string>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="ChartAxisSettings" name="xAxisSettings" native="true"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="yAxisGroupBox">
-     <property name="title">
-      <string>Y Axis Settings</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="ChartAxisSettings" name="yAxisSettings" native="true"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="zAxisGroupBox">
-     <property name="title">
-      <string>Z Axise Settings</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_4">
-      <item>
-       <widget class="ChartAxisSettings" name="zAxisSettings" native="true"/>
-      </item>
-     </layout>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>533</width>
+        <height>350</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QGroupBox" name="xAxisGroupBox">
+         <property name="title">
+          <string>X Axis Settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="ChartAxisSettings" name="xAxisSettings" native="true"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="yAxisGroupBox">
+         <property name="title">
+          <string>Y Axis Settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="ChartAxisSettings" name="yAxisSettings" native="true"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="zAxisGroupBox">
+         <property name="title">
+          <string>Z Axise Settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="ChartAxisSettings" name="zAxisSettings" native="true"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>

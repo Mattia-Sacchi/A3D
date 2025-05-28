@@ -63,6 +63,8 @@ set(SOURCES
     Widgets/chartaxisgeneralsettings.cpp
     Widgets/settingsdialog.cpp
     Widgets/chartwidget.cpp
+    Widgets/indicatorspreviewwidget.cpp
+    Widgets/linearindicatorssettingswidget.cpp
 	keyeventmanager.cpp
 )
 
@@ -123,6 +125,8 @@ set(HEADERS
     Widgets/chartaxisgeneralsettings.h
     Widgets/settingsdialog.h
     Widgets/chartwidget.h
+    Widgets/indicatorspreviewwidget.h
+    Widgets/linearindicatorssettingswidget.h
     Dependencies/stb/stb_image.h
 	keyeventmanager.h
 )
@@ -137,6 +141,8 @@ set(UI_FILES
     Widgets/chartaxissettings.ui
     Widgets/chartaxisgeneralsettings.ui
     Widgets/settingsdialog.ui
+    Widgets/indicatorspreviewwidget.ui
+    Widgets/linearindicatorssettingswidget.ui
 )
  
 qt_add_big_resources(
@@ -150,7 +156,7 @@ qt_add_executable(${PROJECT_NAME}
     ${HEADERS}
     ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
-	${RESOURCES}
+    ${RESOURCES}
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Widgets)

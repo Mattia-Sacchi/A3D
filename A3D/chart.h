@@ -65,7 +65,7 @@ struct ChartAxisIndicator {
 	ChartAxisIndicatorType m_type;   ///< Type of this indicator (major or minor).
 	float m_value;                   ///< Value of the indicator on the axis.
 	float m_normalizedValue;         ///< Normalized position along the axis [0,1].
-	QString m_label;                 ///< Label text for the indicator.
+    QString m_label;                 ///< Label text for the indicator.
 	ChartAxisIndicatorStyle m_style; ///< Style applied to this indicator.
 };
 

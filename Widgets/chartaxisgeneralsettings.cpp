@@ -2,30 +2,82 @@
 #include <QColorDialog>
 #include <QFontDialog>
 
-static uint8_t FontSizes[FR_Count] = { 16, 32, 64 };
+enum FS {
+    FS_Low    = 16,
+    FS_Medium = 32,
+    FS_High   = 64,
+};
+
+static uint8_t FontSizes[FR_Count] = { FS_Low, FS_Medium, FS_High };
 
 ChartAxisGeneralSettings::ChartAxisGeneralSettings(QWidget* parent)
 	: QWidget(parent) {
 	ui.setupUi(this);
 	ui.indicatorColorWidget->setAutoFillBackground(true);
 
-    ui.scaleValueLabel->setMinimumWidth(ui.scaleValueLabel->fontMetrics().boundingRect("1,00").width());
+    ui.scaleValueLabel->setMinimumWidth(ui.scaleValueLabel->fontMetrics().boundingRect("1,000").width());
+    ui.scaleValueLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
     connect(ui.changeIndicatorColorButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onChangeIndicatorColorButtonClicked);
-
     connect(ui.changeLabelColorButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onChangeLabelColorButtonClicked);
-
     connect(ui.changeFontButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onChangeFontButtonClicked);
-
     connect(ui.highResolutionRadioButton, &QRadioButton::clicked, this, &ChartAxisGeneralSettings::onHighResolutionRadioButtonClicked);
-
     connect(ui.mediumResolutionRadioButton, &QRadioButton::clicked, this, &ChartAxisGeneralSettings::onMediumResolutionRadioButtonClicked);
-
     connect(ui.lowResolutionRadioButton, &QRadioButton::clicked, this, &ChartAxisGeneralSettings::onLowResolutionRadioButtonClicked);
-
     connect(ui.resetButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onResetButtonClicked);
-
     connect(ui.scaleSlider, &QSlider::valueChanged, this, &ChartAxisGeneralSettings::onScaleSliderValueChanged);
+
+    ui.highResolutionRadioButton->setChecked(true);
+    setResoulution(FR_High);
+}
+
+A3D::ChartAxisIndicatorStyle ChartAxisGeneralSettings::style() const {
+
+    A3D::ChartAxisIndicatorStyle style;
+
+    style.m_indicatorColor = ui.indicatorColorWidget->palette().color(ui.indicatorColorWidget->backgroundRole());
+    style.m_labelColor     = ui.labelColorExampleLabel->palette().color(QPalette::WindowText);
+    QFont font             = ui.labelColorExampleLabel->font();
+    font.setPointSize(FontSizes[m_resolution]);
+    style.m_labelFont = font;
+    style.m_labelSize = ui.scaleSlider->value() / 100.f;
+
+    return style;
+}
+
+void ChartAxisGeneralSettings::setStyle(A3D::ChartAxisIndicatorStyle style) {
+    QPalette palette;
+    palette = ui.indicatorColorWidget->palette();
+    palette.setColor(ui.indicatorColorWidget->backgroundRole(), style.m_indicatorColor);
+    ui.indicatorColorWidget->setPalette(palette);
+
+    palette = ui.labelColorExampleLabel->palette();
+    palette.setColor(QPalette::WindowText, style.m_labelColor);
+    ui.labelColorExampleLabel->setPalette(palette);
+
+    QFont font       = style.m_labelFont;
+    uint8_t fontSize = font.pointSize();
+    switch(fontSize) {
+    case FS_Low:
+        m_resolution = FR_Low;
+        break;
+
+    case FS_Medium:
+        m_resolution = FR_Medium;
+        break;
+    default:
+    case FS_High:
+        m_resolution = FR_High;
+        break;
+    }
+
+    font.setPointSize(FontSizes[m_resolution] / 4);
+
+    ui.labelFontExampleLabel->setText(font.family());
+    ui.labelFontExampleLabel->setFont(font);
+    updateFontExampleResoulution();
+
+    ui.scaleSlider->setValue(style.m_labelSize * 100.f);
 }
 
 void ChartAxisGeneralSettings::onChangeIndicatorColorButtonClicked() {
@@ -70,7 +122,7 @@ void ChartAxisGeneralSettings::setResoulution(FontResolutions res) {
 
 void ChartAxisGeneralSettings::updateFontExampleResoulution() {
 	QFont actualFont = ui.labelFontExampleLabel->font();
-	actualFont.setPointSize(FontSizes[m_resolution]);
+    actualFont.setPointSize(FontSizes[m_resolution] / 4);
 	ui.labelFontExampleLabel->setFont(actualFont);
 }
 
