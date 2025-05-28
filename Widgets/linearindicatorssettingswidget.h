@@ -3,11 +3,15 @@
 
 #include "ui_linearindicatorssettingswidget.h"
 
+
+
 class LinearIndicatorsSettingsWidget : public QWidget {
 	Q_OBJECT
 
 public:
     explicit LinearIndicatorsSettingsWidget(QWidget* parent = nullptr);
+
+    IndicatorsPreviewWidget * indicatorPreviewWidget() const;
 
 private:
 	Ui::LinearIndicatorsSettingsWidget ui;

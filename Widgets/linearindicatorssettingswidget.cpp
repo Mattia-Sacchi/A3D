@@ -8,3 +8,7 @@ LinearIndicatorsSettingsWidget::LinearIndicatorsSettingsWidget(QWidget* parent)
     ui.maxValueDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
     ui.minValueDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
 }
+
+IndicatorsPreviewWidget * LinearIndicatorsSettingsWidget::indicatorPreviewWidget() const{
+    return ui.previewWidget;
+}

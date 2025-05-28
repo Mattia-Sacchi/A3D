@@ -64,7 +64,9 @@ set(SOURCES
     Widgets/settingsdialog.cpp
     Widgets/chartwidget.cpp
     Widgets/indicatorspreviewwidget.cpp
+    Widgets/valuespreviewwidget.cpp
     Widgets/linearindicatorssettingswidget.cpp
+    Widgets/addliindicatorsdialog.cpp
 	keyeventmanager.cpp
 )
 
@@ -126,9 +128,11 @@ set(HEADERS
     Widgets/settingsdialog.h
     Widgets/chartwidget.h
     Widgets/indicatorspreviewwidget.h
+    Widgets/valuespreviewwidget.h
     Widgets/linearindicatorssettingswidget.h
     Dependencies/stb/stb_image.h
-	keyeventmanager.h
+    keyeventmanager.h
+    Widgets/addliindicatorsdialog.h
 )
 
 set(RESOURCES
@@ -143,6 +147,8 @@ set(UI_FILES
     Widgets/settingsdialog.ui
     Widgets/indicatorspreviewwidget.ui
     Widgets/linearindicatorssettingswidget.ui
+    Widgets/addliindicatorsdialog.ui
+    Widgets/valuespreviewwidget.ui
 )
  
 qt_add_big_resources(
@@ -157,6 +163,8 @@ qt_add_executable(${PROJECT_NAME}
     ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
     ${RESOURCES}
+
+
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Widgets)
