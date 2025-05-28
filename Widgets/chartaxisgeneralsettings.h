@@ -3,20 +3,13 @@
 
 #include "ui_chartaxisgeneralsettings.h"
 
-enum FontResolutions
-{
-    FR_Low = 0,
-    FR_Medium,
-    FR_High,
-    FR_Count
-};
+enum FontResolutions { FR_Low = 0, FR_Medium, FR_High, FR_Count };
 
-class ChartAxisGeneralSettings : public QWidget
-{
+class ChartAxisGeneralSettings : public QWidget {
     Q_OBJECT
 
 public:
-    explicit ChartAxisGeneralSettings(QWidget *parent = nullptr);
+    explicit ChartAxisGeneralSettings(QWidget* parent = nullptr);
 
 private slots:
     void onChangeIndicatorColorButtonClicked();
@@ -30,6 +23,10 @@ private slots:
     void onMediumResolutionRadioButtonClicked();
 
     void onLowResolutionRadioButtonClicked();
+
+    void onResetButtonClicked();
+
+    void onScaleSliderValueChanged(int);
 
 private:
     void setResoulution(FontResolutions res);

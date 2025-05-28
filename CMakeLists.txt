@@ -148,6 +148,7 @@ qt_add_big_resources(
 qt_add_executable(${PROJECT_NAME}
     ${SOURCES}
     ${HEADERS}
+    ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
 	${RESOURCES}
 )
