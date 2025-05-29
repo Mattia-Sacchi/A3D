@@ -3,6 +3,7 @@
 
 #include "ui_chartaxissettings.h"
 #include "../A3D/chart.h"
+#include "addliindicatorsdialog.h"
 
 class ChartAxisSettings : public QWidget {
     Q_OBJECT
@@ -10,9 +11,19 @@ class ChartAxisSettings : public QWidget {
 public:
     explicit ChartAxisSettings(QWidget* parent = nullptr);
 
+private slots:
+    void onLinearInterpolatedRadioButtonClicked();
+    void onEnumeratedRadioButtonClicked();
+
+    void onLinearAddClicked();
+
 private:
-    Ui::ChartAxisSettings ui;
+    void setChartAxisType(A3D::ChartAxisType);
+    A3D::ChartAxisType m_type;
     A3D::ChartAxisData m_axisData;
+
+    AddLiIndicatorsDialog m_linearAddDialog;
+    Ui::ChartAxisSettings ui;
 };
 
 #endif // CHARTAXISSETTINGS_H

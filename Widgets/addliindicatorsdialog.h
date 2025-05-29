@@ -9,7 +9,7 @@ namespace Ui {
 class AddLiIndicatorsDialog;
 }
 
-enum AddMode{
+enum AddMode {
 	AM_BY_STEP = 0,
 	AM_RAW_ADD,
 };
@@ -23,8 +23,8 @@ public:
 
 	std::vector<A3D::ChartAxisIndicator> indicators() const;
 
-
 private:
+    std::vector<A3D::ChartAxisIndicator> getIndicators(size_t count) const;
 	void setMode(AddMode);
 
 	void onRawAddButtonClicked();

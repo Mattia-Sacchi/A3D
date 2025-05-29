@@ -9,6 +9,8 @@
 
 namespace A3D {
 
+uint16_t const MaxIndicators = 1000;
+
 /// @brief Types of axis scaling modes.
 /// @details Determines how axis values are interpreted and rendered.
 enum ChartAxisType {

@@ -127,7 +127,7 @@ void ChartAxisData::addEquidistantIndicatorsByStepSize(float from, float to, flo
 
 	size_t const indicatorCount = static_cast<size_t>((to - from) / stepSize);
 
-	if(indicatorCount > 1000) // Too many, limit to 1000 points...
+    if(indicatorCount > MaxIndicators) // Too many, limit to 1000 points...
 	{
 		addEquidistantIndicatorsByIndicatorCount(from, to, 1000, toStringPrecision, indicatorType);
 		return;

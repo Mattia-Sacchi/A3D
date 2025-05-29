@@ -21,13 +21,7 @@ std::vector<A3D::ChartAxisIndicator> IndicatorsPreviewWidget::indicators() const
 }
 
 void IndicatorsPreviewWidget::onAddButtonClicked() {
-    QString text = QString("Example %1").arg(m_indicators.size() + 1);
-    m_indicators.push_back(A3D::ChartAxisIndicator(A3D::CHAXIND_MAJOR_INDICATOR, m_indicators.size() + 1, m_indicators.size() + 1, text));
-
-    QListWidgetItem* newLabel = new QListWidgetItem;
-    newLabel->setText(text);
-
-    ui.previewWidget->insertItem(m_indicators.size(), newLabel);
+    emit addClicked();
 }
 
 void IndicatorsPreviewWidget::onRemoveButtonClicked() {

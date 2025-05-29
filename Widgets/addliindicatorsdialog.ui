@@ -6,142 +6,212 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>715</width>
-    <height>703</height>
+    <width>741</width>
+    <height>497</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QFormLayout" name="formLayout">
-   <item row="1" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QRadioButton" name="byStepRadioButton">
-       <property name="text">
-        <string>by Step</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="rawEditRadioButton">
-       <property name="text">
-        <string>Raw Edit</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="ChartAxisGeneralSettings" name="generalSettings" native="true"/>
-   </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="stringPrecisionLabel">
-     <property name="text">
-      <string>String Precision</string>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
      </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>717</width>
+        <height>442</height>
+       </rect>
+      </property>
+      <layout class="QFormLayout" name="formLayout_3">
+       <item row="0" column="0" colspan="2">
+        <widget class="ChartAxisGeneralSettings" name="generalSettings" native="true"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="addModeLabel">
+         <property name="text">
+          <string>Add Mode</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QRadioButton" name="byStepRadioButton">
+           <property name="text">
+            <string>by Step</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="rawEditRadioButton">
+           <property name="text">
+            <string>Raw Edit</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="stringPrecisionLabel">
+         <property name="text">
+          <string>String Precision</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QSpinBox" name="stringPrecisionSpinBox">
+         <property name="maximum">
+          <number>6</number>
+         </property>
+         <property name="value">
+          <number>3</number>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="indicatorsTypeLabel">
+         <property name="text">
+          <string>Indicators Type</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QRadioButton" name="minorRadioButton">
+           <property name="text">
+            <string>Minor</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="majorRadioButton">
+           <property name="text">
+            <string>Major</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QWidget" name="byStepWidget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>200</width>
+           <height>100</height>
+          </size>
+         </property>
+         <layout class="QFormLayout" name="formLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="fromLabel">
+            <property name="text">
+             <string>From</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="fromDoubleSpinBox"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="toLabel">
+            <property name="text">
+             <string>To</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="toDoubleSpinBox"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="modeLabel">
+            <property name="text">
+             <string>Mode</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QRadioButton" name="countRadioButton">
+              <property name="text">
+               <string>Count</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="stepRadioButton">
+              <property name="text">
+               <string>Step Size</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="countLabel">
+            <property name="text">
+             <string>Indicators count</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="countSpinBox"/>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="stepSizeLabel">
+            <property name="text">
+             <string>Step Size</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QDoubleSpinBox" name="stepSizeDoubleSpinBox"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="6" column="0" colspan="2">
+        <widget class="ValuesPreviewWidget" name="rawEditWidget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777214</height>
+          </size>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
-   <item row="3" column="1">
-    <widget class="QSpinBox" name="stringPrecisionSpinBox">
-     <property name="maximum">
-      <number>6</number>
-     </property>
-     <property name="value">
-      <number>3</number>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="ValuesPreviewWidget" name="rawEditWidget" native="true"/>
-   </item>
-   <item row="9" column="0" colspan="2">
-    <widget class="QWidget" name="byStepWidget" native="true">
-     <property name="minimumSize">
-      <size>
-       <width>200</width>
-       <height>100</height>
-      </size>
-     </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="fromLabel">
-        <property name="text">
-         <string>From</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="fromDoubleSpinBox"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="toLabel">
-        <property name="text">
-         <string>To</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="toDoubleSpinBox"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="modeLabel">
-        <property name="text">
-         <string>Mode</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QRadioButton" name="countRadioButton">
-          <property name="text">
-           <string>Count</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="stepRadioButton">
-          <property name="text">
-           <string>Step Size</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="countLabel">
-        <property name="text">
-         <string>Indicators count</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QSpinBox" name="countSpinBox"/>
-      </item>
-      <item row="6" column="1">
-       <widget class="QWidget" name="widget" native="true"/>
-      </item>
-      <item row="5" column="1">
-       <widget class="QDoubleSpinBox" name="stepSizeDoubleSpinBox"/>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="stepSizeLabel">
-        <property name="text">
-         <string>Step Size</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="10" column="0">
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
@@ -150,41 +220,6 @@
       <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
      </property>
     </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="addModeLabel">
-     <property name="text">
-      <string>Add Mode</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="indicatorsTypeLabel">
-     <property name="text">
-      <string>Indicators Type</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QRadioButton" name="minorRadioButton">
-       <property name="text">
-        <string>Minor</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="majorRadioButton">
-       <property name="text">
-        <string>Major</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
   </layout>
  </widget>
