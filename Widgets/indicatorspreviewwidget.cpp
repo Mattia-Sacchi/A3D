@@ -16,6 +16,26 @@ IndicatorsPreviewWidget::IndicatorsPreviewWidget(QWidget* parent)
     ui.editIndicatorsButton->setEnabled(false);
 }
 
+
+void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator> indicators)
+{
+	for(A3D::ChartAxisIndicator const& it : indicators)
+	{
+		m_indicators.push_back(it);
+
+		QString text = it.m_label;
+
+		QListWidgetItem* newLabel = new QListWidgetItem;
+		newLabel->setText(text);
+
+		newLabel->setFont(it.m_style.m_labelFont);
+
+
+		ui.previewWidget->insertItem(m_indicators.size(), newLabel);
+	}
+
+}
+
 std::vector<A3D::ChartAxisIndicator> IndicatorsPreviewWidget::indicators() const {
     return m_indicators;
 }

@@ -17,6 +17,8 @@ private slots:
 
     void onLinearAddClicked();
 
+    void onLinearAddDialogAccepted();
+
 private:
     void setChartAxisType(A3D::ChartAxisType);
     A3D::ChartAxisType m_type;

@@ -24,8 +24,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>620</width>
-        <height>479</height>
+        <width>624</width>
+        <height>487</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -64,14 +64,14 @@
             </layout>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="stringPrecisionLabel">
             <property name="text">
              <string>Label digits</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QSpinBox" name="stringPrecisionSpinBox">
             <property name="maximum">
              <number>6</number>
@@ -81,39 +81,59 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="indicatorsTypeLabel">
-            <property name="text">
+          <item row="1" column="0" colspan="2">
+           <widget class="QGroupBox" name="groupBox_2">
+            <property name="title">
              <string>Indicators Type</string>
             </property>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QRadioButton" name="majorRadioButton">
+               <property name="text">
+                <string>Major</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="minorRadioButton">
+               <property name="text">
+                <string>Minor</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
-          </item>
-          <item row="2" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QRadioButton" name="minorRadioButton">
-              <property name="text">
-               <string>Minor</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="majorRadioButton">
-              <property name="text">
-               <string>Major</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
           </item>
          </layout>
         </widget>
        </item>
        <item>
         <widget class="ChartAxisGeneralSettings" name="generalSettings" native="true"/>
+       </item>
+       <item>
+        <widget class="ValuesPreviewWidget" name="rawEditWidget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777214</height>
+          </size>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QWidget" name="byStepWidget" native="true">
@@ -196,28 +216,6 @@
            <widget class="QDoubleSpinBox" name="stepSizeDoubleSpinBox"/>
           </item>
          </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="ValuesPreviewWidget" name="rawEditWidget" native="true">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777214</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
         </widget>
        </item>
        <item>

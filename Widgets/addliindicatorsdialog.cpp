@@ -13,6 +13,17 @@ AddLiIndicatorsDialog::AddLiIndicatorsDialog(QWidget* parent)
     ui->stepSizeLabel->setMinimumWidth(ui->stepSizeLabel->fontMetrics().boundingRect("Indicators count").width());
     ui->stepSizeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
+	ui->stepSizeDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
+	ui->stepSizeDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
+
+	ui->fromDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
+	ui->fromDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
+
+	ui->toDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
+	ui->toDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
+
+	ui->countSpinBox->setMaximum(A3D::MaxIndicators);
+
     connect(ui->byStepRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onByStepButtonClicked);
     connect(ui->rawEditRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onRawAddButtonClicked);
     connect(ui->countRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onCountButtonClicked);
@@ -59,21 +70,6 @@ void AddLiIndicatorsDialog::setMode(AddMode mode) {
     }
 }
 
-std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::getIndicators(size_t count) const {
-    float from = ui->fromDoubleSpinBox->value();
-    float to   = ui->toDoubleSpinBox->value();
-    std::vector<A3D::ChartAxisIndicator> indicators;
-    int stringPrecision                = ui->stringPrecisionSpinBox->value();
-    A3D::ChartAxisIndicatorStyle style = ui->generalSettings->style();
-    A3D::ChartAxisIndicatorType type   = ui->majorRadioButton->isChecked() ? A3D::CHAXIND_MAJOR_INDICATOR : A3D::CHAXIND_MINOR_INDICATOR;
-
-    float fInverseIndicatorCount = 1.f / static_cast<float>(count - 1);
-    for(size_t i = 0; i < count; ++i) {
-        float const val = from + ((to - from) * fInverseIndicatorCount * static_cast<float>(i));
-        indicators.push_back(A3D::ChartAxisIndicator(type, val, 0.f, QString::number(val, 'f', stringPrecision), style));
-    }
-    return indicators;
-}
 
 // TODO:  Normalize value when they arrive
 std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::indicators() const {
@@ -93,18 +89,16 @@ std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::indicators() const {
 
 				size_t count = ui->countSpinBox->value();
 
-                indicators = getIndicators(count);
+				float fInverseIndicatorCount = 1.f / static_cast<float>(count - 1);
+				for(size_t i = 0; i < count; ++i) {
+					float const val = from + ((to - from) * fInverseIndicatorCount * static_cast<float>(i));
+					indicators.push_back(A3D::ChartAxisIndicator(type, val, 0.f, QString::number(val, 'f', stringPrecision), style));
+				}
 			}
             else {
 
                 float stepSize              = ui->stepSizeDoubleSpinBox->value();
 				size_t const indicatorCount = static_cast<size_t>((to - from) / stepSize);
-
-                if(indicatorCount > A3D::MaxIndicators) // Too many, limit to 1000 points...
-                {
-                    indicators = getIndicators(A3D::MaxIndicators);
-                    break;
-				}
 
                 indicators.reserve(indicatorCount + 1);
 

@@ -10,7 +10,6 @@ class IndicatorsPreviewWidget : public QWidget {
 public:
     explicit IndicatorsPreviewWidget(QWidget* parent = nullptr);
 
-    void addIndicator(A3D::ChartAxisIndicator indicator);
     void addIndicators(std::vector<A3D::ChartAxisIndicator>);
 
     std::vector<A3D::ChartAxisIndicator> indicators() const;

@@ -12,6 +12,8 @@ ChartAxisSettings::ChartAxisSettings(QWidget* parent)
     setChartAxisType(m_type);
 
     connect(ui.LinearPreviewWidget->indicatorPreviewWidget(), &IndicatorsPreviewWidget::addClicked, this, &ChartAxisSettings::onLinearAddClicked);
+
+    connect(&m_linearAddDialog, &QDialog::accepted, this, &ChartAxisSettings::onLinearAddDialogAccepted);
 }
 
 void ChartAxisSettings::setChartAxisType(A3D::ChartAxisType type) {
@@ -27,16 +29,19 @@ void ChartAxisSettings::setChartAxisType(A3D::ChartAxisType type) {
         break;
     }
 }
-#include <QDebug>
+
+void ChartAxisSettings::onLinearAddDialogAccepted()
+{
+	std::vector<A3D::ChartAxisIndicator> indicators = m_linearAddDialog.indicators();
+
+	ui.LinearPreviewWidget->indicatorPreviewWidget()->addIndicators(indicators);
+}
+
+
 void ChartAxisSettings::onLinearAddClicked() {
 
     // TODO: Reset the dialog
-
     m_linearAddDialog.open();
-
-    int result = m_linearAddDialog.result();
-
-    qDebug() << (result == QDialog::Accepted ? "Accepted" : "Rejected");
 }
 
 void ChartAxisSettings::onLinearInterpolatedRadioButtonClicked() {
