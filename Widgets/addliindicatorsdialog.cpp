@@ -8,7 +8,10 @@ AddLiIndicatorsDialog::AddLiIndicatorsDialog(QWidget* parent)
       m_countMode(true) {
 	ui->setupUi(this);
 	setMode(m_mode);
-    setCountOrStepSizeMode(true);
+    setCountOrStepSizeMode(m_countMode);
+
+    ui->stepSizeLabel->setMinimumWidth(ui->stepSizeLabel->fontMetrics().boundingRect("Indicators count").width());
+    ui->stepSizeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
     connect(ui->byStepRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onByStepButtonClicked);
     connect(ui->rawEditRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onRawAddButtonClicked);
@@ -34,16 +37,26 @@ void AddLiIndicatorsDialog::onStepSizeButtonClicked() {
 
 void AddLiIndicatorsDialog::setCountOrStepSizeMode(bool mode) {
 	m_countMode = mode;
-	ui->stepSizeDoubleSpinBox->setHidden(mode);
-	ui->stepSizeDoubleSpinBox->setHidden(mode);
-	ui->countSpinBox->setHidden(!mode);
-	ui->countLabel->setHidden(!mode);
+    ui->stepSizeLabel->setHidden(m_countMode);
+    ui->stepSizeDoubleSpinBox->setHidden(m_countMode);
+    ui->countSpinBox->setHidden(!m_countMode);
+    ui->countLabel->setHidden(!m_countMode);
 }
 
 void AddLiIndicatorsDialog::setMode(AddMode mode) {
 	m_mode = mode;
-    ui->rawEditWidget->setHidden(m_mode);
-    ui->byStepWidget->setHidden(m_mode);
+
+    switch(m_mode) {
+    default:
+    case AM_BY_STEP:
+        ui->rawEditWidget->setHidden(true);
+        ui->byStepWidget->setHidden(false);
+        break;
+    case AM_RAW_ADD:
+        ui->rawEditWidget->setHidden(false);
+        ui->byStepWidget->setHidden(true);
+        break;
+    }
 }
 
 std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::getIndicators(size_t count) const {
