@@ -1,4 +1,5 @@
 #include "indicatorspreviewwidget.h"
+#include "chartaxisgeneralsettings.h"
 
 IndicatorsPreviewWidget::IndicatorsPreviewWidget(QWidget* parent)
     : QWidget(parent) {
@@ -28,7 +29,12 @@ void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator>
 		QListWidgetItem* newLabel = new QListWidgetItem;
 		newLabel->setText(text);
 
-		newLabel->setFont(it.m_style.m_labelFont);
+		QFont font = it.m_style.m_labelFont;
+
+		FontResolutions res = ChartAxisGeneralSettings::getFontResoulution(font.pointSize());
+		font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(res));
+
+		newLabel->setFont(font);
 
 
 		ui.previewWidget->insertItem(m_indicators.size(), newLabel);

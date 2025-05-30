@@ -22,7 +22,6 @@ private slots:
     void onItemSelectionChanged();
 
 private:
-	std::vector<float> m_values;
 	Ui::ValuesPreviewWidget ui;
 };
 

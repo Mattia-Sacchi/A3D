@@ -3,12 +3,12 @@
 #include <QFontDialog>
 
 enum FS {
-    FS_Low    = 16,
-    FS_Medium = 32,
-    FS_High   = 64,
+	FS_Low    = 16,
+	FS_Medium = 32,
+	FS_High   = 64,
 };
 
-static uint8_t FontSizes[FR_Count] = { FS_Low, FS_Medium, FS_High };
+uint8_t const FontSizes[FR_Count] = { FS_Low, FS_Medium, FS_High };
 
 ChartAxisGeneralSettings::ChartAxisGeneralSettings(QWidget* parent)
 	: QWidget(parent) {
@@ -45,6 +45,25 @@ A3D::ChartAxisIndicatorStyle ChartAxisGeneralSettings::style() const {
     return style;
 }
 
+FontResolutions ChartAxisGeneralSettings::getFontResoulution(size_t fontPointSize)
+{
+
+	FontResolutions resolution = FR_High;
+	for(size_t i = 0; i < FR_Count; i++)
+	{
+		if(fontPointSize == FontSizes[i])
+			resolution = static_cast<FontResolutions>(i);
+	}
+	return resolution;
+}
+
+size_t ChartAxisGeneralSettings::getDisplaySize(FontResolutions res)
+{
+	if(res >= FR_Count || res < FR_Low)
+		return FontSizes[FR_High];
+	return FontSizes[res] / 4;
+}
+
 void ChartAxisGeneralSettings::setStyle(A3D::ChartAxisIndicatorStyle style) {
     QPalette palette;
     palette = ui.indicatorColorWidget->palette();
@@ -56,22 +75,9 @@ void ChartAxisGeneralSettings::setStyle(A3D::ChartAxisIndicatorStyle style) {
     ui.labelColorExampleLabel->setPalette(palette);
 
     QFont font       = style.m_labelFont;
-    uint8_t fontSize = font.pointSize();
-    switch(fontSize) {
-    case FS_Low:
-        m_resolution = FR_Low;
-        break;
+    m_resolution = ChartAxisGeneralSettings::getFontResoulution(font.pointSize());
 
-    case FS_Medium:
-        m_resolution = FR_Medium;
-        break;
-    default:
-    case FS_High:
-        m_resolution = FR_High;
-        break;
-    }
-
-    font.setPointSize(FontSizes[m_resolution] / 4);
+    font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(m_resolution));
 
     ui.labelFontExampleLabel->setText(font.family());
     ui.labelFontExampleLabel->setFont(font);

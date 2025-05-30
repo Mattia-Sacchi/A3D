@@ -6,6 +6,8 @@
 
 enum FontResolutions { FR_Low = 0, FR_Medium, FR_High, FR_Count };
 
+
+
 class ChartAxisGeneralSettings : public QWidget {
     Q_OBJECT
 
@@ -15,6 +17,10 @@ public:
     A3D::ChartAxisIndicatorStyle style() const;
 
     void setStyle(A3D::ChartAxisIndicatorStyle);
+
+
+	static FontResolutions getFontResoulution(size_t fontPointSize);
+	static size_t getDisplaySize(FontResolutions);
 
 private slots:
     void onChangeIndicatorColorButtonClicked();

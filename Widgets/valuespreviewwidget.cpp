@@ -1,10 +1,12 @@
 #include "valuespreviewwidget.h"
+#include <QDoubleSpinBox>
 
 ValuesPreviewWidget::ValuesPreviewWidget(QWidget* parent)
     : QWidget(parent) {
 	ui.setupUi(this);
 
     ui.previewWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+    ui.previewWidget->setSortingEnabled(true);
 
     connect(ui.previewWidget, &QListWidget::itemSelectionChanged, this, &ValuesPreviewWidget::onItemSelectionChanged);
     connect(ui.addValueButton, &QPushButton::clicked, this, &ValuesPreviewWidget::onAddButtonClicked);
@@ -14,7 +16,7 @@ ValuesPreviewWidget::ValuesPreviewWidget(QWidget* parent)
 }
 
 std::vector<float> ValuesPreviewWidget::values() const {
-    return m_values;
+    return {};
 }
 
 void ValuesPreviewWidget::addValues(std::vector<float> values)
@@ -27,17 +29,30 @@ void ValuesPreviewWidget::addValues(std::vector<float> values)
 
 void ValuesPreviewWidget::addValue(float value)
 {
-	m_values.push_back(value);
+
+	QListWidgetItem* newWidget = new QListWidgetItem(ui.previewWidget);
+
+	QDoubleSpinBox *doubleSpinBox = new QDoubleSpinBox(ui.previewWidget);
+	doubleSpinBox->setValue(value);
+	newWidget->setSizeHint(doubleSpinBox->sizeHint());
+
+	ui.previewWidget->setItemWidget(newWidget, doubleSpinBox);
+	ui.previewWidget->insertItem(0, newWidget);
 
 }
 
 void ValuesPreviewWidget::onAddButtonClicked() {
-    QString text = QString("Example %1").arg(m_values.size() + 1);
 
-    QListWidgetItem* newLabel = new QListWidgetItem;
-    newLabel->setText(text);
 
-    ui.previewWidget->insertItem(m_values.size(), newLabel);
+	float defaultValue = 0.f;
+
+	if(ui.previewWidget->count()){
+		QListWidgetItem * item  = ui.previewWidget->item(0);
+		QWidget * tempDoubleSpinBox =  ui.previewWidget->itemWidget(item);
+		defaultValue = qobject_cast<QDoubleSpinBox*>(tempDoubleSpinBox)->value() + 1;
+	}
+
+	addValue(defaultValue);
 }
 
 void ValuesPreviewWidget::onRemoveButtonClicked() {
@@ -47,9 +62,7 @@ void ValuesPreviewWidget::onRemoveButtonClicked() {
         QListWidgetItem* item = ui.previewWidget->item(i);
         if(!itemsToRemove.contains(item))
             continue;
-        // Qt documentation says that this is the correct way
         delete ui.previewWidget->takeItem(i);
-        m_values.erase(m_values.begin() + i);
     }
 }
 
