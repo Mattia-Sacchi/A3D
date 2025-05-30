@@ -14,7 +14,7 @@ AddLiIndicatorsDialog::AddLiIndicatorsDialog(QWidget* parent)
     ui->stepSizeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
 	ui->stepSizeDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
-    ui->stepSizeDoubleSpinBox->setMinimum(std::numeric_limits<double>::lowest());
+    ui->stepSizeDoubleSpinBox->setMinimum(std::numeric_limits<double>::min());
 
 	ui->fromDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
     ui->fromDoubleSpinBox->setMinimum(std::numeric_limits<double>::lowest());
@@ -74,6 +74,10 @@ void AddLiIndicatorsDialog::setMode(AddMode mode) {
         ui->byStepWidget->setHidden(true);
         break;
     }
+}
+
+void AddLiIndicatorsDialog::setStyle(A3D::ChartAxisIndicatorStyle style) {
+    ui->generalSettings->setStyle(style);
 }
 
 // TODO:  Normalize value when they arrive

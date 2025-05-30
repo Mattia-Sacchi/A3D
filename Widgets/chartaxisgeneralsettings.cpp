@@ -26,9 +26,8 @@ ChartAxisGeneralSettings::ChartAxisGeneralSettings(QWidget* parent)
     connect(ui.lowResolutionRadioButton, &QRadioButton::clicked, this, &ChartAxisGeneralSettings::onLowResolutionRadioButtonClicked);
     connect(ui.resetButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onResetButtonClicked);
     connect(ui.scaleSlider, &QSlider::valueChanged, this, &ChartAxisGeneralSettings::onScaleSliderValueChanged);
-
-    ui.highResolutionRadioButton->setChecked(true);
     setResoulution(FR_High);
+    updateFontExampleResoulution();
 }
 
 A3D::ChartAxisIndicatorStyle ChartAxisGeneralSettings::style() const {
@@ -45,20 +44,17 @@ A3D::ChartAxisIndicatorStyle ChartAxisGeneralSettings::style() const {
     return style;
 }
 
-FontResolutions ChartAxisGeneralSettings::getFontResoulution(size_t fontPointSize)
-{
+FontResolutions ChartAxisGeneralSettings::getFontResoulution(size_t fontPointSize) {
 
 	FontResolutions resolution = FR_High;
-	for(size_t i = 0; i < FR_Count; i++)
-	{
+    for(size_t i = 0; i < FR_Count; i++) {
 		if(fontPointSize == FontSizes[i])
 			resolution = static_cast<FontResolutions>(i);
 	}
 	return resolution;
 }
 
-size_t ChartAxisGeneralSettings::getDisplaySize(FontResolutions res)
-{
+size_t ChartAxisGeneralSettings::getDisplaySize(FontResolutions res) {
 	if(res >= FR_Count || res < FR_Low)
 		return FontSizes[FR_High];
 	return FontSizes[res] / 4;
@@ -74,8 +70,8 @@ void ChartAxisGeneralSettings::setStyle(A3D::ChartAxisIndicatorStyle style) {
     palette.setColor(QPalette::WindowText, style.m_labelColor);
     ui.labelColorExampleLabel->setPalette(palette);
 
-    QFont font       = style.m_labelFont;
-    m_resolution = ChartAxisGeneralSettings::getFontResoulution(font.pointSize());
+    QFont font = style.m_labelFont;
+    setResoulution(ChartAxisGeneralSettings::getFontResoulution(font.pointSize()));
 
     font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(m_resolution));
 
@@ -84,6 +80,8 @@ void ChartAxisGeneralSettings::setStyle(A3D::ChartAxisIndicatorStyle style) {
     updateFontExampleResoulution();
 
     ui.scaleSlider->setValue(style.m_labelSize * 100.f);
+
+    updateFontExampleResoulution();
 }
 
 void ChartAxisGeneralSettings::onChangeIndicatorColorButtonClicked() {
@@ -129,6 +127,7 @@ void ChartAxisGeneralSettings::setResoulution(FontResolutions res) {
 void ChartAxisGeneralSettings::updateFontExampleResoulution() {
 	QFont actualFont = ui.labelFontExampleLabel->font();
     actualFont.setPointSize(FontSizes[m_resolution] / 4);
+    ui.labelFontExampleLabel->setText(actualFont.family());
 	ui.labelFontExampleLabel->setFont(actualFont);
 }
 

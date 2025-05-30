@@ -67,6 +67,7 @@ set(SOURCES
     Widgets/valuespreviewwidget.cpp
     Widgets/linearindicatorssettingswidget.cpp
     Widgets/addliindicatorsdialog.cpp
+    Widgets/editliindicatorsdialog.cpp
 	keyeventmanager.cpp
 )
 
@@ -130,9 +131,10 @@ set(HEADERS
     Widgets/indicatorspreviewwidget.h
     Widgets/valuespreviewwidget.h
     Widgets/linearindicatorssettingswidget.h
+    Widgets/editliindicatorsdialog.h
     Dependencies/stb/stb_image.h
     keyeventmanager.h
-    Widgets/addliindicatorsdialog.h
+
 )
 
 set(RESOURCES
@@ -148,6 +150,7 @@ set(UI_FILES
     Widgets/indicatorspreviewwidget.ui
     Widgets/linearindicatorssettingswidget.ui
     Widgets/addliindicatorsdialog.ui
+    Widgets/editliindicatorsdialog.ui
     Widgets/valuespreviewwidget.ui
 )
  
@@ -163,6 +166,7 @@ qt_add_executable(${PROJECT_NAME}
     ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
     ${RESOURCES}
+
 
 
 )

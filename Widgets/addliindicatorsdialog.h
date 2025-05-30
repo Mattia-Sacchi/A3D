@@ -4,7 +4,6 @@
 #include <QDialog>
 
 #include "../A3D/chart.h"
-
 namespace Ui {
 class AddLiIndicatorsDialog;
 }
@@ -22,6 +21,7 @@ public:
 	~AddLiIndicatorsDialog();
 
 	std::vector<A3D::ChartAxisIndicator> indicators() const;
+    void setStyle(A3D::ChartAxisIndicatorStyle style);
 
 private:
 	void setMode(AddMode);

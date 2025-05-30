@@ -36,6 +36,14 @@ void ChartAxisData::setDefaultIndicatorStyle(ChartAxisIndicatorStyle style) {
 	m_defaultStyle = std::move(style);
 }
 
+bool ChartAxisIndicatorStyle::operator==(ChartAxisIndicatorStyle const& obj) const {
+    return m_indicatorColor == obj.m_indicatorColor && m_labelColor == obj.m_labelColor && m_labelFont == obj.m_labelFont && m_labelSize == obj.m_labelSize;
+}
+
+bool ChartAxisIndicatorStyle::operator!=(ChartAxisIndicatorStyle const& obj) const {
+    return !(*this == obj);
+}
+
 ChartAxisIndicatorStyle ChartAxisData::defaultIndicatorStyle() const {
 	return m_defaultStyle;
 }

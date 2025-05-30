@@ -17,7 +17,7 @@ public:
     std::vector<A3D::ChartAxisIndicator> indicators() const;
 signals:
     void addClicked();
-    void editIndicators(std::vector<A3D::ChartAxisIndicator>);
+    void editIndicators(std::vector<A3D::ChartAxisIndicator> const&);
 private slots:
     void onItemDoubleClicked(QModelIndex const&);
     void onAddButtonClicked();

@@ -39,6 +39,8 @@ struct ChartAxisIndicatorStyle {
 	ChartAxisIndicatorStyle(ChartAxisIndicatorStyle&&)                 = default;
 	ChartAxisIndicatorStyle& operator=(ChartAxisIndicatorStyle const&) = default;
 	ChartAxisIndicatorStyle& operator=(ChartAxisIndicatorStyle&&)      = default;
+    bool operator==(ChartAxisIndicatorStyle const&) const;
+    bool operator!=(ChartAxisIndicatorStyle const&) const;
 
 	QColor m_indicatorColor; ///< Color of the indicator marker.
 	QColor m_labelColor;     ///< Color of the indicator label text.
