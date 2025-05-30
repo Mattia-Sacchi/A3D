@@ -12,8 +12,8 @@ public:
 
     void addValues(std::vector<float>);
 
-	std::vector<float> values() const;
-
+    std::vector<float> getValues() const;
+    void setStringPrecision(size_t);
 	void addValue(float);
 private slots:
 

@@ -28,6 +28,7 @@ AddLiIndicatorsDialog::AddLiIndicatorsDialog(QWidget* parent)
     connect(ui->rawEditRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onRawAddButtonClicked);
     connect(ui->countRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onCountButtonClicked);
     connect(ui->stepRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onStepSizeButtonClicked);
+    connect(ui->stringPrecisionSpinBox, &QSpinBox::editingFinished, this, &AddLiIndicatorsDialog::onLabelDigitsChanged);
 }
 
 void AddLiIndicatorsDialog::onRawAddButtonClicked() {
@@ -44,6 +45,11 @@ void AddLiIndicatorsDialog::onCountButtonClicked() {
 
 void AddLiIndicatorsDialog::onStepSizeButtonClicked() {
 	setCountOrStepSizeMode(false);
+}
+
+void AddLiIndicatorsDialog::onLabelDigitsChanged() {
+    int digits = ui->stringPrecisionSpinBox->value();
+    ui->rawEditWidget->setStringPrecision(digits);
 }
 
 void AddLiIndicatorsDialog::setCountOrStepSizeMode(bool mode) {
@@ -114,7 +120,10 @@ std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::indicators() const {
     case AM_RAW_ADD:
         {
             std::vector<float> values;
-            values = ui->rawEditWidget->values();
+            values = ui->rawEditWidget->getValues();
+
+            for(size_t i = 0; i < values.size(); i++)
+                indicators.push_back(A3D::ChartAxisIndicator(type, values.at(i), 0.f, QString::number(values.at(i), 'f', stringPrecision), style));
         }
 
 		break;

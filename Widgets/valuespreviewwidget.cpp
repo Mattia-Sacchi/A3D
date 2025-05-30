@@ -15,41 +15,54 @@ ValuesPreviewWidget::ValuesPreviewWidget(QWidget* parent)
     ui.removeValueButton->setEnabled(false);
 }
 
-std::vector<float> ValuesPreviewWidget::values() const {
-    return {};
+void ValuesPreviewWidget::setStringPrecision(size_t prec) {
+    for(size_t i = 0; i < ui.previewWidget->count(); i++) {
+        QListWidgetItem* item      = ui.previewWidget->item(i);
+        QWidget* tempDoubleSpinBox = ui.previewWidget->itemWidget(item);
+        qobject_cast<QDoubleSpinBox*>(tempDoubleSpinBox)->setDecimals(prec);
+    }
 }
 
-void ValuesPreviewWidget::addValues(std::vector<float> values)
-{
-	for(int i = 0; i < values.size(); i++)
-	{
+std::vector<float> ValuesPreviewWidget::getValues() const {
+    std::vector<float> values;
+
+    for(size_t i = 0; i < ui.previewWidget->count(); i++) {
+        QListWidgetItem* item      = ui.previewWidget->item(i);
+        QWidget* tempDoubleSpinBox = ui.previewWidget->itemWidget(item);
+        values.push_back(qobject_cast<QDoubleSpinBox*>(tempDoubleSpinBox)->value());
+    }
+
+    return values;
+}
+
+void ValuesPreviewWidget::addValues(std::vector<float> values) {
+    for(int i = 0; i < values.size(); i++) {
 		addValue(values.at(i));
 	}
 }
 
-void ValuesPreviewWidget::addValue(float value)
-{
+void ValuesPreviewWidget::addValue(float value) {
 
-	QListWidgetItem* newWidget = new QListWidgetItem(ui.previewWidget);
-
-	QDoubleSpinBox *doubleSpinBox = new QDoubleSpinBox(ui.previewWidget);
+    QListWidgetItem* newWidget    = new QListWidgetItem(ui.previewWidget);
+    QDoubleSpinBox* doubleSpinBox = new QDoubleSpinBox(ui.previewWidget);
 	doubleSpinBox->setValue(value);
 	newWidget->setSizeHint(doubleSpinBox->sizeHint());
 
+    doubleSpinBox->setMaximum(std::numeric_limits<double>::max());
+    doubleSpinBox->setMinimum(std::numeric_limits<double>::lowest());
+
 	ui.previewWidget->setItemWidget(newWidget, doubleSpinBox);
 	ui.previewWidget->insertItem(0, newWidget);
-
 }
 
 void ValuesPreviewWidget::onAddButtonClicked() {
 
-
 	float defaultValue = 0.f;
 
-	if(ui.previewWidget->count()){
-		QListWidgetItem * item  = ui.previewWidget->item(0);
-		QWidget * tempDoubleSpinBox =  ui.previewWidget->itemWidget(item);
-		defaultValue = qobject_cast<QDoubleSpinBox*>(tempDoubleSpinBox)->value() + 1;
+    if(ui.previewWidget->count()) {
+        QListWidgetItem* item      = ui.previewWidget->item(0);
+        QWidget* tempDoubleSpinBox = ui.previewWidget->itemWidget(item);
+        defaultValue               = qobject_cast<QDoubleSpinBox*>(tempDoubleSpinBox)->value() + 1;
 	}
 
 	addValue(defaultValue);
@@ -65,8 +78,6 @@ void ValuesPreviewWidget::onRemoveButtonClicked() {
         delete ui.previewWidget->takeItem(i);
     }
 }
-
-
 
 void ValuesPreviewWidget::onItemSelectionChanged() {
     int count   = ui.previewWidget->selectedItems().count();

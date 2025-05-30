@@ -26,7 +26,6 @@ private slots:
     void onItemSelectionChanged();
 
 private:
-    std::vector<float> values() const;
     std::vector<A3D::ChartAxisIndicator> m_indicators;
 	Ui::IndicatorsPreviewWidget ui;
 };

@@ -34,6 +34,8 @@ private:
 
 	void setCountOrStepSizeMode(bool);
 
+    void onLabelDigitsChanged();
+
 	AddMode m_mode;
 	bool m_countMode;
 

@@ -16,15 +16,6 @@ IndicatorsPreviewWidget::IndicatorsPreviewWidget(QWidget* parent)
     ui.editIndicatorsButton->setEnabled(false);
 }
 
-std::vector<float> IndicatorsPreviewWidget::values() const {
-    std::vector<float> values;
-    values.reserve(m_indicators.size());
-    for(A3D::ChartAxisIndicator const& it: m_indicators) {
-        values.push_back(it.m_value);
-    }
-    return values;
-}
-
 void IndicatorsPreviewWidget::sort() {
     addIndicators(m_indicators);
 }
@@ -38,7 +29,7 @@ void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator>
         if(std::find_if(
                m_indicators.begin(), m_indicators.end(),
                [value](A3D::ChartAxisIndicator const& it) -> bool {
-                   return it.m_value == value;
+                   return std::abs(it.m_value - value) < std::numeric_limits<float>::min();
                }
            )
            != m_indicators.end())
@@ -53,17 +44,34 @@ void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator>
 
     ui.previewWidget->clear();
     for(A3D::ChartAxisIndicator const& it: m_indicators) {
+
         QString text = it.m_label;
 
-        QListWidgetItem* newLabel = new QListWidgetItem;
-        newLabel->setText(text);
+        QListWidgetItem* newLabel = new QListWidgetItem(ui.previewWidget);
+        QFrame* frame             = new QFrame(ui.previewWidget);
+        frame->setLayout(new QVBoxLayout);
+
+        QLabel* label = new QLabel(frame);
+        frame->layout()->addWidget(label);
+
+        if(it.m_type == A3D::CHAXIND_MAJOR_INDICATOR) {
+            frame->setFrameShape(QFrame::Box);
+            frame->setFrameShadow(QFrame::Raised);
+            frame->setLineWidth(2);
+        }
+
+        label->setText(text);
 
         QFont font = it.m_style.m_labelFont;
 
         FontResolutions res = ChartAxisGeneralSettings::getFontResoulution(font.pointSize());
         font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(res));
 
-        newLabel->setFont(font);
+        label->setFont(font);
+
+        newLabel->setSizeHint(frame->sizeHint());
+
+        ui.previewWidget->setItemWidget(newLabel, frame);
         ui.previewWidget->insertItem(ui.previewWidget->count(), newLabel);
     }
 }
