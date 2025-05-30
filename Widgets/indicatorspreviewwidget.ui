@@ -38,9 +38,6 @@
      <property name="itemAlignment">
       <set>Qt::AlignmentFlag::AlignVCenter</set>
      </property>
-     <property name="sortingEnabled">
-      <bool>true</bool>
-     </property>
     </widget>
    </item>
    <item>

@@ -12,34 +12,60 @@ IndicatorsPreviewWidget::IndicatorsPreviewWidget(QWidget* parent)
     connect(ui.addIndicatorsButton, &QPushButton::clicked, this, &IndicatorsPreviewWidget::onAddButtonClicked);
     connect(ui.removeIndicatorsButton, &QPushButton::clicked, this, &IndicatorsPreviewWidget::onRemoveButtonClicked);
     connect(ui.editIndicatorsButton, &QPushButton::clicked, this, &IndicatorsPreviewWidget::onEditIndicartorsClicked);
-
     ui.removeIndicatorsButton->setEnabled(false);
     ui.editIndicatorsButton->setEnabled(false);
 }
 
+std::vector<float> IndicatorsPreviewWidget::values() const {
+    std::vector<float> values;
+    values.reserve(m_indicators.size());
+    for(A3D::ChartAxisIndicator const& it: m_indicators) {
+        values.push_back(it.m_value);
+    }
+    return values;
+}
 
-void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator> indicators)
-{
-	for(A3D::ChartAxisIndicator const& it : indicators)
-	{
-		m_indicators.push_back(it);
+void IndicatorsPreviewWidget::sort() {
+    addIndicators(m_indicators);
+}
 
-		QString text = it.m_label;
+void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator> indicators) {
 
-		QListWidgetItem* newLabel = new QListWidgetItem;
-		newLabel->setText(text);
+    for(A3D::ChartAxisIndicator const& it: indicators) {
 
-		QFont font = it.m_style.m_labelFont;
+        float value = it.m_value;
 
-		FontResolutions res = ChartAxisGeneralSettings::getFontResoulution(font.pointSize());
-		font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(res));
+        if(std::find_if(
+               m_indicators.begin(), m_indicators.end(),
+               [value](A3D::ChartAxisIndicator const& it) -> bool {
+                   return it.m_value == value;
+               }
+           )
+           != m_indicators.end())
+            continue;
 
-		newLabel->setFont(font);
-
-
-		ui.previewWidget->insertItem(m_indicators.size(), newLabel);
+        m_indicators.push_back(it);
 	}
 
+    std::sort(m_indicators.begin(), m_indicators.end(), [](A3D::ChartAxisIndicator const& a, A3D::ChartAxisIndicator const& b) -> bool {
+        return a.m_value < b.m_value;
+    });
+
+    ui.previewWidget->clear();
+    for(A3D::ChartAxisIndicator const& it: m_indicators) {
+        QString text = it.m_label;
+
+        QListWidgetItem* newLabel = new QListWidgetItem;
+        newLabel->setText(text);
+
+        QFont font = it.m_style.m_labelFont;
+
+        FontResolutions res = ChartAxisGeneralSettings::getFontResoulution(font.pointSize());
+        font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(res));
+
+        newLabel->setFont(font);
+        ui.previewWidget->insertItem(ui.previewWidget->count(), newLabel);
+    }
 }
 
 std::vector<A3D::ChartAxisIndicator> IndicatorsPreviewWidget::indicators() const {

@@ -12,6 +12,8 @@ public:
 
     void addIndicators(std::vector<A3D::ChartAxisIndicator>);
 
+    void sort();
+
     std::vector<A3D::ChartAxisIndicator> indicators() const;
 signals:
     void addClicked();
@@ -24,6 +26,7 @@ private slots:
     void onItemSelectionChanged();
 
 private:
+    std::vector<float> values() const;
     std::vector<A3D::ChartAxisIndicator> m_indicators;
 	Ui::IndicatorsPreviewWidget ui;
 };

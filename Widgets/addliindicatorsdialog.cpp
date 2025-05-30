@@ -14,13 +14,13 @@ AddLiIndicatorsDialog::AddLiIndicatorsDialog(QWidget* parent)
     ui->stepSizeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
 	ui->stepSizeDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
-	ui->stepSizeDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
+    ui->stepSizeDoubleSpinBox->setMinimum(std::numeric_limits<double>::lowest());
 
 	ui->fromDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
-	ui->fromDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
+    ui->fromDoubleSpinBox->setMinimum(std::numeric_limits<double>::lowest());
 
 	ui->toDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
-	ui->toDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
+    ui->toDoubleSpinBox->setMinimum(std::numeric_limits<double>::lowest());
 
 	ui->countSpinBox->setMaximum(A3D::MaxIndicators);
 
@@ -69,7 +69,6 @@ void AddLiIndicatorsDialog::setMode(AddMode mode) {
         break;
     }
 }
-
 
 // TODO:  Normalize value when they arrive
 std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::indicators() const {
