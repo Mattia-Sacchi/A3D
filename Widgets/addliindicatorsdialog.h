@@ -26,6 +26,8 @@ public:
 private:
 	void setMode(AddMode);
 
+    std::vector<A3D::ChartAxisIndicator> getIndicatorFromCount(size_t) const;
+
 	void onRawAddButtonClicked();
 	void onByStepButtonClicked();
 

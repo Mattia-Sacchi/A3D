@@ -18,6 +18,15 @@ ChartAxisGeneralSettings::ChartAxisGeneralSettings(QWidget* parent)
     ui.scaleValueLabel->setMinimumWidth(ui.scaleValueLabel->fontMetrics().boundingRect("1,000").width());
     ui.scaleValueLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
+    QPalette palette;
+    palette = ui.indicatorColorWidget->palette();
+    palette.setColor(ui.indicatorColorWidget->backgroundRole(), Qt::white);
+    ui.indicatorColorWidget->setPalette(palette);
+
+    palette = ui.labelColorExampleLabel->palette();
+    palette.setColor(QPalette::WindowText, Qt::white);
+    ui.labelColorExampleLabel->setPalette(palette);
+
     connect(ui.changeIndicatorColorButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onChangeIndicatorColorButtonClicked);
     connect(ui.changeLabelColorButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onChangeLabelColorButtonClicked);
     connect(ui.changeFontButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onChangeFontButtonClicked);
@@ -36,7 +45,7 @@ A3D::ChartAxisIndicatorStyle ChartAxisGeneralSettings::style() const {
 
     style.m_indicatorColor = ui.indicatorColorWidget->palette().color(ui.indicatorColorWidget->backgroundRole());
     style.m_labelColor     = ui.labelColorExampleLabel->palette().color(QPalette::WindowText);
-    QFont font             = ui.labelColorExampleLabel->font();
+    QFont font             = ui.labelFontExampleLabel->font();
     font.setPointSize(FontSizes[m_resolution]);
     style.m_labelFont = font;
     style.m_labelSize = ui.scaleSlider->value() / 100.f;

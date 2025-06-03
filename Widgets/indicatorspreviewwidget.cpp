@@ -1,5 +1,44 @@
 #include "indicatorspreviewwidget.h"
 #include "chartaxisgeneralsettings.h"
+#include <QPainter>
+
+class ColoredFrame : public QFrame {
+public:
+    explicit ColoredFrame(QWidget* parent = nullptr, QColor borderColor = Qt::black, size_t borderSize = 2)
+        : QFrame(parent),
+          m_borderColor(borderColor),
+          m_borderSize(borderSize),
+          m_label(nullptr) {
+        setLayout(new QVBoxLayout);
+        layout()->setSpacing(0);
+        size_t px = borderSize * 2;
+        layout()->setContentsMargins(px, px, px, px);
+    }
+
+    void setLabel(QLabel* label) {
+        if(m_label) {
+            layout()->removeWidget(m_label);
+            delete m_label;
+        }
+        layout()->addWidget(m_label = label);
+    }
+
+protected:
+    void paintEvent(QPaintEvent* event) override {
+        QFrame::paintEvent(event);
+
+        // Disegna il bordo
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setPen(QPen(m_borderColor, m_borderSize)); // Spessore 2px
+        painter.drawRect(rect().adjusted(1, 1, -2, -2));
+    }
+
+private:
+    QColor m_borderColor;
+    size_t m_borderSize;
+    QLabel* m_label;
+};
 
 IndicatorsPreviewWidget::IndicatorsPreviewWidget(QWidget* parent)
     : QWidget(parent) {
@@ -13,6 +52,8 @@ IndicatorsPreviewWidget::IndicatorsPreviewWidget(QWidget* parent)
     connect(ui.removeIndicatorsButton, &QPushButton::clicked, this, &IndicatorsPreviewWidget::onRemoveButtonClicked);
     connect(ui.editIndicatorsButton, &QPushButton::clicked, this, &IndicatorsPreviewWidget::onEditIndicartorsClicked);
     ui.removeIndicatorsButton->setEnabled(false);
+
+    ui.previewWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui.editIndicatorsButton->setEnabled(false);
 }
 
@@ -43,37 +84,46 @@ void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator>
     });
 
     ui.previewWidget->clear();
+
     for(A3D::ChartAxisIndicator const& it: m_indicators) {
 
         QString text = it.m_label;
 
         QListWidgetItem* newLabel = new QListWidgetItem(ui.previewWidget);
-        QFrame* frame             = new QFrame(ui.previewWidget);
-        frame->setLayout(new QVBoxLayout);
+        size_t width              = 2;
+        if(it.m_type == A3D::CHAXIND_MAJOR_INDICATOR)
+            width = 4;
+
+        ColoredFrame* frame = new ColoredFrame(ui.previewWidget, it.m_style.m_indicatorColor, width);
 
         QLabel* label = new QLabel(frame);
-        frame->layout()->addWidget(label);
-
-        if(it.m_type == A3D::CHAXIND_MAJOR_INDICATOR) {
-            frame->setFrameShape(QFrame::Box);
-            frame->setFrameShadow(QFrame::Raised);
-            frame->setLineWidth(2);
-        }
 
         label->setText(text);
 
-        QFont font = it.m_style.m_labelFont;
+        QPalette palette = label->palette();
+        label->setForegroundRole(QPalette::WindowText);
+        palette.setColor(QPalette::WindowText, it.m_style.m_labelColor);
+        label->setPalette(palette);
 
+        QFont font          = it.m_style.m_labelFont;
         FontResolutions res = ChartAxisGeneralSettings::getFontResoulution(font.pointSize());
         font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(res));
-
         label->setFont(font);
 
+        frame->setLabel(label);
+
+        // Aumento artificialmente l'altezza per starci dentro
         newLabel->setSizeHint(frame->sizeHint());
 
+        size_t height = newLabel->sizeHint().height();
+        if(height + 20 >= ui.previewWidget->minimumHeight())
+            ui.previewWidget->setMinimumHeight(height + 20);
+
         ui.previewWidget->setItemWidget(newLabel, frame);
-        ui.previewWidget->insertItem(ui.previewWidget->count(), newLabel);
+        ui.previewWidget->addItem(newLabel);
     }
+
+    ui.previewWidget->viewport()->update();
 }
 
 std::vector<A3D::ChartAxisIndicator> IndicatorsPreviewWidget::indicators() const {

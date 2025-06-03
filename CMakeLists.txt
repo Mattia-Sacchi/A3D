@@ -58,6 +58,7 @@ set(SOURCES
     A3D/chart.cpp
     A3D/view.cpp
     A3D/charteditorcontroller.cpp
+    Widgets/addliindicatorsdialog.cpp
     Widgets/calibrationwidget.cpp
     Widgets/chartaxissettings.cpp
     Widgets/chartaxisgeneralsettings.cpp
@@ -123,6 +124,7 @@ set(HEADERS
     A3D/view.h
     A3D/chart.h
     A3D/charteditorcontroller.h
+    Widgets/addliindicatorsdialog.h
     Widgets/calibrationwidget.h
     Widgets/chartaxissettings.h
     Widgets/chartaxisgeneralsettings.h

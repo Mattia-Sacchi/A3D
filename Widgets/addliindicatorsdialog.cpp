@@ -80,11 +80,29 @@ void AddLiIndicatorsDialog::setStyle(A3D::ChartAxisIndicatorStyle style) {
     ui->generalSettings->setStyle(style);
 }
 
+std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::getIndicatorFromCount(size_t count) const {
+    std::vector<A3D::ChartAxisIndicator> indicators;
+    A3D::ChartAxisIndicatorType type   = ui->majorRadioButton->isChecked() ? A3D::CHAXIND_MAJOR_INDICATOR : A3D::CHAXIND_MINOR_INDICATOR;
+    int const stringPrecision          = ui->stringPrecisionSpinBox->value();
+    A3D::ChartAxisIndicatorStyle style = ui->generalSettings->style();
+
+    float const from = ui->fromDoubleSpinBox->value();
+    float const to   = ui->toDoubleSpinBox->value();
+
+    float fInverseIndicatorCount = 1.f / static_cast<float>(count - 1);
+    for(size_t i = 0; i < count; ++i) {
+        float const val = from + ((to - from) * fInverseIndicatorCount * static_cast<float>(i));
+        indicators.push_back(A3D::ChartAxisIndicator(type, val, 0.f, QString::number(val, 'f', stringPrecision), style));
+    }
+
+    return indicators;
+}
+
 // TODO:  Normalize value when they arrive
 std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::indicators() const {
 	std::vector<A3D::ChartAxisIndicator> indicators;
     A3D::ChartAxisIndicatorType type   = ui->majorRadioButton->isChecked() ? A3D::CHAXIND_MAJOR_INDICATOR : A3D::CHAXIND_MINOR_INDICATOR;
-    int stringPrecision                = ui->stringPrecisionSpinBox->value();
+    int const stringPrecision          = ui->stringPrecisionSpinBox->value();
 	A3D::ChartAxisIndicatorStyle style = ui->generalSettings->style();
 
     switch(m_mode) {
@@ -92,33 +110,30 @@ std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::indicators() const {
 	case AM_BY_STEP:
 		{
 			// Copied from A3D/chart.h
-			float from = ui->fromDoubleSpinBox->value();
-            float to   = ui->toDoubleSpinBox->value();
+            float const from = ui->fromDoubleSpinBox->value();
+            float const to   = ui->toDoubleSpinBox->value();
             if(m_countMode) {
+                indicators = getIndicatorFromCount(ui->countSpinBox->value());
+                return indicators;
+            }
 
-				size_t count = ui->countSpinBox->value();
+            float stepSize              = ui->stepSizeDoubleSpinBox->value();
+            size_t const indicatorCount = static_cast<size_t>((to - from) / stepSize);
 
-				float fInverseIndicatorCount = 1.f / static_cast<float>(count - 1);
-				for(size_t i = 0; i < count; ++i) {
-					float const val = from + ((to - from) * fInverseIndicatorCount * static_cast<float>(i));
-					indicators.push_back(A3D::ChartAxisIndicator(type, val, 0.f, QString::number(val, 'f', stringPrecision), style));
-				}
-			}
-            else {
+            if(indicatorCount > A3D::MaxIndicators) {
+                indicators = getIndicatorFromCount(A3D::MaxIndicators);
+                return indicators;
+            }
 
-                float stepSize              = ui->stepSizeDoubleSpinBox->value();
-				size_t const indicatorCount = static_cast<size_t>((to - from) / stepSize);
+            indicators.reserve(indicatorCount + 1);
 
-                indicators.reserve(indicatorCount + 1);
-
-				for(size_t i = 0; i < indicatorCount; ++i) {
-					float const val = from + stepSize * static_cast<float>(i);
-                    indicators.push_back(A3D::ChartAxisIndicator(type, val, 0.f, QString::number(val, 'f', stringPrecision), style));
-				}
-
-				float const val = to;
+            for(size_t i = 0; i < indicatorCount; ++i) {
+                float const val = from + stepSize * static_cast<float>(i);
                 indicators.push_back(A3D::ChartAxisIndicator(type, val, 0.f, QString::number(val, 'f', stringPrecision), style));
-			}
+            }
+
+            float const val = to;
+            indicators.push_back(A3D::ChartAxisIndicator(type, val, 0.f, QString::number(val, 'f', stringPrecision), style));
 		}
 
     case AM_RAW_ADD:
