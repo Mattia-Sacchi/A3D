@@ -1,44 +1,7 @@
 #include "indicatorspreviewwidget.h"
 #include "chartaxisgeneralsettings.h"
 #include <QPainter>
-
-class ColoredFrame : public QFrame {
-public:
-    explicit ColoredFrame(QWidget* parent = nullptr, QColor borderColor = Qt::black, size_t borderSize = 2)
-        : QFrame(parent),
-          m_borderColor(borderColor),
-          m_borderSize(borderSize),
-          m_label(nullptr) {
-        setLayout(new QVBoxLayout);
-        layout()->setSpacing(0);
-        size_t px = borderSize * 2;
-        layout()->setContentsMargins(px, px, px, px);
-    }
-
-    void setLabel(QLabel* label) {
-        if(m_label) {
-            layout()->removeWidget(m_label);
-            delete m_label;
-        }
-        layout()->addWidget(m_label = label);
-    }
-
-protected:
-    void paintEvent(QPaintEvent* event) override {
-        QFrame::paintEvent(event);
-
-        // Disegna il bordo
-        QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setPen(QPen(m_borderColor, m_borderSize)); // Spessore 2px
-        painter.drawRect(rect().adjusted(1, 1, -2, -2));
-    }
-
-private:
-    QColor m_borderColor;
-    size_t m_borderSize;
-    QLabel* m_label;
-};
+#include "customwidgets.h"
 
 IndicatorsPreviewWidget::IndicatorsPreviewWidget(QWidget* parent)
     : QWidget(parent) {
@@ -90,9 +53,9 @@ void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator>
         QString text = it.m_label;
 
         QListWidgetItem* newLabel = new QListWidgetItem(ui.previewWidget);
-        size_t width              = 2;
+        size_t width              = MinorWidth;
         if(it.m_type == A3D::CHAXIND_MAJOR_INDICATOR)
-            width = 4;
+            width = MajorWidth;
 
         ColoredFrame* frame = new ColoredFrame(ui.previewWidget, it.m_style.m_indicatorColor, width);
 

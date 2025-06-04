@@ -6,6 +6,17 @@
 #include "addliindicatorsdialog.h"
 #include "editliindicatorsdialog.h"
 
+struct IndicatorInfo {
+    A3D::ChartAxisIndicatorStyle m_style;
+    A3D::ChartAxisIndicatorType m_type;
+    bool operator==(IndicatorInfo const& i) const { return m_style == i.m_style && m_type == i.m_type; }
+    bool operator!=(IndicatorInfo const& i) const { return !(*this == i); }
+    IndicatorInfo(A3D::ChartAxisIndicator const& indicator) {
+        m_style = indicator.m_style;
+        m_type  = indicator.m_type;
+    }
+};
+
 class ChartAxisSettings : public QWidget {
     Q_OBJECT
 

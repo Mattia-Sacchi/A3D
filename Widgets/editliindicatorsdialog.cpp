@@ -3,10 +3,18 @@
 
 EditLiIndicatorsDialog::EditLiIndicatorsDialog(QWidget* parent)
 	: QDialog(parent),
-      ui(new Ui::EditLiIndicatorsDialog) {
+      ui(new Ui::EditLiIndicatorsDialog),
+      m_styleNeeded(false) {
     ui->setupUi(this);
 
     connect(ui->stringPrecisionSpinBox, &QSpinBox::editingFinished, this, &EditLiIndicatorsDialog::onLabelDigitsChanged);
+    setChartIndicatorsType(A3D::CHAXIND_MAJOR_INDICATOR);
+}
+
+void EditLiIndicatorsDialog::setStyleNeeded(bool styleNeeded) {
+    ui->generalSettings->setHidden(!styleNeeded);
+    ui->indicatorTypeWidget->setHidden(!styleNeeded);
+    m_styleNeeded = styleNeeded;
 }
 
 void EditLiIndicatorsDialog::onLabelDigitsChanged() {
@@ -14,13 +22,20 @@ void EditLiIndicatorsDialog::onLabelDigitsChanged() {
     ui->rawEditWidget->setStringPrecision(digits);
 }
 
-void EditLiIndicatorsDialog::editIndicators(std::vector<A3D::ChartAxisIndicator> list) {
+void EditLiIndicatorsDialog::editIndicators(std::vector<A3D::ChartAxisIndicator> const& list) {
     for(size_t i = 0; i < list.size(); ++i)
         ui->rawEditWidget->addValue(list.at(i).m_value);
 }
 
+void EditLiIndicatorsDialog::setChartIndicatorsType(A3D::ChartAxisIndicatorType type) {
+    bool isMajor = type == A3D::CHAXIND_MAJOR_INDICATOR;
+    ui->majorRadioButton->setChecked(isMajor);
+    ui->minorRadioButton->setChecked(!isMajor);
+}
+
 void EditLiIndicatorsDialog::setStyle(A3D::ChartAxisIndicatorStyle style) {
     ui->generalSettings->setStyle(style);
+    m_styleNeeded = true;
 }
 
 // TODO:  Normalize value when they arrive

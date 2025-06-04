@@ -2,6 +2,8 @@
 #include <QColorDialog>
 #include <QFontDialog>
 #include <QMessageBox>
+#include "incompatibilitydialog.h"
+
 ChartAxisSettings::ChartAxisSettings(QWidget* parent)
     : QWidget(parent),
       m_type(A3D::CHAXIS_LINEAR_INTERPOLATED) {
@@ -36,26 +38,15 @@ void ChartAxisSettings::onLinearEditDialogAccepted() {
     ui.LinearPreviewWidget->indicatorPreviewWidget()->addIndicators(indicators);
 }
 
-struct Info {
-    A3D::ChartAxisIndicatorStyle m_style;
-    A3D::ChartAxisIndicatorType m_type;
-    bool operator==(Info const& i) const { return m_style == i.m_style && m_type == i.m_type; }
-    bool operator!=(Info const& i) const { return !(*this == i); }
-    Info(A3D::ChartAxisIndicator const& indicator) {
-        m_style = indicator.m_style;
-        m_type  = indicator.m_type;
-    }
-};
-
 void ChartAxisSettings::onLinearEditDialogClicked(std::vector<A3D::ChartAxisIndicator> const& indicators) {
-    std::vector<Info> infos;
+    std::vector<IndicatorInfo> infos;
     infos.clear();
 
     infos.emplace_back(indicators[0]);
 
     for(size_t i = 0; i < indicators.size() - 1; i++) {
-        Info current = Info(indicators[i]);
-        Info next    = Info(indicators[i + 1]);
+        IndicatorInfo current = IndicatorInfo(indicators[i]);
+        IndicatorInfo next    = IndicatorInfo(indicators[i + 1]);
 
         if(current != next && std::find(infos.begin(), infos.end(), next) == infos.end())
             infos.push_back(next);
@@ -69,51 +60,26 @@ void ChartAxisSettings::onLinearEditDialogClicked(std::vector<A3D::ChartAxisIndi
         return;
     }
 
-    QMessageBox msgBox;
-    msgBox.setWindowTitle("Confirmation");
-    msgBox.setText("The selected indicator styles are incompatible. Please choose one from the following options:");
+    // Insert here dialog
+    IncompatibilityDialog dialog(this, infos);
+    dialog.exec();
 
-    msgBox.setStandardButtons(QMessageBox::Discard);
-    msgBox.setDefaultButton(QMessageBox::Discard);
-
-    QMap<QPushButton*, Info*> buttons;
-
-    for(size_t i = 0; i < count; i++) {
-        Info& info  = infos[i];
-        QString pre = info.m_type == A3D::CHAXIND_MINOR_INDICATOR ? "Minor" : "Major";
-        pre += ": ";
-        QString buttonName  = pre + info.m_style.m_labelFont.family();
-        QPushButton* btn    = msgBox.addButton(buttonName, QMessageBox::AcceptRole);
-        QFont font          = info.m_style.m_labelFont;
-        FontResolutions res = ChartAxisGeneralSettings::getFontResoulution(font.pointSize());
-        font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(res));
-        btn->setFont(font);
-
-        QPalette palette = btn->palette();
-        palette.setColor(QPalette::WindowText, info.m_style.m_labelColor);
-        btn->setPalette(palette);
-
-        buttons[btn] = &info;
-    }
-
-    msgBox.exec();
-
-    std::vector<A3D::ChartAxisIndicator> tempIndicators = indicators;
-
-    QPushButton* btn = qobject_cast<QPushButton*>(msgBox.clickedButton());
-    if(buttons.contains(btn)) {
-        Info* i = buttons[btn];
-        for(A3D::ChartAxisIndicator& it: tempIndicators) {
-            it.m_type  = i->m_type;
-            it.m_style = i->m_style;
+    switch(dialog.getUserChoice()) {
+    case IncompatibilityDialog::UC_CHOOSE:
+        {
+            IndicatorInfo info = dialog.getInfo();
+            m_linearEditDialog.setStyle(info.m_style);
+            m_linearEditDialog.setChartIndicatorsType(info.m_type);
         }
-    }
-    else {
-        // Total Roll back
-        ui.LinearPreviewWidget->indicatorPreviewWidget()->addIndicators(tempIndicators);
+        break;
+    case IncompatibilityDialog::UC_CONTINUE:
+        break;
+    default:
+    case IncompatibilityDialog::UC_DISCARD:
+        // Total rollback
+        ui.LinearPreviewWidget->indicatorPreviewWidget()->addIndicators(indicators);
         return;
     }
-
     m_linearEditDialog.editIndicators(indicators);
     m_linearEditDialog.open();
 }

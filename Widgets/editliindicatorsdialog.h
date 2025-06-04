@@ -17,11 +17,15 @@ public:
 
 	std::vector<A3D::ChartAxisIndicator> indicators() const;
     void setStyle(A3D::ChartAxisIndicatorStyle style);
+    void setChartIndicatorsType(A3D::ChartAxisIndicatorType type);
 
-    void editIndicators(std::vector<A3D::ChartAxisIndicator>);
+    void editIndicators(std::vector<A3D::ChartAxisIndicator> const& indicators);
 
 private:
     void onLabelDigitsChanged();
+    void setStyleNeeded(bool);
+    bool m_styleNeeded;
+    std::vector<A3D::ChartAxisIndicator> m_indicators;
 
     Ui::EditLiIndicatorsDialog* ui;
 };

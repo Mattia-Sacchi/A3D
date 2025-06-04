@@ -69,6 +69,7 @@ set(SOURCES
     Widgets/linearindicatorssettingswidget.cpp
     Widgets/addliindicatorsdialog.cpp
     Widgets/editliindicatorsdialog.cpp
+    Widgets/incompatibilitydialog.cpp
 	keyeventmanager.cpp
 )
 
@@ -134,6 +135,8 @@ set(HEADERS
     Widgets/valuespreviewwidget.h
     Widgets/linearindicatorssettingswidget.h
     Widgets/editliindicatorsdialog.h
+    Widgets/incompatibilitydialog.h
+    Widgets/customwidgets.h
     Dependencies/stb/stb_image.h
     keyeventmanager.h
 
@@ -154,6 +157,7 @@ set(UI_FILES
     Widgets/addliindicatorsdialog.ui
     Widgets/editliindicatorsdialog.ui
     Widgets/valuespreviewwidget.ui
+    Widgets/incompatibilitydialog.ui
 )
  
 qt_add_big_resources(
@@ -168,9 +172,6 @@ qt_add_executable(${PROJECT_NAME}
     ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
     ${RESOURCES}
-
-
-
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Widgets)
