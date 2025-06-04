@@ -37,6 +37,8 @@ private slots:
 
     void onLinearEditDialogClicked(std::vector<A3D::ChartAxisIndicator> const&);
 
+    void onEnumeratedAddClicked();
+
 private:
     void linearEditFinished();
     void setChartAxisType(A3D::ChartAxisType);

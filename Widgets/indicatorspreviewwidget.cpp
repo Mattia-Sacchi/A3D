@@ -85,8 +85,6 @@ void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator>
         ui.previewWidget->setItemWidget(newLabel, frame);
         ui.previewWidget->addItem(newLabel);
     }
-
-    ui.previewWidget->viewport()->update();
 }
 
 std::vector<A3D::ChartAxisIndicator> IndicatorsPreviewWidget::indicators() const {

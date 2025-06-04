@@ -18,10 +18,11 @@ ChartAxisSettings::ChartAxisSettings(QWidget* parent)
     connect(&m_linearAddDialog, &QDialog::accepted, this, &ChartAxisSettings::onLinearAddDialogAccepted);
     connect(&m_linearEditDialog, &QDialog::rejected, this, &ChartAxisSettings::onLinearEditDialogRejected);
     connect(&m_linearEditDialog, &QDialog::accepted, this, &ChartAxisSettings::onLinearEditDialogAccepted);
+    connect(ui.EnumeratedPreviewWidget, &ListIndicatorsPreviewWidget::addClicked, this, &ChartAxisSettings::onEnumeratedAddClicked);
 }
 
 void ChartAxisSettings::setChartAxisType(A3D::ChartAxisType type) {
-    switch(type) {
+    switch(m_type = type) {
     case A3D::CHAXIS_ENUMERATED:
         ui.EnumeratedPreviewWidget->show();
         ui.LinearPreviewWidget->hide();
@@ -93,6 +94,15 @@ void ChartAxisSettings::onLinearEditDialogClicked(std::vector<A3D::ChartAxisIndi
     }
     m_linearEditDialog.editIndicators(indicators);
     m_linearEditDialog.open();
+}
+
+void ChartAxisSettings::onEnumeratedAddClicked() {
+    A3D::ChartAxisIndicator indicator;
+    indicator.m_type  = A3D::CHAXIND_MAJOR_INDICATOR;
+    indicator.m_label = "Lorem Ipsum";
+    indicator.m_style = ui.chartAxisGeneralSettings->style();
+
+    ui.EnumeratedPreviewWidget->addIndicator(indicator);
 }
 
 void ChartAxisSettings::onLinearAddDialogAccepted() {

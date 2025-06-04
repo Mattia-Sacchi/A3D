@@ -5,6 +5,8 @@
 #include <QLabel>
 #include <QPainter>
 #include <QLayout>
+#include <QFormLayout>
+#include "chartaxisgeneralsettings.h"
 
 enum {
     MajorWidth = 4,
@@ -53,6 +55,61 @@ protected:
 private:
     QColor m_borderColor;
     size_t m_borderSize;
+};
+
+class CustomFrame : public QFrame {
+    Q_OBJECT
+public:
+    inline explicit CustomFrame(QWidget* parent = nullptr, QColor borderColor = Qt::black, size_t borderSize = 2)
+        : QFrame(parent),
+          m_borderColor(borderColor),
+          m_borderSize(borderSize) {
+
+        QFont font;
+        font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(FR_High));
+        m_numberLabel.setFont(font);
+        QFormLayout* lay = new QFormLayout;
+        setLayout(lay);
+        layout()->setSpacing(0);
+        size_t px = borderSize * 2;
+        layout()->setContentsMargins(px, px, px, px);
+        lay->addRow(&m_numberLabel, &m_label);
+    }
+
+    inline void setBorder(QColor color, size_t borderSize) {
+        size_t px = borderSize * 2;
+        layout()->setContentsMargins(px, px, px, px);
+        m_borderColor = color;
+        m_borderSize  = borderSize;
+        update();
+    }
+
+    inline void setText(QString text) { m_label.setText(text); }
+    inline void setNumber(size_t n) { m_numberLabel.setText(QString::number(n, 10).append(":  ")); }
+
+    inline QLabel& label() { return m_label; }
+
+    inline void setValues(QString text, size_t n) {
+        setText(text);
+        setNumber(n);
+    }
+
+protected:
+    void paintEvent(QPaintEvent* event) override {
+        QFrame::paintEvent(event);
+
+        // Disegna il bordo
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setPen(QPen(m_borderColor, m_borderSize)); // Spessore 2px
+        painter.drawRect(rect().adjusted(1, 1, -2, -2));
+    }
+
+private:
+    QColor m_borderColor;
+    size_t m_borderSize;
+    QLabel m_numberLabel;
+    QLabel m_label;
 };
 
 class ColoredFrame : public QFrame {

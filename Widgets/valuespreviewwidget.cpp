@@ -56,7 +56,7 @@ void ValuesPreviewWidget::addValue(float value) {
     newWidget->setSizeHint(doubleSpinBox->sizeHint());
 
 	ui.previewWidget->setItemWidget(newWidget, doubleSpinBox);
-	ui.previewWidget->insertItem(0, newWidget);
+    ui.previewWidget->addItem(newWidget);
 }
 
 void ValuesPreviewWidget::onAddButtonClicked() {

@@ -65,11 +65,13 @@ set(SOURCES
     Widgets/settingsdialog.cpp
     Widgets/chartwidget.cpp
     Widgets/indicatorspreviewwidget.cpp
+    Widgets/listindicatorspreviewwidget.cpp
     Widgets/valuespreviewwidget.cpp
     Widgets/linearindicatorssettingswidget.cpp
     Widgets/addliindicatorsdialog.cpp
     Widgets/editliindicatorsdialog.cpp
     Widgets/incompatibilitydialog.cpp
+    Widgets/editenumdialog.cpp
 	keyeventmanager.cpp
 )
 
@@ -132,10 +134,12 @@ set(HEADERS
     Widgets/settingsdialog.h
     Widgets/chartwidget.h
     Widgets/indicatorspreviewwidget.h
+    Widgets/listindicatorspreviewwidget.h
     Widgets/valuespreviewwidget.h
     Widgets/linearindicatorssettingswidget.h
     Widgets/editliindicatorsdialog.h
     Widgets/incompatibilitydialog.h
+    Widgets/editenumdialog.h
     Widgets/customwidgets.h
     Dependencies/stb/stb_image.h
     keyeventmanager.h
@@ -153,9 +157,11 @@ set(UI_FILES
     Widgets/chartaxisgeneralsettings.ui
     Widgets/settingsdialog.ui
     Widgets/indicatorspreviewwidget.ui
+    Widgets/listindicatorspreviewwidget.ui
     Widgets/linearindicatorssettingswidget.ui
     Widgets/addliindicatorsdialog.ui
     Widgets/editliindicatorsdialog.ui
+    Widgets/editenumdialog.ui
     Widgets/valuespreviewwidget.ui
     Widgets/incompatibilitydialog.ui
 )
@@ -172,6 +178,7 @@ qt_add_executable(${PROJECT_NAME}
     ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
     ${RESOURCES}
+
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Widgets)

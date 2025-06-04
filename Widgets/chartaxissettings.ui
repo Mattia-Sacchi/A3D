@@ -62,17 +62,11 @@
     <widget class="LinearIndicatorsSettingsWidget" name="LinearPreviewWidget" native="true"/>
    </item>
    <item>
-    <widget class="IndicatorsPreviewWidget" name="EnumeratedPreviewWidget" native="true"/>
+    <widget class="ListIndicatorsPreviewWidget" name="EnumeratedPreviewWidget" native="true"/>
    </item>
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>IndicatorsPreviewWidget</class>
-   <extends>QWidget</extends>
-   <header>indicatorspreviewwidget.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>ChartAxisGeneralSettings</class>
    <extends>QWidget</extends>
@@ -83,6 +77,12 @@
    <class>LinearIndicatorsSettingsWidget</class>
    <extends>QWidget</extends>
    <header>linearindicatorssettingswidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ListIndicatorsPreviewWidget</class>
+   <extends>QWidget</extends>
+   <header>listindicatorspreviewwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
