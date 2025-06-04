@@ -16,6 +16,7 @@ ChartAxisSettings::ChartAxisSettings(QWidget* parent)
     connect(ui.LinearPreviewWidget->indicatorPreviewWidget(), &IndicatorsPreviewWidget::addClicked, this, &ChartAxisSettings::onLinearAddClicked);
     connect(ui.LinearPreviewWidget->indicatorPreviewWidget(), &IndicatorsPreviewWidget::editIndicators, this, &ChartAxisSettings::onLinearEditDialogClicked);
     connect(&m_linearAddDialog, &QDialog::accepted, this, &ChartAxisSettings::onLinearAddDialogAccepted);
+    connect(&m_linearEditDialog, &QDialog::rejected, this, &ChartAxisSettings::onLinearEditDialogRejected);
     connect(&m_linearEditDialog, &QDialog::accepted, this, &ChartAxisSettings::onLinearEditDialogAccepted);
 }
 
@@ -33,14 +34,24 @@ void ChartAxisSettings::setChartAxisType(A3D::ChartAxisType type) {
     }
 }
 
-void ChartAxisSettings::onLinearEditDialogAccepted() {
+void ChartAxisSettings::linearEditFinished() {
     std::vector<A3D::ChartAxisIndicator> indicators = m_linearEditDialog.indicators();
     ui.LinearPreviewWidget->indicatorPreviewWidget()->addIndicators(indicators);
+}
+
+void ChartAxisSettings::onLinearEditDialogAccepted() {
+    linearEditFinished();
+}
+
+void ChartAxisSettings::onLinearEditDialogRejected() {
+    linearEditFinished();
 }
 
 void ChartAxisSettings::onLinearEditDialogClicked(std::vector<A3D::ChartAxisIndicator> const& indicators) {
     std::vector<IndicatorInfo> infos;
     infos.clear();
+
+    m_linearEditDialog.reset();
 
     infos.emplace_back(indicators[0]);
 

@@ -41,15 +41,19 @@ void ValuesPreviewWidget::addValues(std::vector<float> values) {
 	}
 }
 
+void ValuesPreviewWidget::clear() {
+    ui.previewWidget->clear();
+}
+
 void ValuesPreviewWidget::addValue(float value) {
 
     QListWidgetItem* newWidget    = new QListWidgetItem(ui.previewWidget);
     QDoubleSpinBox* doubleSpinBox = new QDoubleSpinBox(ui.previewWidget);
-	doubleSpinBox->setValue(value);
-	newWidget->setSizeHint(doubleSpinBox->sizeHint());
 
     doubleSpinBox->setMaximum(std::numeric_limits<double>::max());
     doubleSpinBox->setMinimum(std::numeric_limits<double>::lowest());
+    doubleSpinBox->setValue(value);
+    newWidget->setSizeHint(doubleSpinBox->sizeHint());
 
 	ui.previewWidget->setItemWidget(newWidget, doubleSpinBox);
 	ui.previewWidget->insertItem(0, newWidget);

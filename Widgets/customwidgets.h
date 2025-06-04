@@ -19,7 +19,7 @@ public:
           m_borderColor(borderColor),
           m_borderSize(borderSize) {
 
-        size_t px = borderSize * 2;
+        size_t px = borderSize * 4;
         setContentsMargins(px, px, px, px);
     }
 
@@ -35,6 +35,11 @@ protected:
         // Disegna prima il pulsante standard
         QStyleOptionButton option;
         initStyleOption(&option);
+
+        // Apply padding by adjusting the rect
+        //int padding = m_borderSize * 2; // or customize left/right/top/bottom individually
+        //option.rect = option.rect.adjusted(padding, padding, -padding, -padding);
+
         QPainter painter(this);
         style()->drawControl(QStyle::CE_PushButton, &option, &painter, this);
 

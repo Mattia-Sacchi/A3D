@@ -38,8 +38,7 @@ IncompatibilityDialog::IncompatibilityDialog(QWidget* parent, std::vector<Indica
             m_info   = info;
             accept();
         });
-
-        ui->buttonsLayout->addWidget(btn);
+        ui->scrollAreaWidgetContents->layout()->addWidget(btn);
     }
 }
 

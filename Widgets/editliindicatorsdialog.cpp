@@ -3,12 +3,12 @@
 
 EditLiIndicatorsDialog::EditLiIndicatorsDialog(QWidget* parent)
 	: QDialog(parent),
-      ui(new Ui::EditLiIndicatorsDialog),
-      m_styleNeeded(false) {
+      ui(new Ui::EditLiIndicatorsDialog) {
     ui->setupUi(this);
 
     connect(ui->stringPrecisionSpinBox, &QSpinBox::editingFinished, this, &EditLiIndicatorsDialog::onLabelDigitsChanged);
-    setChartIndicatorsType(A3D::CHAXIND_MAJOR_INDICATOR);
+    reset();
+    ui->rawEditWidget->setEditingMode(true);
 }
 
 void EditLiIndicatorsDialog::setStyleNeeded(bool styleNeeded) {
@@ -22,9 +22,10 @@ void EditLiIndicatorsDialog::onLabelDigitsChanged() {
     ui->rawEditWidget->setStringPrecision(digits);
 }
 
-void EditLiIndicatorsDialog::editIndicators(std::vector<A3D::ChartAxisIndicator> const& list) {
-    for(size_t i = 0; i < list.size(); ++i)
-        ui->rawEditWidget->addValue(list.at(i).m_value);
+void EditLiIndicatorsDialog::editIndicators(std::vector<A3D::ChartAxisIndicator> const& indicators) {
+    for(size_t i = 0; i < indicators.size(); ++i)
+        ui->rawEditWidget->addValue(indicators.at(i).m_value);
+    m_indicators = indicators;
 }
 
 void EditLiIndicatorsDialog::setChartIndicatorsType(A3D::ChartAxisIndicatorType type) {
@@ -35,23 +36,36 @@ void EditLiIndicatorsDialog::setChartIndicatorsType(A3D::ChartAxisIndicatorType 
 
 void EditLiIndicatorsDialog::setStyle(A3D::ChartAxisIndicatorStyle style) {
     ui->generalSettings->setStyle(style);
-    m_styleNeeded = true;
+    setStyleNeeded(true);
+}
+
+void EditLiIndicatorsDialog::reset() {
+    setChartIndicatorsType(A3D::CHAXIND_MAJOR_INDICATOR);
+    setStyleNeeded(false);
+    m_indicators.clear();
+    ui->rawEditWidget->clear();
 }
 
 // TODO:  Normalize value when they arrive
-std::vector<A3D::ChartAxisIndicator> EditLiIndicatorsDialog::indicators() const {
-	std::vector<A3D::ChartAxisIndicator> indicators;
+std::vector<A3D::ChartAxisIndicator> EditLiIndicatorsDialog::indicators() {
+    std::vector<float> values = ui->rawEditWidget->getValues();
+    int stringPrecision       = ui->stringPrecisionSpinBox->value();
+    for(size_t i = 0; i < values.size(); i++) {
+        m_indicators[i].m_value = values[i];
+        m_indicators[i].m_label = QString::number(values.at(i), 'f', stringPrecision);
+    }
+    if(!m_styleNeeded)
+        return m_indicators;
+
     A3D::ChartAxisIndicatorType type   = ui->majorRadioButton->isChecked() ? A3D::CHAXIND_MAJOR_INDICATOR : A3D::CHAXIND_MINOR_INDICATOR;
-    int stringPrecision                = ui->stringPrecisionSpinBox->value();
-	A3D::ChartAxisIndicatorStyle style = ui->generalSettings->style();
+    A3D::ChartAxisIndicatorStyle style = ui->generalSettings->style();
 
-    std::vector<float> values;
-    values = ui->rawEditWidget->getValues();
+    for(A3D::ChartAxisIndicator& it: m_indicators) {
+        it.m_type  = type;
+        it.m_style = style;
+    }
 
-    for(size_t i = 0; i < values.size(); i++)
-        indicators.push_back(A3D::ChartAxisIndicator(type, values.at(i), 0.f, QString::number(values.at(i), 'f', stringPrecision), style));
-
-    return indicators;
+    return m_indicators;
 }
 
 EditLiIndicatorsDialog::~EditLiIndicatorsDialog() {

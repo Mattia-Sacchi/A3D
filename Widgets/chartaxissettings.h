@@ -33,9 +33,12 @@ private slots:
 
     void onLinearEditDialogAccepted();
 
+    void onLinearEditDialogRejected();
+
     void onLinearEditDialogClicked(std::vector<A3D::ChartAxisIndicator> const&);
 
 private:
+    void linearEditFinished();
     void setChartAxisType(A3D::ChartAxisType);
     A3D::ChartAxisType m_type;
     A3D::ChartAxisData m_axisData;

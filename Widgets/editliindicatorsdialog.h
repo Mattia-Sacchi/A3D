@@ -15,7 +15,9 @@ public:
     explicit EditLiIndicatorsDialog(QWidget* parent = nullptr);
     ~EditLiIndicatorsDialog();
 
-	std::vector<A3D::ChartAxisIndicator> indicators() const;
+    void reset();
+
+    std::vector<A3D::ChartAxisIndicator> indicators();
     void setStyle(A3D::ChartAxisIndicatorStyle style);
     void setChartIndicatorsType(A3D::ChartAxisIndicatorType type);
 
