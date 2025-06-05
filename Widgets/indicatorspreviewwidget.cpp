@@ -2,6 +2,8 @@
 #include "chartaxisgeneralsettings.h"
 #include <QPainter>
 #include "customwidgets.h"
+#include "chartaxissettings.h"
+#include "incompatibilitydialog.h"
 
 IndicatorsPreviewWidget::IndicatorsPreviewWidget(QWidget* parent)
     : QWidget(parent) {
@@ -14,14 +16,131 @@ IndicatorsPreviewWidget::IndicatorsPreviewWidget(QWidget* parent)
     connect(ui.addIndicatorsButton, &QPushButton::clicked, this, &IndicatorsPreviewWidget::onAddButtonClicked);
     connect(ui.removeIndicatorsButton, &QPushButton::clicked, this, &IndicatorsPreviewWidget::onRemoveButtonClicked);
     connect(ui.editIndicatorsButton, &QPushButton::clicked, this, &IndicatorsPreviewWidget::onEditIndicartorsClicked);
+    connect(&m_addDialog, &QDialog::accepted, this, &IndicatorsPreviewWidget::onAddDialogAccepted);
+    connect(&m_editDialog, &QDialog::rejected, this, &IndicatorsPreviewWidget::onEditDialogFinished);
+    connect(&m_editDialog, &QDialog::accepted, this, &IndicatorsPreviewWidget::onEditDialogFinished);
     ui.removeIndicatorsButton->setEnabled(false);
 
     ui.previewWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui.editIndicatorsButton->setEnabled(false);
+
+    QWidget* parentWidget = parent;
+    while(parentWidget) {
+        ChartAxisSettings* settings = qobject_cast<ChartAxisSettings*>(parentWidget);
+        if(settings) {
+            m_settings = settings;
+            break;
+        }
+        parentWidget = parentWidget->parentWidget();
+    }
 }
 
-void IndicatorsPreviewWidget::sort() {
-    addIndicators(m_indicators);
+void IndicatorsPreviewWidget::onAddButtonClicked() {
+    A3D::ChartAxisIndicatorStyle style;
+    if(m_settings)
+        style = m_settings->style();
+    m_addDialog.setStyle(style);
+    m_addDialog.open();
+}
+
+void IndicatorsPreviewWidget::onAddDialogAccepted() {
+    addIndicators(m_addDialog.indicators());
+}
+
+void IndicatorsPreviewWidget::onItemDoubleClicked(QModelIndex const& index) {
+    // The idea is to remove the widget and then re add it modified
+    int row = index.row();
+
+    A3D::ChartAxisIndicator indicator = m_indicators.at(row);
+
+    delete ui.previewWidget->takeItem(row);
+    m_indicators.erase(m_indicators.begin() + row);
+
+    editIndicators({ indicator });
+}
+
+void IndicatorsPreviewWidget::onEditIndicartorsClicked() {
+
+    std::vector<A3D::ChartAxisIndicator> indicators;
+    QList<QListWidgetItem*> selectedItems = ui.previewWidget->selectedItems();
+
+    for(int i = ui.previewWidget->count() - 1; i >= 0; --i) {
+        QListWidgetItem* item = ui.previewWidget->item(i);
+        if(!selectedItems.contains(item))
+            continue;
+        // Qt documentation says that this is the correct way
+        indicators.push_back(m_indicators.at(i));
+        delete ui.previewWidget->takeItem(i);
+        m_indicators.erase(m_indicators.begin() + i);
+    }
+    editIndicators(indicators);
+}
+
+void IndicatorsPreviewWidget::onEditDialogFinished() {
+    addIndicators(m_editDialog.indicators());
+}
+
+void IndicatorsPreviewWidget::editIndicators(std::vector<A3D::ChartAxisIndicator> const& indicators) {
+    std::vector<IndicatorInfo> infos;
+    infos.clear();
+
+    m_editDialog.reset();
+
+    infos.emplace_back(indicators[0]);
+
+    for(size_t i = 0; i < indicators.size() - 1; i++) {
+        IndicatorInfo current = IndicatorInfo(indicators[i]);
+        IndicatorInfo next    = IndicatorInfo(indicators[i + 1]);
+
+        if(current != next && std::find(infos.begin(), infos.end(), next) == infos.end())
+            infos.push_back(next);
+    }
+    size_t count = infos.size();
+
+    if(count == 1) {
+        // Ho un solo tipo di indicatore quindi li posso pushare in edit
+        IndicatorInfo info = infos[0];
+        m_editDialog.setStyle(info.m_style);
+        m_editDialog.setChartIndicatorsType(info.m_type);
+        m_editDialog.editIndicators(indicators);
+        return;
+    }
+
+    // Insert here dialog
+    IncompatibilityDialog dialog(this, infos);
+    dialog.exec();
+
+    switch(dialog.getUserChoice()) {
+    case IncompatibilityDialog::UC_CHOOSE:
+        {
+            IndicatorInfo info = dialog.getInfo();
+            m_editDialog.setStyle(info.m_style);
+            m_editDialog.setChartIndicatorsType(info.m_type);
+        }
+        break;
+    case IncompatibilityDialog::UC_CONTINUE:
+        break;
+    default:
+    case IncompatibilityDialog::UC_DISCARD:
+        // Total rollback
+        addIndicators(indicators);
+        return;
+    }
+
+    m_editDialog.editIndicators(indicators);
+}
+
+void IndicatorsPreviewWidget::onRemoveButtonClicked() {
+    QList<QListWidgetItem*> itemsToRemove = ui.previewWidget->selectedItems();
+
+    for(int i = ui.previewWidget->count() - 1; i >= 0; --i) {
+        QListWidgetItem* item = ui.previewWidget->item(i);
+        if(!itemsToRemove.contains(item))
+            continue;
+        // Qt documentation says that this is the correct way
+        delete ui.previewWidget->takeItem(i);
+        m_indicators.erase(m_indicators.begin() + i);
+    }
 }
 
 void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator> indicators) {
@@ -40,7 +159,7 @@ void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator>
             continue;
 
         m_indicators.push_back(it);
-	}
+    }
 
     std::sort(m_indicators.begin(), m_indicators.end(), [](A3D::ChartAxisIndicator const& a, A3D::ChartAxisIndicator const& b) -> bool {
         return a.m_value < b.m_value;
@@ -89,52 +208,6 @@ void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator>
 
 std::vector<A3D::ChartAxisIndicator> IndicatorsPreviewWidget::indicators() const {
     return m_indicators;
-}
-
-void IndicatorsPreviewWidget::onAddButtonClicked() {
-    emit addClicked();
-}
-
-void IndicatorsPreviewWidget::onRemoveButtonClicked() {
-    QList<QListWidgetItem*> itemsToRemove = ui.previewWidget->selectedItems();
-
-    for(int i = ui.previewWidget->count() - 1; i >= 0; --i) {
-        QListWidgetItem* item = ui.previewWidget->item(i);
-        if(!itemsToRemove.contains(item))
-            continue;
-        // Qt documentation says that this is the correct way
-        delete ui.previewWidget->takeItem(i);
-        m_indicators.erase(m_indicators.begin() + i);
-    }
-}
-
-void IndicatorsPreviewWidget::onItemDoubleClicked(QModelIndex const& index) {
-    // The idea is to remove the widget and then re add it modified
-    int row = index.row();
-
-    A3D::ChartAxisIndicator indicator = m_indicators.at(row);
-
-    delete ui.previewWidget->takeItem(row);
-    m_indicators.erase(m_indicators.begin() + row);
-
-    emit editIndicators({ indicator });
-}
-
-void IndicatorsPreviewWidget::onEditIndicartorsClicked() {
-
-    std::vector<A3D::ChartAxisIndicator> indicators;
-    QList<QListWidgetItem*> selectedItems = ui.previewWidget->selectedItems();
-
-    for(int i = ui.previewWidget->count() - 1; i >= 0; --i) {
-        QListWidgetItem* item = ui.previewWidget->item(i);
-        if(!selectedItems.contains(item))
-            continue;
-        // Qt documentation says that this is the correct way
-        indicators.push_back(m_indicators.at(i));
-        delete ui.previewWidget->takeItem(i);
-        m_indicators.erase(m_indicators.begin() + i);
-    }
-    emit editIndicators(indicators);
 }
 
 void IndicatorsPreviewWidget::onItemSelectionChanged() {

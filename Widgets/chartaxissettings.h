@@ -3,8 +3,6 @@
 
 #include "ui_chartaxissettings.h"
 #include "../A3D/chart.h"
-#include "addliindicatorsdialog.h"
-#include "editliindicatorsdialog.h"
 
 struct IndicatorInfo {
     A3D::ChartAxisIndicatorStyle m_style;
@@ -23,30 +21,17 @@ class ChartAxisSettings : public QWidget {
 public:
     explicit ChartAxisSettings(QWidget* parent = nullptr);
 
+    A3D::ChartAxisIndicatorStyle style() const;
+
 private slots:
     void onLinearInterpolatedRadioButtonClicked();
     void onEnumeratedRadioButtonClicked();
 
-    void onLinearAddClicked();
-
-    void onLinearAddDialogAccepted();
-
-    void onLinearEditDialogAccepted();
-
-    void onLinearEditDialogRejected();
-
-    void onLinearEditDialogClicked(std::vector<A3D::ChartAxisIndicator> const&);
-
-    void onEnumeratedAddClicked();
-
 private:
-    void linearEditFinished();
     void setChartAxisType(A3D::ChartAxisType);
     A3D::ChartAxisType m_type;
     A3D::ChartAxisData m_axisData;
 
-    AddLiIndicatorsDialog m_linearAddDialog;
-    EditLiIndicatorsDialog m_linearEditDialog;
     Ui::ChartAxisSettings ui;
 };
 

@@ -5,6 +5,8 @@
 #include "../A3D/chart.h"
 #include "editenumdialog.h"
 
+class ChartAxisSettings;
+
 class ListIndicatorsPreviewWidget : public QWidget {
 	Q_OBJECT
 
@@ -15,8 +17,7 @@ public:
     void addIndicator(A3D::ChartAxisIndicator const&);
 
     std::vector<A3D::ChartAxisIndicator> indicators() const;
-signals:
-    void addClicked();
+
 private slots:
     void onItemDoubleClicked(QModelIndex const&);
     void onAddButtonClicked();
@@ -27,6 +28,7 @@ private slots:
 
 private:
     std::vector<A3D::ChartAxisIndicator> m_indicators;
+    ChartAxisSettings* m_settings;
     EditEnumDialog m_dialog;
     Ui::ListIndicatorsPreviewWidget ui;
 };

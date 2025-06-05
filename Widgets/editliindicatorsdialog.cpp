@@ -26,6 +26,7 @@ void EditLiIndicatorsDialog::editIndicators(std::vector<A3D::ChartAxisIndicator>
     for(size_t i = 0; i < indicators.size(); ++i)
         ui->rawEditWidget->addValue(indicators.at(i).m_value);
     m_indicators = indicators;
+    open();
 }
 
 void EditLiIndicatorsDialog::setChartIndicatorsType(A3D::ChartAxisIndicatorType type) {

@@ -2,6 +2,7 @@
 #include "chartaxisgeneralsettings.h"
 #include <QPainter>
 #include "customwidgets.h"
+#include "chartaxissettings.h"
 
 ListIndicatorsPreviewWidget::ListIndicatorsPreviewWidget(QWidget* parent)
     : QWidget(parent) {
@@ -19,6 +20,16 @@ ListIndicatorsPreviewWidget::ListIndicatorsPreviewWidget(QWidget* parent)
 
     ui.removeIndicatorsButton->setEnabled(false);
     ui.editIndicatorsButton->setEnabled(false);
+
+    QWidget* parentWidget = parent;
+    while(parentWidget) {
+        ChartAxisSettings* settings = qobject_cast<ChartAxisSettings*>(parentWidget);
+        if(settings) {
+            m_settings = settings;
+            break;
+        }
+        parentWidget = parentWidget->parentWidget();
+    }
 }
 
 void ListIndicatorsPreviewWidget::addIndicator(A3D::ChartAxisIndicator const& indicator) {
@@ -93,7 +104,13 @@ std::vector<A3D::ChartAxisIndicator> ListIndicatorsPreviewWidget::indicators() c
 }
 
 void ListIndicatorsPreviewWidget::onAddButtonClicked() {
-    emit addClicked();
+    A3D::ChartAxisIndicator indicator;
+    indicator.m_type  = A3D::CHAXIND_MAJOR_INDICATOR;
+    indicator.m_label = "Lorem Ipsum";
+    if(m_settings)
+        indicator.m_style = m_settings->style();
+
+    addIndicator(indicator);
 }
 
 void ListIndicatorsPreviewWidget::onRemoveButtonClicked() {
@@ -128,8 +145,6 @@ void ListIndicatorsPreviewWidget::onEditIndicartorsClicked() {
 
     if(selectedItems.count() > 1 || !selectedItems.count())
         return;
-
-    A3D::ChartAxisIndicator indicator;
 
     QListWidgetItem* current = selectedItems.first();
 

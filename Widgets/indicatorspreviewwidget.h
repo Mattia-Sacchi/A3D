@@ -3,6 +3,10 @@
 
 #include "ui_indicatorspreviewwidget.h"
 #include "../A3D/chart.h"
+#include "addliindicatorsdialog.h"
+#include "editliindicatorsdialog.h"
+
+class ChartAxisSettings;
 
 class IndicatorsPreviewWidget : public QWidget {
 	Q_OBJECT
@@ -11,21 +15,28 @@ public:
     explicit IndicatorsPreviewWidget(QWidget* parent = nullptr);
 
     void addIndicators(std::vector<A3D::ChartAxisIndicator>);
-
-    void sort();
-
     std::vector<A3D::ChartAxisIndicator> indicators() const;
-signals:
-    void addClicked();
-    void editIndicators(std::vector<A3D::ChartAxisIndicator> const&);
+
 private slots:
-    void onItemDoubleClicked(QModelIndex const&);
+    // Add
     void onAddButtonClicked();
-    void onRemoveButtonClicked();
+    void onAddDialogAccepted();
+
+    // Edit
+    void onItemDoubleClicked(QModelIndex const&);
     void onEditIndicartorsClicked();
+    void onEditDialogFinished();
+
+    // Remove
+    void onRemoveButtonClicked();
+
     void onItemSelectionChanged();
 
 private:
+    void editIndicators(std::vector<A3D::ChartAxisIndicator> const&);
+    ChartAxisSettings* m_settings;
+    AddLiIndicatorsDialog m_addDialog;
+    EditLiIndicatorsDialog m_editDialog;
     std::vector<A3D::ChartAxisIndicator> m_indicators;
 	Ui::IndicatorsPreviewWidget ui;
 };
