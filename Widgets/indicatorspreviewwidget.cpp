@@ -1,7 +1,7 @@
 #include "indicatorspreviewwidget.h"
 #include "chartaxisgeneralsettings.h"
 #include <QPainter>
-#include "customwidgets.h"
+#include "customframe.h"
 #include "chartaxissettings.h"
 #include "incompatibilitydialog.h"
 
@@ -9,13 +9,13 @@ IndicatorsPreviewWidget::IndicatorsPreviewWidget(QWidget* parent)
     : QWidget(parent) {
 	ui.setupUi(this);
 
-    ui.previewWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+    ui.previewWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     connect(ui.previewWidget, &QListWidget::doubleClicked, this, &IndicatorsPreviewWidget::onItemDoubleClicked);
     connect(ui.previewWidget, &QListWidget::itemSelectionChanged, this, &IndicatorsPreviewWidget::onItemSelectionChanged);
     connect(ui.addIndicatorsButton, &QPushButton::clicked, this, &IndicatorsPreviewWidget::onAddButtonClicked);
     connect(ui.removeIndicatorsButton, &QPushButton::clicked, this, &IndicatorsPreviewWidget::onRemoveButtonClicked);
-    connect(ui.editIndicatorsButton, &QPushButton::clicked, this, &IndicatorsPreviewWidget::onEditIndicartorsClicked);
+    connect(ui.editIndicatorsButton, &QPushButton::clicked, this, &IndicatorsPreviewWidget::onEditIndicatorsClicked);
     connect(&m_addDialog, &QDialog::accepted, this, &IndicatorsPreviewWidget::onAddDialogAccepted);
     connect(&m_editDialog, &QDialog::rejected, this, &IndicatorsPreviewWidget::onEditDialogFinished);
     connect(&m_editDialog, &QDialog::accepted, this, &IndicatorsPreviewWidget::onEditDialogFinished);
@@ -59,7 +59,7 @@ void IndicatorsPreviewWidget::onItemDoubleClicked(QModelIndex const& index) {
     editIndicators({ indicator });
 }
 
-void IndicatorsPreviewWidget::onEditIndicartorsClicked() {
+void IndicatorsPreviewWidget::onEditIndicatorsClicked() {
 
     std::vector<A3D::ChartAxisIndicator> indicators;
     QList<QListWidgetItem*> selectedItems = ui.previewWidget->selectedItems();
@@ -99,6 +99,7 @@ void IndicatorsPreviewWidget::editIndicators(std::vector<A3D::ChartAxisIndicator
 
     if(count == 1) {
         // Ho un solo tipo di indicatore quindi li posso pushare in edit
+
         IndicatorInfo info = infos[0];
         m_editDialog.setStyle(info.m_style);
         m_editDialog.setChartIndicatorsType(info.m_type);
@@ -107,27 +108,29 @@ void IndicatorsPreviewWidget::editIndicators(std::vector<A3D::ChartAxisIndicator
     }
 
     // Insert here dialog
-    IncompatibilityDialog dialog(this, infos);
-    dialog.exec();
+    IncompatibilityDialog* dialog = new IncompatibilityDialog(this, infos);
+    dialog->open();
 
-    switch(dialog.getUserChoice()) {
-    case IncompatibilityDialog::UC_CHOOSE:
-        {
-            IndicatorInfo info = dialog.getInfo();
-            m_editDialog.setStyle(info.m_style);
-            m_editDialog.setChartIndicatorsType(info.m_type);
+    connect(dialog, &IncompatibilityDialog::finished, this, [this, dialog, indicators]() {
+        switch(dialog->getUserChoice()) {
+        case IncompatibilityDialog::UC_CHOOSE:
+            {
+                IndicatorInfo info = dialog->getInfo();
+                m_editDialog.setStyle(info.m_style);
+                m_editDialog.setChartIndicatorsType(info.m_type);
+            }
+            break;
+        case IncompatibilityDialog::UC_CONTINUE:
+            break;
+        default:
+        case IncompatibilityDialog::UC_DISCARD:
+            // Total rollback
+            addIndicators(indicators);
+            return;
         }
-        break;
-    case IncompatibilityDialog::UC_CONTINUE:
-        break;
-    default:
-    case IncompatibilityDialog::UC_DISCARD:
-        // Total rollback
-        addIndicators(indicators);
-        return;
-    }
 
-    m_editDialog.editIndicators(indicators);
+        m_editDialog.editIndicators(indicators);
+    });
 }
 
 void IndicatorsPreviewWidget::onRemoveButtonClicked() {
@@ -171,38 +174,22 @@ void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator>
 
         QString text = it.m_label;
 
-        QListWidgetItem* newLabel = new QListWidgetItem(ui.previewWidget);
-        size_t width              = MinorWidth;
-        if(it.m_type == A3D::CHAXIND_MAJOR_INDICATOR)
-            width = MajorWidth;
+        QListWidgetItem* item = new QListWidgetItem(ui.previewWidget);
 
-        ColoredFrame* frame = new ColoredFrame(ui.previewWidget, it.m_style.m_indicatorColor, width);
+        CustomFrame* frame = new CustomFrame(ui.previewWidget, it.m_style.m_indicatorColor, it.m_type);
 
-        QLabel* label = new QLabel(frame);
-
-        label->setText(text);
-
-        QPalette palette = label->palette();
-        label->setForegroundRole(QPalette::WindowText);
-        palette.setColor(QPalette::WindowText, it.m_style.m_labelColor);
-        label->setPalette(palette);
-
-        QFont font          = it.m_style.m_labelFont;
-        FontResolutions res = ChartAxisGeneralSettings::getFontResoulution(font.pointSize());
-        font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(res));
-        label->setFont(font);
-
-        frame->setLabel(label);
+        frame->setText(text);
+        frame->setFormats(it.m_style.m_labelColor, it.m_style.m_labelFont);
 
         // Aumento artificialmente l'altezza per starci dentro
-        newLabel->setSizeHint(frame->sizeHint());
+        item->setSizeHint(frame->sizeHint());
 
-        size_t height = newLabel->sizeHint().height();
+        size_t height = item->sizeHint().height();
         if(height + 20 >= ui.previewWidget->minimumHeight())
             ui.previewWidget->setMinimumHeight(height + 20);
 
-        ui.previewWidget->setItemWidget(newLabel, frame);
-        ui.previewWidget->addItem(newLabel);
+        ui.previewWidget->addItem(item);
+        ui.previewWidget->setItemWidget(item, frame);
     }
 }
 
@@ -224,4 +211,13 @@ void IndicatorsPreviewWidget::onItemSelectionChanged() {
 
     ui.editIndicatorsButton->setEnabled(result);
     ui.removeIndicatorsButton->setEnabled(result);
+
+    for(int i = 0; i < ui.previewWidget->count(); ++i) {
+        QListWidgetItem* item = ui.previewWidget->item(i);
+        CustomFrame* frame    = qobject_cast<CustomFrame*>(ui.previewWidget->itemWidget(item));
+        if(!frame)
+            continue;
+
+        frame->setHighlighted(item->isSelected());
+    }
 }

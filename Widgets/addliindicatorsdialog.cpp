@@ -28,7 +28,7 @@ AddLiIndicatorsDialog::AddLiIndicatorsDialog(QWidget* parent)
     connect(ui->rawEditRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onRawAddButtonClicked);
     connect(ui->countRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onCountButtonClicked);
     connect(ui->stepRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onStepSizeButtonClicked);
-    connect(ui->stringPrecisionSpinBox, &QSpinBox::editingFinished, this, &AddLiIndicatorsDialog::onLabelDigitsChanged);
+    connect(ui->labelDigitsWidget, &StringPrecisionWidget::stringPrecisionChanged, this, &AddLiIndicatorsDialog::onLabelDigitsChanged);
 }
 
 void AddLiIndicatorsDialog::onRawAddButtonClicked() {
@@ -48,7 +48,7 @@ void AddLiIndicatorsDialog::onStepSizeButtonClicked() {
 }
 
 void AddLiIndicatorsDialog::onLabelDigitsChanged() {
-    int digits = ui->stringPrecisionSpinBox->value();
+    size_t digits = ui->labelDigitsWidget->getPrecision();
     ui->rawEditWidget->setStringPrecision(digits);
 }
 
@@ -83,7 +83,7 @@ void AddLiIndicatorsDialog::setStyle(A3D::ChartAxisIndicatorStyle style) {
 std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::getIndicatorFromCount(size_t count) const {
     std::vector<A3D::ChartAxisIndicator> indicators;
     A3D::ChartAxisIndicatorType type   = ui->indicatorTypeWidget->type();
-    int const stringPrecision          = ui->stringPrecisionSpinBox->value();
+    size_t const stringPrecision       = ui->labelDigitsWidget->getPrecision();
     A3D::ChartAxisIndicatorStyle style = ui->generalSettings->style();
 
     float const from = ui->fromDoubleSpinBox->value();
@@ -102,7 +102,7 @@ std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::getIndicatorFromCoun
 std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::indicators() const {
 	std::vector<A3D::ChartAxisIndicator> indicators;
     A3D::ChartAxisIndicatorType type   = ui->indicatorTypeWidget->type();
-    int const stringPrecision          = ui->stringPrecisionSpinBox->value();
+    int const stringPrecision          = ui->labelDigitsWidget->getPrecision();
 	A3D::ChartAxisIndicatorStyle style = ui->generalSettings->style();
 
     switch(m_mode) {

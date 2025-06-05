@@ -1,7 +1,7 @@
 #include "incompatibilitydialog.h"
 #include "ui_incompatibilitydialog.h"
 #include "chartaxisgeneralsettings.h"
-#include "customwidgets.h"
+#include "customframe.h"
 
 IncompatibilityDialog::IncompatibilityDialog(QWidget* parent, std::vector<IndicatorInfo>& infos)
     : QDialog(parent),
@@ -23,17 +23,14 @@ IncompatibilityDialog::IncompatibilityDialog(QWidget* parent, std::vector<Indica
 
     for(size_t i = 0; i < infos.size(); i++) {
         IndicatorInfo& info = infos[i];
-        size_t buttonWidth  = info.m_type == A3D::CHAXIND_MINOR_INDICATOR ? MinorWidth : MajorWidth;
         QString buttonName  = info.m_style.m_labelFont.family();
-        CustomButton* btn   = new CustomButton(this, info.m_style.m_indicatorColor, buttonWidth);
+        CustomFrame* btn    = new CustomFrame(this, info.m_style.m_indicatorColor, info.m_type);
 
-        QFont font          = info.m_style.m_labelFont;
-        FontResolutions res = ChartAxisGeneralSettings::getFontResoulution(font.pointSize());
-        font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(res));
-        btn->setFont(font);
-        btn->setText(buttonName, info.m_style.m_labelColor);
+        btn->setFormats(info.m_style.m_labelColor, info.m_style.m_labelFont);
+        btn->setText(buttonName);
+        btn->setAsButton();
 
-        connect(btn, &QPushButton::clicked, this, [this, info]() {
+        connect(btn, &CustomFrame::clicked, this, [this, info]() {
             m_choice = UC_CHOOSE;
             m_info   = info;
             accept();

@@ -34,8 +34,8 @@
        </property>
        <item>
         <widget class="QWidget" name="widget" native="true">
-         <layout class="QFormLayout" name="formLayout">
-          <item row="0" column="0" colspan="2">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
            <widget class="QGroupBox" name="groupBox">
             <property name="title">
              <string>Add Mode</string>
@@ -64,25 +64,13 @@
             </layout>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="stringPrecisionLabel">
-            <property name="text">
-             <string>Label digits</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QSpinBox" name="stringPrecisionSpinBox">
-            <property name="maximum">
-             <number>6</number>
-            </property>
-            <property name="value">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="2">
+          <item>
            <widget class="ChartIndicatorTypeWidget" name="indicatorTypeWidget" native="true"/>
+          </item>
+          <item>
+           <widget class="StringPrecisionWidget" name="labelDigitsWidget" native="true">
+            <layout class="QFormLayout" name="formLayout"/>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -246,6 +234,12 @@
    <class>ChartIndicatorTypeWidget</class>
    <extends>QWidget</extends>
    <header>chartindicatortypewidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>StringPrecisionWidget</class>
+   <extends>QWidget</extends>
+   <header>stringprecisionwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

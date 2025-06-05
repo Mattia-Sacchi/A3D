@@ -72,6 +72,9 @@ set(SOURCES
     Widgets/editliindicatorsdialog.cpp
     Widgets/incompatibilitydialog.cpp
     Widgets/editenumdialog.cpp
+    Widgets/customframe.cpp
+    Widgets/chartindicatortypewidget.cpp
+    Widgets/stringprecisionwidget.cpp
 	keyeventmanager.cpp
 )
 
@@ -140,7 +143,9 @@ set(HEADERS
     Widgets/editliindicatorsdialog.h
     Widgets/incompatibilitydialog.h
     Widgets/editenumdialog.h
-    Widgets/customwidgets.h
+    Widgets/customframe.h
+    Widgets/chartindicatortypewidget.h
+    Widgets/stringprecisionwidget.h
     Dependencies/stb/stb_image.h
     keyeventmanager.h
 
@@ -164,6 +169,8 @@ set(UI_FILES
     Widgets/editenumdialog.ui
     Widgets/valuespreviewwidget.ui
     Widgets/incompatibilitydialog.ui
+    Widgets/chartindicatortypewidget.ui
+    Widgets/stringprecisionwidget.ui
 )
  
 qt_add_big_resources(
@@ -178,7 +185,9 @@ qt_add_executable(${PROJECT_NAME}
     ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
     ${RESOURCES}
-    Widgets/chartindicatortypewidget.h Widgets/chartindicatortypewidget.cpp Widgets/chartindicatortypewidget.ui
+
+
+
 
 )
 

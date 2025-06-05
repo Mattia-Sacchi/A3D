@@ -24,7 +24,7 @@ private slots:
 
     // Edit
     void onItemDoubleClicked(QModelIndex const&);
-    void onEditIndicartorsClicked();
+    void onEditIndicatorsClicked();
     void onEditDialogFinished();
 
     // Remove

@@ -39,26 +39,8 @@
         <widget class="ChartAxisGeneralSettings" name="generalSettings" native="true"/>
        </item>
        <item>
-        <widget class="QWidget" name="stringPrecisionWidget" native="true">
-         <layout class="QFormLayout" name="formLayout_2">
-          <item row="1" column="0">
-           <widget class="QLabel" name="stringPrecisionLabel">
-            <property name="text">
-             <string>Label digits</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="stringPrecisionSpinBox">
-            <property name="maximum">
-             <number>6</number>
-            </property>
-            <property name="value">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
+        <widget class="StringPrecisionWidget" name="stringPrecisionWidget" native="true">
+         <layout class="QFormLayout" name="formLayout_2"/>
         </widget>
        </item>
        <item>
@@ -116,6 +98,12 @@
    <class>ChartIndicatorTypeWidget</class>
    <extends>QWidget</extends>
    <header>chartindicatortypewidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>StringPrecisionWidget</class>
+   <extends>QWidget</extends>
+   <header>stringprecisionwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

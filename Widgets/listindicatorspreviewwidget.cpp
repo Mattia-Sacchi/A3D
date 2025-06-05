@@ -1,14 +1,14 @@
 #include "listindicatorspreviewwidget.h"
 #include "chartaxisgeneralsettings.h"
 #include <QPainter>
-#include "customwidgets.h"
+#include "customframe.h"
 #include "chartaxissettings.h"
 
 ListIndicatorsPreviewWidget::ListIndicatorsPreviewWidget(QWidget* parent)
     : QWidget(parent) {
 	ui.setupUi(this);
 
-    ui.previewWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+    ui.previewWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     connect(ui.previewWidget, &QListWidget::doubleClicked, this, &ListIndicatorsPreviewWidget::onItemDoubleClicked);
     connect(ui.previewWidget, &QListWidget::itemSelectionChanged, this, &ListIndicatorsPreviewWidget::onItemSelectionChanged);
@@ -30,6 +30,8 @@ ListIndicatorsPreviewWidget::ListIndicatorsPreviewWidget(QWidget* parent)
         }
         parentWidget = parentWidget->parentWidget();
     }
+
+    ui.previewWidget->setMinimumHeight(300);
 }
 
 void ListIndicatorsPreviewWidget::addIndicator(A3D::ChartAxisIndicator const& indicator) {
@@ -37,32 +39,12 @@ void ListIndicatorsPreviewWidget::addIndicator(A3D::ChartAxisIndicator const& in
     QString text = indicator.m_label;
 
     QListWidgetItem* newWidget = new QListWidgetItem(ui.previewWidget);
-    size_t width               = MinorWidth;
-    if(indicator.m_type == A3D::CHAXIND_MAJOR_INDICATOR)
-        width = MajorWidth;
 
-    CustomFrame* frame = new CustomFrame(ui.previewWidget, indicator.m_style.m_indicatorColor, width);
-
+    CustomFrame* frame = new CustomFrame(ui.previewWidget, indicator.m_style.m_indicatorColor, indicator.m_type);
     frame->setValues(text, index);
+    frame->setFormats(indicator.m_style.m_labelColor, indicator.m_style.m_labelFont);
 
-    QLabel& label = frame->label();
-
-    QPalette palette = label.palette();
-    label.setForegroundRole(QPalette::WindowText);
-    palette.setColor(QPalette::WindowText, indicator.m_style.m_labelColor);
-    label.setPalette(palette);
-
-    QFont font          = indicator.m_style.m_labelFont;
-    FontResolutions res = ChartAxisGeneralSettings::getFontResoulution(font.pointSize());
-    font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(res));
-    label.setFont(font);
-
-    // Aumento artificialmente l'altezza per starci dentro
     newWidget->setSizeHint(frame->sizeHint());
-
-    size_t height = newWidget->sizeHint().height() * 3;
-    if(height + 20 >= ui.previewWidget->minimumHeight())
-        ui.previewWidget->setMinimumHeight(height + 20);
 
     ui.previewWidget->setItemWidget(newWidget, frame);
     ui.previewWidget->addItem(newWidget);
@@ -167,23 +149,9 @@ void ListIndicatorsPreviewWidget::onEditAccepted() {
     QString text             = it.indicator.m_label;
     customFrame->setText(text);
 
-    size_t width = MinorWidth;
-    if(it.indicator.m_type == A3D::CHAXIND_MAJOR_INDICATOR)
-        width = MajorWidth;
+    customFrame->setBorder(it.indicator.m_style.m_indicatorColor, it.indicator.m_type);
 
-    customFrame->setBorder(it.indicator.m_style.m_indicatorColor, width);
-
-    QLabel& label = customFrame->label();
-
-    QPalette palette = label.palette();
-    label.setForegroundRole(QPalette::WindowText);
-    palette.setColor(QPalette::WindowText, it.indicator.m_style.m_labelColor);
-    label.setPalette(palette);
-
-    QFont font          = it.indicator.m_style.m_labelFont;
-    FontResolutions res = ChartAxisGeneralSettings::getFontResoulution(font.pointSize());
-    font.setPointSize(ChartAxisGeneralSettings::getDisplaySize(res));
-    label.setFont(font);
+    customFrame->setFormats(it.indicator.m_style.m_labelColor, it.indicator.m_style.m_labelFont);
 }
 
 void ListIndicatorsPreviewWidget::onItemSelectionChanged() {
@@ -196,4 +164,13 @@ void ListIndicatorsPreviewWidget::onItemSelectionChanged() {
 
     ui.editIndicatorsButton->setEnabled(count == 1);
     ui.removeIndicatorsButton->setEnabled(result);
+
+    for(int i = 0; i < ui.previewWidget->count(); ++i) {
+        QListWidgetItem* item = ui.previewWidget->item(i);
+        CustomFrame* frame    = qobject_cast<CustomFrame*>(ui.previewWidget->itemWidget(item));
+        if(!frame)
+            continue;
+
+        frame->setHighlighted(item->isSelected());
+    }
 }
