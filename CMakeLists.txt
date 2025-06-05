@@ -178,6 +178,7 @@ qt_add_executable(${PROJECT_NAME}
     ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
     ${RESOURCES}
+    Widgets/chartindicatortypewidget.h Widgets/chartindicatortypewidget.cpp Widgets/chartindicatortypewidget.ui
 
 )
 

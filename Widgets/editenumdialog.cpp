@@ -18,14 +18,12 @@ void EditEnumDialog::editIndicator(IndicatorIterator const& iterator) {
 EditEnumDialog::IndicatorIterator EditEnumDialog::indicator() {
     m_iterator.indicator.m_style = ui->generalSettingsWidget->style();
     m_iterator.indicator.m_label = ui->lineEdit->text();
-    m_iterator.indicator.m_type  = ui->majorRadioButton->isChecked() ? A3D::CHAXIND_MAJOR_INDICATOR : A3D::CHAXIND_MINOR_INDICATOR;
+    m_iterator.indicator.m_type  = ui->indicatorTypeWidget->type();
     return m_iterator;
 }
 
 void EditEnumDialog::setChartIndicatorsType(A3D::ChartAxisIndicatorType type) {
-    bool isMajor = type == A3D::CHAXIND_MAJOR_INDICATOR;
-    ui->majorRadioButton->setChecked(isMajor);
-    ui->minorRadioButton->setChecked(!isMajor);
+    ui->indicatorTypeWidget->setType(type);
 }
 
 EditEnumDialog::~EditEnumDialog() {

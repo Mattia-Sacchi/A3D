@@ -29,9 +29,7 @@ void EditLiIndicatorsDialog::editIndicators(std::vector<A3D::ChartAxisIndicator>
 }
 
 void EditLiIndicatorsDialog::setChartIndicatorsType(A3D::ChartAxisIndicatorType type) {
-    bool isMajor = type == A3D::CHAXIND_MAJOR_INDICATOR;
-    ui->majorRadioButton->setChecked(isMajor);
-    ui->minorRadioButton->setChecked(!isMajor);
+    ui->indicatorTypeWidget->setType(type);
 }
 
 void EditLiIndicatorsDialog::setStyle(A3D::ChartAxisIndicatorStyle style) {
@@ -57,7 +55,7 @@ std::vector<A3D::ChartAxisIndicator> EditLiIndicatorsDialog::indicators() {
     if(!m_styleNeeded)
         return m_indicators;
 
-    A3D::ChartAxisIndicatorType type   = ui->majorRadioButton->isChecked() ? A3D::CHAXIND_MAJOR_INDICATOR : A3D::CHAXIND_MINOR_INDICATOR;
+    A3D::ChartAxisIndicatorType type   = ui->indicatorTypeWidget->type();
     A3D::ChartAxisIndicatorStyle style = ui->generalSettings->style();
 
     for(A3D::ChartAxisIndicator& it: m_indicators) {

@@ -82,7 +82,7 @@ void AddLiIndicatorsDialog::setStyle(A3D::ChartAxisIndicatorStyle style) {
 
 std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::getIndicatorFromCount(size_t count) const {
     std::vector<A3D::ChartAxisIndicator> indicators;
-    A3D::ChartAxisIndicatorType type   = ui->majorRadioButton->isChecked() ? A3D::CHAXIND_MAJOR_INDICATOR : A3D::CHAXIND_MINOR_INDICATOR;
+    A3D::ChartAxisIndicatorType type   = ui->indicatorTypeWidget->type();
     int const stringPrecision          = ui->stringPrecisionSpinBox->value();
     A3D::ChartAxisIndicatorStyle style = ui->generalSettings->style();
 
@@ -101,7 +101,7 @@ std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::getIndicatorFromCoun
 // TODO:  Normalize value when they arrive
 std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::indicators() const {
 	std::vector<A3D::ChartAxisIndicator> indicators;
-    A3D::ChartAxisIndicatorType type   = ui->majorRadioButton->isChecked() ? A3D::CHAXIND_MAJOR_INDICATOR : A3D::CHAXIND_MINOR_INDICATOR;
+    A3D::ChartAxisIndicatorType type   = ui->indicatorTypeWidget->type();
     int const stringPrecision          = ui->stringPrecisionSpinBox->value();
 	A3D::ChartAxisIndicatorStyle style = ui->generalSettings->style();
 
