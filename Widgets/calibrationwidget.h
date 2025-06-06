@@ -3,20 +3,22 @@
 
 #include "ui_calibrationwidget.h"
 #include "settingsdialog.h"
-
-class CalibrationWidget : public QWidget
-{
+#include "../A3D/chart.h"
+class CalibrationWidget : public QWidget {
     Q_OBJECT
 
 public:
-    explicit CalibrationWidget(QWidget *parent = nullptr);
+    explicit CalibrationWidget(QWidget* parent = nullptr);
+
+    A3D::SurfaceChartEntity* chart() const;
 
 private slots:
-    void on_settingsButton_clicked();
+    void onSettingsButtonClicked();
+    void onSettingsDialogAccepted();
 
 private:
     Ui::CalibrationWidget ui;
-    SettingsDialog m_settingsDialog;
+    SettingsDialog* m_settingsDialog;
 };
 
 #endif // CALIBRATIONWIDGET_H
