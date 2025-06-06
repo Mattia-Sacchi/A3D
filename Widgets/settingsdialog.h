@@ -10,10 +10,15 @@ class SettingsDialog : public QDialog {
 public:
 	explicit SettingsDialog(QWidget* parent = nullptr);
 
+    void setMap(A3D::MapChart3D&);
     void onSettingsAccepted();
+signals:
+    void mapUpdated(A3D::MapChart3D const&);
 
 private:
 	Ui::SettingsDialog ui;
+
+    A3D::MapChart3D m_map;
 };
 
 #endif // SETTINGSDIALOG_H

@@ -23,14 +23,18 @@ public:
 
     A3D::ChartAxisIndicatorStyle style() const;
 
+    void setAxisData(A3D::ChartAxisData const&);
+
+    A3D::ChartAxisData axisData();
+
 private slots:
     void onLinearInterpolatedRadioButtonClicked();
     void onEnumeratedRadioButtonClicked();
 
 private:
     void setChartAxisType(A3D::ChartAxisType);
+    // This is only to decide the window
     A3D::ChartAxisType m_type;
-    A3D::ChartAxisData m_axisData;
 
     Ui::ChartAxisSettings ui;
 };

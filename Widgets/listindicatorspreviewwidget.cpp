@@ -34,22 +34,11 @@ ListIndicatorsPreviewWidget::ListIndicatorsPreviewWidget(QWidget* parent)
     ui.previewWidget->setMinimumHeight(300);
 }
 
-void ListIndicatorsPreviewWidget::addIndicator(A3D::ChartAxisIndicator const& indicator) {
-    size_t index = ui.previewWidget->count();
-    QString text = indicator.m_label;
-
-    QListWidgetItem* newWidget = new QListWidgetItem(ui.previewWidget);
-
-    CustomFrame* frame = new CustomFrame(ui.previewWidget, indicator.m_style.m_indicatorColor, indicator.m_type);
-    frame->setValues(text, index);
-    frame->setFormats(indicator.m_style.m_labelColor, indicator.m_style.m_labelFont);
-
-    newWidget->setSizeHint(frame->sizeHint());
-
-    ui.previewWidget->setItemWidget(newWidget, frame);
-    ui.previewWidget->addItem(newWidget);
-
-    m_indicators.push_back(indicator);
+void ListIndicatorsPreviewWidget::setInverted(bool inverted) {
+    m_inverted                                      = inverted;
+    std::vector<A3D::ChartAxisIndicator> indicators = m_indicators;
+    m_indicators.clear();
+    addIndicators(indicators);
 }
 
 void ListIndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator> const& indicators) {
@@ -70,15 +59,39 @@ void ListIndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndica
         m_indicators.push_back(it);
 	}
 
-    std::sort(m_indicators.begin(), m_indicators.end(), [](A3D::ChartAxisIndicator const& a, A3D::ChartAxisIndicator const& b) -> bool {
-        return a.m_value < b.m_value;
+    std::sort(m_indicators.begin(), m_indicators.end(), [this](A3D::ChartAxisIndicator const& a, A3D::ChartAxisIndicator const& b) -> bool {
+        if(m_inverted)
+            return a.m_value > b.m_value;
+        else
+            return a.m_value < b.m_value;
     });
     // Devo farlo comunque, perché è come mi arrivano
 
     ui.previewWidget->clear();
 
-    for(A3D::ChartAxisIndicator const& it: m_indicators)
-        addIndicator(it);
+    for(A3D::ChartAxisIndicator const& indicator: m_indicators) {
+        size_t index = ui.previewWidget->count();
+        QString text = indicator.m_label;
+
+        QListWidgetItem* newWidget = new QListWidgetItem(ui.previewWidget);
+
+        CustomFrame* frame = new CustomFrame(ui.previewWidget, indicator.m_style.m_indicatorColor, indicator.m_type);
+        frame->setValues(text, index);
+        frame->setFormats(indicator.m_style.m_labelColor, indicator.m_style.m_labelFont);
+
+        newWidget->setSizeHint(frame->sizeHint());
+
+        ui.previewWidget->setItemWidget(newWidget, frame);
+        ui.previewWidget->addItem(newWidget);
+    }
+}
+
+std::vector<ListIndicatorsPreviewWidget::StyledIndicator> ListIndicatorsPreviewWidget::enumeratedIndicators() const {
+    std::vector<StyledIndicator> indicators;
+    indicators.reserve(indicators.size());
+    for(size_t i = 0; i < m_indicators.size(); i++)
+        indicators.push_back(StyledIndicator(m_indicators[i]));
+    return indicators;
 }
 
 std::vector<A3D::ChartAxisIndicator> ListIndicatorsPreviewWidget::indicators() const {
@@ -92,7 +105,7 @@ void ListIndicatorsPreviewWidget::onAddButtonClicked() {
     if(m_settings)
         indicator.m_style = m_settings->style();
 
-    addIndicator(indicator);
+    addIndicators({ indicator });
 }
 
 void ListIndicatorsPreviewWidget::onRemoveButtonClicked() {

@@ -246,11 +246,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    autoUpChart->setChart(autoUpMap);
     autoUpChart->setLabelDistances(QVector3D(0.1f, 0.1f, 0.1f));
-
-    cal.chart()->setChart(autoUpMap);
-    cal.setWindowFlags(Qt::Window);
+    autoUpChart->setChart(autoUpMap);
     w.setCentralWidget(&cal);
 	w.show();
 

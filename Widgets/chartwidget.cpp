@@ -3,6 +3,8 @@
 
 ChartWidget::ChartWidget(QWidget* parent)
 	: QWidget(parent) {
+    setLayout(new QVBoxLayout);
+
 	m_scene = new A3D::Scene(this);
 
 	A3D::PointLightInfo& light = m_scene->getOrCreateLight(0);
@@ -35,6 +37,8 @@ ChartWidget::ChartWidget(QWidget* parent)
 
     m_view->setAutoRefreshEnabled(true);
     m_scene->run();
+
+    layout()->addWidget(m_view);
 }
 
 void ChartWidget::setMap(A3D::MapChart3D map) {

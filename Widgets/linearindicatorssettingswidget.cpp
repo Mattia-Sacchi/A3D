@@ -12,3 +12,10 @@ LinearIndicatorsSettingsWidget::LinearIndicatorsSettingsWidget(QWidget* parent)
 IndicatorsPreviewWidget* LinearIndicatorsSettingsWidget::indicatorPreviewWidget() const {
     return ui.previewWidget;
 }
+
+float LinearIndicatorsSettingsWidget::min() const {
+    return ui.minValueDoubleSpinBox->value();
+}
+float LinearIndicatorsSettingsWidget::max() const {
+    return ui.maxValueDoubleSpinBox->value();
+}
