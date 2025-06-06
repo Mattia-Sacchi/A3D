@@ -11,12 +11,11 @@ ChartAxisSettings::ChartAxisSettings(QWidget* parent)
 
     connect(ui.enumeratedRadioButton, &QRadioButton::clicked, this, &ChartAxisSettings::onEnumeratedRadioButtonClicked);
     connect(ui.linearInterpolatedRadioButton, &QRadioButton::clicked, this, &ChartAxisSettings::onLinearInterpolatedRadioButtonClicked);
-    connect(ui.invertedCheckbox, &QCheckBox::checkStateChanged, [this](bool state) {
+    connect(ui.invertedCheckbox, &QPushButton::clicked, [this]() {
         ui.LinearPreviewWidget->setBounds(ui.LinearPreviewWidget->max(), ui.LinearPreviewWidget->min());
-        ui.LinearPreviewWidget->indicatorPreviewWidget()->setInverted(state);
+        ui.LinearPreviewWidget->indicatorPreviewWidget()->setInverted(ui.LinearPreviewWidget->min() > ui.LinearPreviewWidget->max());
+        ui.EnumeratedPreviewWidget->invert();
     });
-    connect(ui.invertedCheckbox, &QCheckBox::checkStateChanged, ui.EnumeratedPreviewWidget, &ListIndicatorsPreviewWidget::setInverted);
-
     setChartAxisType(m_type);
     ui.nameLineEdit->setMaxLength(32);
 }

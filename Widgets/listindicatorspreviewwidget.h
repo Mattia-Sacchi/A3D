@@ -31,7 +31,7 @@ public:
     std::vector<A3D::ChartAxisIndicator> indicators() const;
 
 public slots:
-    void setInverted(bool);
+    void invert();
 
 private slots:
 

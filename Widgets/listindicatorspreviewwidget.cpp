@@ -5,7 +5,8 @@
 #include "chartaxissettings.h"
 
 ListIndicatorsPreviewWidget::ListIndicatorsPreviewWidget(QWidget* parent)
-    : QWidget(parent) {
+    : QWidget(parent),
+      m_inverted(false) {
 	ui.setupUi(this);
 
     ui.previewWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -34,8 +35,8 @@ ListIndicatorsPreviewWidget::ListIndicatorsPreviewWidget(QWidget* parent)
     ui.previewWidget->setMinimumHeight(300);
 }
 
-void ListIndicatorsPreviewWidget::setInverted(bool inverted) {
-    m_inverted                                      = inverted;
+void ListIndicatorsPreviewWidget::invert() {
+    m_inverted                                      = !m_inverted;
     std::vector<A3D::ChartAxisIndicator> indicators = m_indicators;
     m_indicators.clear();
     addIndicators(indicators);
@@ -69,9 +70,11 @@ void ListIndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndica
 
     ui.previewWidget->clear();
 
-    for(A3D::ChartAxisIndicator const& indicator: m_indicators) {
-        size_t index = ui.previewWidget->count();
-        QString text = indicator.m_label;
+    for(size_t i = 0; i < m_indicators.size(); i++) {
+        A3D::ChartAxisIndicator indicator = m_indicators[i];
+        size_t index                      = ui.previewWidget->count();
+        indicator.m_value                 = i;
+        QString text                      = indicator.m_label;
 
         QListWidgetItem* newWidget = new QListWidgetItem(ui.previewWidget);
 

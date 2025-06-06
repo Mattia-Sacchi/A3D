@@ -181,7 +181,6 @@ int main(int argc, char* argv[]) {
         axis_GasPercent.addIndicators({ 0, 10, 15, 20, 30, 40, 50, 75, 100 }, 0, A3D::CHAXIND_MAJOR_INDICATOR);
         axis_GasPercent.setDefaultIndicatorStyle(minorStyle);
         axis_GasPercent.addIndicators({ 60, 80, 90 }, 0, A3D::CHAXIND_MINOR_INDICATOR);
-        axis_GasPercent.invert();
         axis_GasPercent.setName("Gas Percent");
         autoUpMap.setAxisData(A3D::AXIS_X, axis_GasPercent);
 
@@ -212,7 +211,6 @@ int main(int argc, char* argv[]) {
 
             axis_Gear.setIndicators(std::move(gearShifts));
         }
-        axis_Gear.invert();
         axis_Gear.setName("Gear");
         autoUpMap.setAxisData(A3D::AXIS_Z, axis_Gear);
 
