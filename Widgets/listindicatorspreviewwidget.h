@@ -14,6 +14,7 @@ public:
     explicit ListIndicatorsPreviewWidget(QWidget* parent = nullptr);
 
     void addIndicators(std::vector<A3D::ChartAxisIndicator> const&);
+    inline bool isInverted() const { return m_inverted; }
 
     struct StyledIndicator {
         inline StyledIndicator(A3D::ChartAxisIndicator indicator)

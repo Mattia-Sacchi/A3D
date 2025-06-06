@@ -16,6 +16,8 @@ public:
 
     void addIndicators(std::vector<A3D::ChartAxisIndicator>);
     std::vector<A3D::ChartAxisIndicator> indicators() const;
+
+    inline bool isInverted() const { return m_inverted; }
 public slots:
     void setInverted(bool);
 
