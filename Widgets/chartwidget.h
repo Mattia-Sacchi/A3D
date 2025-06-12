@@ -21,6 +21,9 @@ public:
     QColor worldColor() const;
     void setWorldColor(QColor);
 
+    void stop();
+    void restart();
+
 private:
     A3D::Scene* m_scene;
     A3D::SurfaceChartEntity* m_chart;

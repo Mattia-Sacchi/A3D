@@ -53,6 +53,16 @@ QColor ChartWidget::worldColor() const {
     return m_worldColor;
 }
 
+void ChartWidget::stop()
+{
+    m_timer.stop();
+}
+
+void ChartWidget::restart()
+{
+    m_timer.start();
+}
+
 void ChartWidget::setWorldColor(QColor color) {
     if(color == m_worldColor)
         return;

@@ -7,10 +7,12 @@ CalibrationWidget::CalibrationWidget(QWidget* parent)
 
     connect(m_settingsDialog, &SettingsDialog::mapUpdated, this, &CalibrationWidget::onMapUpdated);
     connect(m_settingsDialog, &SettingsDialog::generalInfoChanged, this, &CalibrationWidget::onGeneralInfoChanged);
+    connect(m_settingsDialog, &SettingsDialog::finished, this, &CalibrationWidget::onDialogFinished);
     connect(ui.settingsButton, &QPushButton::clicked, this, &CalibrationWidget::onSettingsButtonClicked);
 }
 
 void CalibrationWidget::onSettingsButtonClicked() {
+    ui.chartWidget->stop();
     A3D::SurfaceChartEntity* chart = ui.chartWidget->chart();
     m_settingsDialog->setMap(chart->mapChart());
     GeneralInfo info;
@@ -19,6 +21,11 @@ void CalibrationWidget::onSettingsButtonClicked() {
     info.m_variants    = chart->renderVariants();
     m_settingsDialog->setGeneralInfo(info);
     m_settingsDialog->open();
+}
+
+void CalibrationWidget::onDialogFinished(int)
+{
+    ui.chartWidget->restart();
 }
 
 void CalibrationWidget::onGeneralInfoChanged(GeneralInfo info) {
