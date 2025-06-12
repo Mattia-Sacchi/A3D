@@ -12,26 +12,12 @@ EditLiIndicatorsDialog::EditLiIndicatorsDialog(QWidget* parent)
 }
 
 static size_t getPrecisionFromString(const QString text) {
-    size_t dotIndex = text.indexOf('.');
+    QStringList lst = text.split(".");
 
-    if(dotIndex < 0) {
-        // No decimal point found
+    if(lst.count() != 2)
         return 0;
-    }
 
-    // Extract substring after '.'
-    QString decimals = text.mid(dotIndex + 1);
-
-    // Trim any trailing non-digits (e.g. thousands separators or suffixes)
-    size_t precision = 0;
-    for(size_t i = 0; i < decimals.size(); ++i) {
-        if(decimals[i].isDigit())
-            ++precision;
-        else
-            break;
-    }
-
-    return precision;
+    return lst.at(1).size();
 }
 
 void EditLiIndicatorsDialog::setStyleNeeded(bool styleNeeded) {

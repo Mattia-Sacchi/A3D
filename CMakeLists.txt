@@ -185,6 +185,7 @@ qt_add_executable(${PROJECT_NAME}
     ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
     ${RESOURCES}
+    Widgets/colorpickerform.h Widgets/colorpickerform.cpp Widgets/colorpickerform.ui
 
 
 

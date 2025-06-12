@@ -17,9 +17,7 @@ public:
     void addIndicators(std::vector<A3D::ChartAxisIndicator>);
     std::vector<A3D::ChartAxisIndicator> indicators() const;
 
-    inline bool isInverted() const { return m_inverted; }
-public slots:
-    void setInverted(bool);
+    void clear();
 
 private slots:
     // Add
@@ -42,7 +40,6 @@ private:
     AddLiIndicatorsDialog m_addDialog;
     EditLiIndicatorsDialog m_editDialog;
     std::vector<A3D::ChartAxisIndicator> m_indicators;
-    bool m_inverted;
     Ui::IndicatorsPreviewWidget ui;
 };
 

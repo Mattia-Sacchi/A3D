@@ -14,7 +14,6 @@ public:
     explicit ListIndicatorsPreviewWidget(QWidget* parent = nullptr);
 
     void addIndicators(std::vector<A3D::ChartAxisIndicator> const&);
-    inline bool isInverted() const { return m_inverted; }
 
     struct StyledIndicator {
         inline StyledIndicator(A3D::ChartAxisIndicator indicator)
@@ -30,9 +29,6 @@ public:
     std::vector<StyledIndicator> enumeratedIndicators() const;
 
     std::vector<A3D::ChartAxisIndicator> indicators() const;
-
-public slots:
-    void invert();
 
 private slots:
 
@@ -50,7 +46,6 @@ private:
     std::vector<A3D::ChartAxisIndicator> m_indicators;
     ChartAxisSettings* m_settings;
     EditEnumDialog m_dialog;
-    bool m_inverted;
     Ui::ListIndicatorsPreviewWidget ui;
 };
 

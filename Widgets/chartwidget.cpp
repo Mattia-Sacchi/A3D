@@ -29,7 +29,7 @@ ChartWidget::ChartWidget(QWidget* parent)
     if(m_view->format().swapInterval() > 0)
         m_timer.setInterval(0);
     else
-        m_timer.setInterval(10);
+        m_timer.setInterval(100);
     m_timer.start();
 
     QObject::connect(&m_timer, &QTimer::timeout, m_view, &A3D::View::updateView);

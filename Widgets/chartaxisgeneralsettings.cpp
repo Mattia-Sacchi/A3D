@@ -13,21 +13,15 @@ uint8_t const FontSizes[FR_Count] = { FS_Low, FS_Medium, FS_High };
 ChartAxisGeneralSettings::ChartAxisGeneralSettings(QWidget* parent)
 	: QWidget(parent) {
 	ui.setupUi(this);
-	ui.indicatorColorWidget->setAutoFillBackground(true);
+    ui.indicatorColorPicker->setText("Indicator color:");
+    ui.indicatorColorPicker->setColor(Qt::white);
 
     ui.scaleValueLabel->setMinimumWidth(ui.scaleValueLabel->fontMetrics().boundingRect("1,000").width());
     ui.scaleValueLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-
-    QPalette palette;
-    palette = ui.indicatorColorWidget->palette();
-    palette.setColor(ui.indicatorColorWidget->backgroundRole(), Qt::white);
-    ui.indicatorColorWidget->setPalette(palette);
-
-    palette = ui.labelColorExampleLabel->palette();
+    QPalette palette = ui.labelColorExampleLabel->palette();
     palette.setColor(QPalette::WindowText, Qt::white);
     ui.labelColorExampleLabel->setPalette(palette);
 
-    connect(ui.changeIndicatorColorButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onChangeIndicatorColorButtonClicked);
     connect(ui.changeLabelColorButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onChangeLabelColorButtonClicked);
     connect(ui.changeFontButton, &QPushButton::clicked, this, &ChartAxisGeneralSettings::onChangeFontButtonClicked);
     connect(ui.highResolutionRadioButton, &QRadioButton::clicked, this, &ChartAxisGeneralSettings::onHighResolutionRadioButtonClicked);
@@ -43,7 +37,7 @@ A3D::ChartAxisIndicatorStyle ChartAxisGeneralSettings::style() const {
 
     A3D::ChartAxisIndicatorStyle style;
 
-    style.m_indicatorColor = ui.indicatorColorWidget->palette().color(ui.indicatorColorWidget->backgroundRole());
+    style.m_indicatorColor = ui.indicatorColorPicker->color();
     style.m_labelColor     = ui.labelColorExampleLabel->palette().color(QPalette::WindowText);
     QFont font             = ui.labelFontExampleLabel->font();
     font.setPointSize(FontSizes[m_resolution]);
@@ -70,10 +64,9 @@ size_t ChartAxisGeneralSettings::getDisplaySize(FontResolutions res) {
 }
 
 void ChartAxisGeneralSettings::setStyle(A3D::ChartAxisIndicatorStyle style) {
+    ui.indicatorColorPicker->setColor(style.m_indicatorColor);
+
     QPalette palette;
-    palette = ui.indicatorColorWidget->palette();
-    palette.setColor(ui.indicatorColorWidget->backgroundRole(), style.m_indicatorColor);
-    ui.indicatorColorWidget->setPalette(palette);
 
     palette = ui.labelColorExampleLabel->palette();
     palette.setColor(QPalette::WindowText, style.m_labelColor);
@@ -91,17 +84,6 @@ void ChartAxisGeneralSettings::setStyle(A3D::ChartAxisIndicatorStyle style) {
     ui.scaleSlider->setValue(style.m_labelSize * 100.f);
 
     updateFontExampleResoulution();
-}
-
-void ChartAxisGeneralSettings::onChangeIndicatorColorButtonClicked() {
-	QColor color = QColorDialog::getColor();
-
-	if(!color.isValid())
-		return;
-
-	QPalette palette = ui.indicatorColorWidget->palette();
-	palette.setColor(ui.indicatorColorWidget->backgroundRole(), color);
-	ui.indicatorColorWidget->setPalette(palette);
 }
 
 void ChartAxisGeneralSettings::onChangeLabelColorButtonClicked() {

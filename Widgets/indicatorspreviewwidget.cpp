@@ -6,8 +6,7 @@
 #include "incompatibilitydialog.h"
 
 IndicatorsPreviewWidget::IndicatorsPreviewWidget(QWidget* parent)
-    : QWidget(parent),
-      m_inverted(false) {
+    : QWidget(parent) {
 	ui.setupUi(this);
 
     ui.previewWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -147,15 +146,13 @@ void IndicatorsPreviewWidget::onRemoveButtonClicked() {
     }
 }
 
-void IndicatorsPreviewWidget::setInverted(bool inverted) {
-    m_inverted                                      = inverted;
-    std::vector<A3D::ChartAxisIndicator> indicators = m_indicators;
+void IndicatorsPreviewWidget::clear() {
     m_indicators.clear();
-    addIndicators(indicators);
+    for(int i = 0; i < ui.previewWidget->count(); i++)
+        delete ui.previewWidget->takeItem(i);
 }
 
 void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator> indicators) {
-
     for(A3D::ChartAxisIndicator const& it: indicators) {
 
         float value = it.m_value;
@@ -173,10 +170,7 @@ void IndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator>
     }
 
     std::sort(m_indicators.begin(), m_indicators.end(), [this](A3D::ChartAxisIndicator const& a, A3D::ChartAxisIndicator const& b) -> bool {
-        if(m_inverted)
-            return a.m_value > b.m_value;
-        else
-            return a.m_value < b.m_value;
+        return a.m_value < b.m_value;
     });
 
     ui.previewWidget->clear();

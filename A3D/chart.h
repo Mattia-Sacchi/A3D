@@ -201,6 +201,8 @@ public:
 	/// @brief Invert the axis direction.
 	void invert();
 
+    bool isInverted() const;
+
 	/// @brief Get the current axis type.
 	/// @return The axis type.
 	ChartAxisType type() const;
@@ -275,12 +277,26 @@ public:
 	/// @return True if valid data is set, false otherwise.
 	bool isValid() const;
 
-	/// @brief Returns the revision ID of this chart.
+    /// @brief Returns the revision ID of the mesh.
 	///
 	/// The revision ID is automatically increased when the map is changed.
 	/// By looking at the revision ID, an Entity can tell if it needs to be refreshed.
 	/// @return The revision ID of this chart.
-	int revision() const;
+    size_t surfaceRevision() const;
+
+    /// @brief Returns the revision ID of this indicators.
+    ///
+    /// The revision ID is automatically increased when the map is changed.
+    /// By looking at the revision ID, an Entity can tell if it needs to be refreshed.
+    /// @return The revision ID of this chart.
+    size_t indicatorsRevision() const;
+
+    /// @brief Returns the revision ID of this labels.
+    ///
+    /// The revision ID is automatically increased when the map is changed.
+    /// By looking at the revision ID, an Entity can tell if it needs to be refreshed.
+    /// @return The revision ID of this chart.
+    size_t labelsRevision() const;
 
 	/// @brief Set axis metadata and indicators.
 	/// @param[in] axis Identifier for the 3D axis.
@@ -376,7 +392,9 @@ private:
 	ChartAxisData m_axes[AXIS_COUNT];                   ///< Axis data for each dimension.
 	std::vector<float> m_values[AXIS_COUNT];            ///< Raw input values per axis.
 	std::vector<float> m_normalized_values[AXIS_COUNT]; ///< Normalized values per axis.
-	int m_revision;                                     ///< Current map revision index.
+    size_t m_surfaceRevision;                           ///< Current map revision index.
+    size_t m_indicatorRevision;
+    size_t m_labelsRevision;
 };
 
 }

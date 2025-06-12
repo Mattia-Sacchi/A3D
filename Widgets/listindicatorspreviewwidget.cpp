@@ -5,8 +5,7 @@
 #include "chartaxissettings.h"
 
 ListIndicatorsPreviewWidget::ListIndicatorsPreviewWidget(QWidget* parent)
-    : QWidget(parent),
-      m_inverted(false) {
+    : QWidget(parent) {
 	ui.setupUi(this);
 
     ui.previewWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -35,13 +34,6 @@ ListIndicatorsPreviewWidget::ListIndicatorsPreviewWidget(QWidget* parent)
     ui.previewWidget->setMinimumHeight(300);
 }
 
-void ListIndicatorsPreviewWidget::invert() {
-    m_inverted                                      = !m_inverted;
-    std::vector<A3D::ChartAxisIndicator> indicators = m_indicators;
-    m_indicators.clear();
-    addIndicators(indicators);
-}
-
 void ListIndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator> const& indicators) {
 
     for(A3D::ChartAxisIndicator const& it: indicators) {
@@ -61,10 +53,7 @@ void ListIndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndica
 	}
 
     std::sort(m_indicators.begin(), m_indicators.end(), [this](A3D::ChartAxisIndicator const& a, A3D::ChartAxisIndicator const& b) -> bool {
-        if(m_inverted)
-            return a.m_value > b.m_value;
-        else
-            return a.m_value < b.m_value;
+        return a.m_value < b.m_value;
     });
     // Devo farlo comunque, perché è come mi arrivano
 
@@ -91,7 +80,7 @@ void ListIndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndica
 
 std::vector<ListIndicatorsPreviewWidget::StyledIndicator> ListIndicatorsPreviewWidget::enumeratedIndicators() const {
     std::vector<StyledIndicator> indicators;
-    indicators.reserve(indicators.size());
+    indicators.reserve(m_indicators.size());
     for(size_t i = 0; i < m_indicators.size(); i++)
         indicators.push_back(StyledIndicator(m_indicators[i]));
     return indicators;
@@ -164,10 +153,9 @@ void ListIndicatorsPreviewWidget::onEditAccepted() {
     CustomFrame* customFrame = qobject_cast<CustomFrame*>(w);
     QString text             = it.indicator.m_label;
     customFrame->setText(text);
-
     customFrame->setBorder(it.indicator.m_style.m_indicatorColor, it.indicator.m_type);
-
     customFrame->setFormats(it.indicator.m_style.m_labelColor, it.indicator.m_style.m_labelFont);
+    m_indicators[it.index] = it.indicator;
 }
 
 void ListIndicatorsPreviewWidget::onItemSelectionChanged() {

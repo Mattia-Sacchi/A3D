@@ -15,6 +15,7 @@ public:
 private slots:
     void onSettingsButtonClicked();
     void onMapUpdated(A3D::MapChart3D const&);
+    void onGeneralInfoChanged(GeneralInfo);
 
 private:
     Ui::CalibrationWidget ui;

@@ -225,6 +225,10 @@ void ChartAxisData::invert() {
 	}
 }
 
+bool ChartAxisData::isInverted() const {
+    return m_axisMinimumValue > m_axisMaximumValue;
+}
+
 ChartAxisType ChartAxisData::type() const {
 	return m_type;
 }
@@ -254,14 +258,24 @@ void ChartAxisData::normalizeIndicatorValues() {
 
 MapChart3D::MapChart3D()
 	: m_isValid(false),
-	  m_revision(0) {}
+      m_surfaceRevision(0),
+      m_indicatorRevision(0),
+      m_labelsRevision(0) {}
 
 bool MapChart3D::isValid() const {
 	return m_isValid;
 }
 
-int MapChart3D::revision() const {
-	return m_revision;
+size_t MapChart3D::surfaceRevision() const {
+    return m_surfaceRevision;
+}
+
+size_t MapChart3D::indicatorsRevision() const {
+    return m_indicatorRevision;
+}
+
+size_t MapChart3D::labelsRevision() const {
+    return m_labelsRevision;
 }
 
 void MapChart3D::setAxisData(Axis3D axis, ChartAxisData data) {
@@ -269,7 +283,9 @@ void MapChart3D::setAxisData(Axis3D axis, ChartAxisData data) {
 		return;
 	m_axes[axis] = std::move(data);
 	normalizeAxisPoints(axis);
-	++m_revision;
+    ++m_surfaceRevision;
+    ++m_indicatorRevision;
+    ++m_labelsRevision;
 }
 
 void MapChart3D::offsetY(std::vector<Chart3DSearchResult>& points, float offset, ClampType clamp) {
@@ -314,7 +330,7 @@ void MapChart3D::offsetY(std::vector<Chart3DSearchResult>& points, float offset,
 		float& val = m_normalized_values[AXIS_Y][it->m_index];
 		val        = (newValue - fZeroOffset) * fInvDelta;
 	}
-	++m_revision;
+    ++m_surfaceRevision;
 }
 
 ChartAxisData const& MapChart3D::axisData(Axis3D axis) const {
@@ -338,7 +354,7 @@ void MapChart3D::setChartPoints(std::vector<float> x_input_positions, std::vecto
 	normalizeAxisPoints(AXIS_Z);
 
 	m_isValid = true;
-	++m_revision;
+    ++m_surfaceRevision;
 }
 
 std::vector<float> const& MapChart3D::valuesForAxis(Axis3D axis) const {

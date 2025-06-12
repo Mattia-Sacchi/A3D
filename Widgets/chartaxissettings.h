@@ -23,7 +23,7 @@ public:
 
     A3D::ChartAxisIndicatorStyle style() const;
 
-    void setAxisData(A3D::ChartAxisData const&);
+    void setAxisData(A3D::ChartAxisData);
 
     A3D::ChartAxisData axisData();
 
