@@ -1,5 +1,6 @@
 #include "chartwidget.h"
 #include "calibrationwidget.h"
+#include "../A3D/cubemap.h"
 
 ChartWidget::ChartWidget(QWidget* parent)
 	: QWidget(parent) {
@@ -10,6 +11,12 @@ ChartWidget::ChartWidget(QWidget* parent)
 	A3D::PointLightInfo& light = m_scene->getOrCreateLight(0);
 	light.position             = QVector3D(0.5f, 10.f, 0.5f);
 	light.color                = QVector4D(1.f, 1.f, 1.f, 500.f);
+
+    m_cubemap = new A3D::Cubemap(m_scene->resourceManager());
+    setWorldColor(Qt::black);
+
+    if(m_cubemap->isValid())
+        m_scene->setSkybox(m_cubemap);
 
 	m_view = new A3D::View(this);
 	m_view->camera().setPosition(QVector3D(2.f, 2.f, 2.f));
@@ -36,9 +43,27 @@ ChartWidget::ChartWidget(QWidget* parent)
     QObject::connect(&m_timer, &QTimer::timeout, m_scene, &A3D::Scene::updateScene);
 
     m_view->setAutoRefreshEnabled(true);
+
     m_scene->run();
 
     layout()->addWidget(m_view);
+}
+
+QColor ChartWidget::worldColor() const {
+    return m_worldColor;
+}
+
+void ChartWidget::setWorldColor(QColor color) {
+    if(color == m_worldColor)
+        return;
+    m_worldColor = color;
+    m_cubemap->setCubemapFace(A3D::Cubemap::CF_NEG_X, m_worldColor);
+    m_cubemap->setCubemapFace(A3D::Cubemap::CF_NEG_Y, m_worldColor);
+    m_cubemap->setCubemapFace(A3D::Cubemap::CF_NEG_Z, m_worldColor);
+    m_cubemap->setCubemapFace(A3D::Cubemap::CF_POS_X, m_worldColor);
+    m_cubemap->setCubemapFace(A3D::Cubemap::CF_POS_Y, m_worldColor);
+    m_cubemap->setCubemapFace(A3D::Cubemap::CF_POS_Z, m_worldColor);
+    m_cubemap->invalidateCache();
 }
 
 void ChartWidget::setMap(A3D::MapChart3D map) {

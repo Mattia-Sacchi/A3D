@@ -14,7 +14,7 @@ void CalibrationWidget::onSettingsButtonClicked() {
     A3D::SurfaceChartEntity* chart = ui.chartWidget->chart();
     m_settingsDialog->setMap(chart->mapChart());
     GeneralInfo info;
-    info.m_worldColor  = Qt::white;
+    info.m_worldColor  = ui.chartWidget->worldColor();
     info.m_markerColor = chart->markerColor();
     info.m_variants    = chart->renderVariants();
     m_settingsDialog->setGeneralInfo(info);
@@ -24,6 +24,7 @@ void CalibrationWidget::onSettingsButtonClicked() {
 void CalibrationWidget::onGeneralInfoChanged(GeneralInfo info) {
     ui.chartWidget->chart()->setMarkerColor(info.m_markerColor);
     ui.chartWidget->chart()->setRenderVariants(info.m_variants);
+    ui.chartWidget->setWorldColor(info.m_worldColor);
 }
 
 void CalibrationWidget::onMapUpdated(A3D::MapChart3D const& map) {

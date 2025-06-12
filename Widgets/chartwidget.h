@@ -18,6 +18,9 @@ public:
 
     inline A3D::SurfaceChartEntity* chart() const { return m_chart; }
 
+    QColor worldColor() const;
+    void setWorldColor(QColor);
+
 private:
     A3D::Scene* m_scene;
     A3D::SurfaceChartEntity* m_chart;
@@ -25,6 +28,8 @@ private:
     A3D::KeyboardCameraController* m_keyCamController;
     A3D::ChartEditorController* m_chartEditorController;
     A3D::MapChart3D m_map;
+    A3D::Cubemap* m_cubemap;
+    QColor m_worldColor;
 
     QTimer m_timer;
 };
