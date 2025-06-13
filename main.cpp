@@ -10,7 +10,7 @@
 #include "A3D/chart.h"
 #include "A3D/charteditorcontroller.h"
 #include "keyeventmanager.h"
-#include "calibrationwidget.h"
+#include "../Widgets/calibrationwidget.h"
 
 int main(int argc, char* argv[]) {
 	QApplication a(argc, argv);

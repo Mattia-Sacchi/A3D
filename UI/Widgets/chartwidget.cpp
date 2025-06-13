@@ -1,6 +1,6 @@
 #include "chartwidget.h"
 #include "calibrationwidget.h"
-#include "../A3D/cubemap.h"
+#include "../../A3D/cubemap.h"
 
 ChartWidget::ChartWidget(QWidget* parent)
 	: QWidget(parent) {
@@ -53,13 +53,11 @@ QColor ChartWidget::worldColor() const {
     return m_worldColor;
 }
 
-void ChartWidget::stop()
-{
+void ChartWidget::stop() {
     m_timer.stop();
 }
 
-void ChartWidget::restart()
-{
+void ChartWidget::restart() {
     m_timer.start(20);
 }
 

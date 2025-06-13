@@ -15,16 +15,16 @@
   </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="1" column="0">
-    <widget class="QLabel" name="labelColorLabel">
+    <widget class="QLabel" name="colorLabel">
      <property name="text">
       <string>Label color</string>
      </property>
     </widget>
    </item>
    <item row="1" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="colorHorizontalLayout">
      <item>
-      <widget class="QLabel" name="labelColorExampleLabel">
+      <widget class="QLabel" name="exampleOfColorLabel">
        <property name="text">
         <string>Example Label</string>
        </property>
@@ -53,7 +53,7 @@
     </widget>
    </item>
    <item row="2" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout_5">
+    <layout class="QHBoxLayout" name="resolutionHorizontalLayout">
      <item>
       <widget class="QRadioButton" name="lowResolutionRadioButton">
        <property name="text">
@@ -88,9 +88,9 @@
     </widget>
    </item>
    <item row="3" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
+    <layout class="QHBoxLayout" name="fontHorizontalLayout">
      <item>
-      <widget class="QLabel" name="labelFontExampleLabel">
+      <widget class="QLabel" name="exampleOfFontLabel">
        <property name="text">
         <string>Font Label</string>
        </property>
@@ -106,14 +106,14 @@
     </layout>
    </item>
    <item row="4" column="0">
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="scaleLabel">
      <property name="text">
       <string>Label Scale</string>
      </property>
     </widget>
    </item>
    <item row="4" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="scaleHorizontalLayout">
      <item>
       <widget class="QLabel" name="scaleValueLabel">
        <property name="sizePolicy">

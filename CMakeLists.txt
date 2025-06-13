@@ -18,7 +18,7 @@ find_package(Qt6 REQUIRED COMPONENTS
 # Sources
 set(SOURCES
     main.cpp
-
+    keyeventmanager.cpp
     A3D/entitycontroller.cpp
     A3D/keyboardcameracontroller.cpp
     A3D/linegroup.cpp
@@ -58,24 +58,25 @@ set(SOURCES
     A3D/chart.cpp
     A3D/view.cpp
     A3D/charteditorcontroller.cpp
-    Widgets/addliindicatorsdialog.cpp
-    Widgets/calibrationwidget.cpp
-    Widgets/chartaxissettings.cpp
-    Widgets/chartaxisgeneralsettings.cpp
-    Widgets/settingsdialog.cpp
-    Widgets/chartwidget.cpp
-    Widgets/indicatorspreviewwidget.cpp
-    Widgets/listindicatorspreviewwidget.cpp
-    Widgets/valuespreviewwidget.cpp
-    Widgets/linearindicatorssettingswidget.cpp
-    Widgets/addliindicatorsdialog.cpp
-    Widgets/editliindicatorsdialog.cpp
-    Widgets/incompatibilitydialog.cpp
-    Widgets/editenumdialog.cpp
-    Widgets/customframe.cpp
-    Widgets/chartindicatortypewidget.cpp
-    Widgets/stringprecisionwidget.cpp
-	keyeventmanager.cpp
+    UI/Widgets/calibrationwidget.cpp
+    UI/Widgets/chartaxissettings.cpp
+    UI/Widgets/chartwidget.cpp
+    UI/Widgets/indicatorspreviewwidget.cpp
+    UI/Widgets/listindicatorspreviewwidget.cpp
+    UI/Widgets/linearindicatorssettingswidget.cpp
+
+    UI/Dialogs/settingsdialog.cpp
+    UI/Dialogs/addliindicatorsdialog.cpp
+    UI/Dialogs/editliindicatorsdialog.cpp
+    UI/Dialogs/incompatibilitydialog.cpp
+    UI/Dialogs/editenumdialog.cpp
+    UI/Dialogs/addliindicatorsdialog.cpp
+    UI/Widgets/General/chartindicatortypewidget.cpp
+    UI/Widgets/General/valuespreviewwidget.cpp
+    UI/Widgets/General/stringprecisionwidget.cpp
+    UI/Widgets/General/customframe.cpp
+    UI/Widgets/General/chartaxisgeneralsettings.cpp
+    UI/Widgets/General//colorpickerform.cpp
 )
 
 set(INCPATHS
@@ -90,7 +91,8 @@ set(DEFINES
 
 # Headers
 set(HEADERS
-
+    Dependencies/stb/stb_image.h
+    keyeventmanager.h
     A3D/entitycontroller.h
     A3D/keyboardcameracontroller.h
     A3D/linegroup.h
@@ -130,24 +132,25 @@ set(HEADERS
     A3D/view.h
     A3D/chart.h
     A3D/charteditorcontroller.h
-    Widgets/addliindicatorsdialog.h
-    Widgets/calibrationwidget.h
-    Widgets/chartaxissettings.h
-    Widgets/chartaxisgeneralsettings.h
-    Widgets/settingsdialog.h
-    Widgets/chartwidget.h
-    Widgets/indicatorspreviewwidget.h
-    Widgets/listindicatorspreviewwidget.h
-    Widgets/valuespreviewwidget.h
-    Widgets/linearindicatorssettingswidget.h
-    Widgets/editliindicatorsdialog.h
-    Widgets/incompatibilitydialog.h
-    Widgets/editenumdialog.h
-    Widgets/customframe.h
-    Widgets/chartindicatortypewidget.h
-    Widgets/stringprecisionwidget.h
-    Dependencies/stb/stb_image.h
-    keyeventmanager.h
+    UI/Widgets/calibrationwidget.h
+    UI/Widgets/chartaxissettings.h
+    UI/Widgets/chartwidget.h
+    UI/Widgets/indicatorspreviewwidget.h
+    UI/Widgets/listindicatorspreviewwidget.h
+    UI/Widgets/linearindicatorssettingswidget.h
+    UI/Dialogs/settingsdialog.h
+    UI/Dialogs/addliindicatorsdialog.h
+    UI/Dialogs/editliindicatorsdialog.h
+    UI/Dialogs/incompatibilitydialog.h
+    UI/Dialogs/editenumdialog.h
+    UI/Dialogs/addliindicatorsdialog.h
+    UI/Widgets/General/chartindicatortypewidget.h
+    UI/Widgets/General/valuespreviewwidget.h
+    UI/Widgets/General/stringprecisionwidget.h
+    UI/Widgets/General/customframe.h
+    UI/Widgets/General/chartaxisgeneralsettings.h
+    UI/Widgets/General//colorpickerform.h
+
 
 )
 
@@ -157,20 +160,23 @@ set(RESOURCES
 )
 
 set(UI_FILES
-    Widgets/calibrationwidget.ui
-    Widgets/chartaxissettings.ui
-    Widgets/chartaxisgeneralsettings.ui
-    Widgets/settingsdialog.ui
-    Widgets/indicatorspreviewwidget.ui
-    Widgets/listindicatorspreviewwidget.ui
-    Widgets/linearindicatorssettingswidget.ui
-    Widgets/addliindicatorsdialog.ui
-    Widgets/editliindicatorsdialog.ui
-    Widgets/editenumdialog.ui
-    Widgets/valuespreviewwidget.ui
-    Widgets/incompatibilitydialog.ui
-    Widgets/chartindicatortypewidget.ui
-    Widgets/stringprecisionwidget.ui
+    UI/Widgets/calibrationwidget.ui
+    UI/Widgets/chartaxissettings.ui
+    UI/Widgets/indicatorspreviewwidget.ui
+    UI/Widgets/listindicatorspreviewwidget.ui
+    UI/Widgets/linearindicatorssettingswidget.ui
+
+    UI/Dialogs/settingsdialog.ui
+    UI/Dialogs/addliindicatorsdialog.ui
+    UI/Dialogs/editliindicatorsdialog.ui
+    UI/Dialogs/incompatibilitydialog.ui
+    UI/Dialogs/editenumdialog.ui
+    UI/Dialogs/addliindicatorsdialog.ui
+    UI/Widgets/General/chartindicatortypewidget.ui
+    UI/Widgets/General/valuespreviewwidget.cpp ui
+    UI/Widgets/General/stringprecisionwidget.ui
+    UI/Widgets/General/chartaxisgeneralsettings.ui
+    UI/Widgets/General//colorpickerform.ui
 )
  
 qt_add_big_resources(
@@ -185,14 +191,11 @@ qt_add_executable(${PROJECT_NAME}
     ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
     ${RESOURCES}
-    Widgets/colorpickerform.h Widgets/colorpickerform.cpp Widgets/colorpickerform.ui
-
-
-
-
 )
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Widgets)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/UI/Widgets
+${CMAKE_CURRENT_SOURCE_DIR}/UI/Dialogs
+${CMAKE_CURRENT_SOURCE_DIR}/UI/Widgets/General)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${INCPATHS}

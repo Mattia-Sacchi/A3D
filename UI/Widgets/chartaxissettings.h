@@ -2,7 +2,7 @@
 #define CHARTAXISSETTINGS_H
 
 #include "ui_chartaxissettings.h"
-#include "../A3D/chart.h"
+#include "../../A3D/chart.h"
 
 struct IndicatorInfo {
     A3D::ChartAxisIndicatorStyle m_style;

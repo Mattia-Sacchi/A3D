@@ -2,7 +2,7 @@
 #define VALUESPREVIEWWIDGET_H
 
 #include "ui_valuespreviewwidget.h"
-#include "../A3D/chart.h"
+#include "../../A3D/chart.h"
 
 class ValuesPreviewWidget : public QWidget {
 	Q_OBJECT

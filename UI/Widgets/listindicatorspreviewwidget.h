@@ -2,8 +2,8 @@
 #define LISTINDICATORSPREVIEWWIDGET_H
 
 #include "ui_listindicatorspreviewwidget.h"
-#include "../A3D/chart.h"
-#include "editenumdialog.h"
+#include "../../A3D/chart.h"
+#include "../Dialogs/editenumdialog.h"
 
 class ChartAxisSettings;
 

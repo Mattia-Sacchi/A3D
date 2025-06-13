@@ -3,8 +3,8 @@
 
 #include <QDialog>
 
-#include "../A3D/chart.h"
-#include "chartaxissettings.h"
+#include "../../A3D/chart.h"
+#include "../Widgets/chartaxissettings.h"
 
 namespace Ui {
 class IncompatibilityDialog;

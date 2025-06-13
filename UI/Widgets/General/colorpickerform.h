@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+// Warning, on Linux, the QColorDialog doesn't work if QOpelGLWidget is running
+
 namespace Ui {
 class ColorPickerForm;
 }
@@ -24,7 +26,6 @@ private slots:
 
 private:
     QColor m_color;
-
     Ui::ColorPickerForm* ui;
 };
 

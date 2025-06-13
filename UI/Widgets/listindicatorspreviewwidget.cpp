@@ -1,7 +1,7 @@
 #include "listindicatorspreviewwidget.h"
-#include "chartaxisgeneralsettings.h"
+#include "General/chartaxisgeneralsettings.h"
 #include <QPainter>
-#include "customframe.h"
+#include "General/customframe.h"
 #include "chartaxissettings.h"
 
 ListIndicatorsPreviewWidget::ListIndicatorsPreviewWidget(QWidget* parent)

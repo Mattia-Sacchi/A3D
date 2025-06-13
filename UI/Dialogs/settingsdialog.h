@@ -2,8 +2,8 @@
 #define SETTINGSDIALOG_H
 
 #include "ui_settingsdialog.h"
-#include "../A3D/chart.h"
-#include "../A3D/surfacechartentity.h"
+#include "../../A3D/chart.h"
+#include "../../A3D/surfacechartentity.h"
 
 struct GeneralInfo {
     QColor m_worldColor;

@@ -3,11 +3,11 @@
 
 #include <QWidget>
 #include <QTimer>
-#include "../A3D/scene.h"
-#include "../A3D/view.h"
-#include "../A3D/surfacechartentity.h"
-#include "../A3D/keyboardcameracontroller.h"
-#include "../A3D/charteditorcontroller.h"
+#include "../../A3D/scene.h"
+#include "../../A3D/view.h"
+#include "../../A3D/surfacechartentity.h"
+#include "../../A3D/keyboardcameracontroller.h"
+#include "../../A3D/charteditorcontroller.h"
 
 class ChartWidget : public QWidget {
 	Q_OBJECT

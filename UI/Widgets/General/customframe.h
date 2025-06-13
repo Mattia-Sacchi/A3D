@@ -13,6 +13,8 @@ enum {
     MinorWidth = 2,
 };
 
+// This is a general widget used as button and as a display frame.
+
 class CustomFrame : public QFrame {
     Q_OBJECT
 public:

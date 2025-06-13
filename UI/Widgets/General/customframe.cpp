@@ -20,7 +20,6 @@ CustomFrame::CustomFrame(QWidget* parent, QColor borderColor, A3D::ChartAxisIndi
     m_numberLabel.hide();
     m_label.setAlignment(Qt::AlignCenter | Qt::AlignVCenter);
     m_numberLabel.setAlignment(Qt::AlignCenter | Qt::AlignVCenter);
-
     setAttribute(Qt::WA_Hover, true);
     setMouseTracking(true);
 }
@@ -30,8 +29,6 @@ void CustomFrame::setBorder(QColor color, A3D::ChartAxisIndicatorType type) {
     if(type == A3D::CHAXIND_MAJOR_INDICATOR)
         borderSize = MajorWidth;
 
-    //size_t px = borderSize * 2;
-    //layout()->setContentsMargins(px, px, px, px);
     m_borderColor = color;
     m_borderSize  = borderSize;
     update();

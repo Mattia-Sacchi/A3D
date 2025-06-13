@@ -2,9 +2,9 @@
 #define INDICATORSPREVIEWWIDGET_H
 
 #include "ui_indicatorspreviewwidget.h"
-#include "../A3D/chart.h"
-#include "addliindicatorsdialog.h"
-#include "editliindicatorsdialog.h"
+#include "../../A3D/chart.h"
+#include "../Dialogs/addliindicatorsdialog.h"
+#include "../Dialogs/editliindicatorsdialog.h"
 
 class ChartAxisSettings;
 

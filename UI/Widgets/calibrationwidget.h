@@ -2,8 +2,8 @@
 #define CALIBRATIONWIDGET_H
 
 #include "ui_calibrationwidget.h"
-#include "settingsdialog.h"
-#include "../A3D/chart.h"
+#include "../Dialogs/settingsdialog.h"
+#include "../../A3D/chart.h"
 class CalibrationWidget : public QWidget {
     Q_OBJECT
 

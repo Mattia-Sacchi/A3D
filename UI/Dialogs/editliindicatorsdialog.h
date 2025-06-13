@@ -2,7 +2,7 @@
 #define EDITLIINDICATORSDIALOG_H
 
 #include <QDialog>
-#include "../A3D/chart.h"
+#include "../../A3D/chart.h"
 
 namespace Ui {
 class EditLiIndicatorsDialog;
