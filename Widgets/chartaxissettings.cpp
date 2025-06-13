@@ -81,8 +81,10 @@ A3D::ChartAxisData ChartAxisSettings::axisData() {
         break;
     default:
     case A3D::CHAXIS_LINEAR_INTERPOLATED:
-        data.setMinMax(ui.LinearPreviewWidget->min(), ui.LinearPreviewWidget->max());
+
         data.setIndicators(ui.LinearPreviewWidget->indicatorPreviewWidget()->indicators());
+        // I set the bounds so it auto normalize them
+        data.setMinMax(ui.LinearPreviewWidget->min(), ui.LinearPreviewWidget->max());
         break;
     }
 
