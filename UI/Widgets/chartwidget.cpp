@@ -90,7 +90,7 @@ void ChartWidget::setWorldColor(QColor color) {
     m_cubemap->setCubemapFace(A3D::Cubemap::CF_POS_X, m_worldColor);
     m_cubemap->setCubemapFace(A3D::Cubemap::CF_POS_Y, m_worldColor);
     m_cubemap->setCubemapFace(A3D::Cubemap::CF_POS_Z, m_worldColor);
-    m_view->updateView();
+    m_cubemap->invalidateCache();
 }
 
 A3D::MapChart3D ChartWidget::map() const
