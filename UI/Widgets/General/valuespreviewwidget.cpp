@@ -5,8 +5,7 @@ ValuesPreviewWidget::ValuesPreviewWidget(QWidget* parent)
     : QWidget(parent) {
 	ui.setupUi(this);
 
-    ui.previewWidget->setSelectionMode(QAbstractItemView::MultiSelection);
-    ui.previewWidget->setSortingEnabled(true);
+    ui.previewWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     connect(ui.previewWidget, &QListWidget::itemSelectionChanged, this, &ValuesPreviewWidget::onItemSelectionChanged);
     connect(ui.addValueButton, &QPushButton::clicked, this, &ValuesPreviewWidget::onAddButtonClicked);
@@ -61,14 +60,12 @@ void ValuesPreviewWidget::addValue(float value) {
 
 void ValuesPreviewWidget::onAddButtonClicked() {
 
-	float defaultValue = 0.f;
-
+    float defaultValue = 0.f;
     if(ui.previewWidget->count()) {
         QListWidgetItem* item      = ui.previewWidget->item(0);
         QWidget* tempDoubleSpinBox = ui.previewWidget->itemWidget(item);
         defaultValue               = qobject_cast<QDoubleSpinBox*>(tempDoubleSpinBox)->value() + 1;
 	}
-
 	addValue(defaultValue);
 }
 
@@ -84,14 +81,11 @@ void ValuesPreviewWidget::onRemoveButtonClicked() {
 }
 
 void ValuesPreviewWidget::onItemSelectionChanged() {
-    int count   = ui.previewWidget->selectedItems().count();
-    bool result = count > 0;
-    if(count == 1) {
+    int count = ui.previewWidget->selectedItems().count();
+    if(count == 1)
         ui.removeValueButton->setText("Remove value");
-    }
-    else if(count > 1) {
+    else if(count)
         ui.removeValueButton->setText("Remove values");
-    }
 
-    ui.removeValueButton->setEnabled(result);
+    ui.removeValueButton->setEnabled(count > 0);
 }
