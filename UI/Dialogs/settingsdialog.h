@@ -17,7 +17,7 @@ class SettingsDialog : public QDialog {
 public:
 	explicit SettingsDialog(QWidget* parent = nullptr);
 
-    void setMap(A3D::MapChart3D&);
+    void setMap(A3D::MapChart3D const&);
     void setGeneralInfo(GeneralInfo);
 
     // Here the shortcuts and other settings

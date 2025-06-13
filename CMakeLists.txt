@@ -64,7 +64,6 @@ set(SOURCES
     UI/Widgets/indicatorspreviewwidget.cpp
     UI/Widgets/listindicatorspreviewwidget.cpp
     UI/Widgets/linearindicatorssettingswidget.cpp
-
     UI/Dialogs/settingsdialog.cpp
     UI/Dialogs/addliindicatorsdialog.cpp
     UI/Dialogs/editliindicatorsdialog.cpp
@@ -150,8 +149,6 @@ set(HEADERS
     UI/Widgets/General/customframe.h
     UI/Widgets/General/chartaxisgeneralsettings.h
     UI/Widgets/General//colorpickerform.h
-
-
 )
 
 set(RESOURCES
@@ -165,7 +162,6 @@ set(UI_FILES
     UI/Widgets/indicatorspreviewwidget.ui
     UI/Widgets/listindicatorspreviewwidget.ui
     UI/Widgets/linearindicatorssettingswidget.ui
-
     UI/Dialogs/settingsdialog.ui
     UI/Dialogs/addliindicatorsdialog.ui
     UI/Dialogs/editliindicatorsdialog.ui
@@ -173,10 +169,10 @@ set(UI_FILES
     UI/Dialogs/editenumdialog.ui
     UI/Dialogs/addliindicatorsdialog.ui
     UI/Widgets/General/chartindicatortypewidget.ui
-    UI/Widgets/General/valuespreviewwidget.cpp ui
+    UI/Widgets/General/valuespreviewwidget.ui
     UI/Widgets/General/stringprecisionwidget.ui
     UI/Widgets/General/chartaxisgeneralsettings.ui
-    UI/Widgets/General//colorpickerform.ui
+    UI/Widgets/General/colorpickerform.ui
 )
  
 qt_add_big_resources(

@@ -9,29 +9,40 @@
 #include "../../A3D/keyboardcameracontroller.h"
 #include "../../A3D/charteditorcontroller.h"
 
+
+// This class is meant to be a wall between other projects and A3D
+// Data enters and settings enter and exit through here
+// The sanity of the input is checked here
 class ChartWidget : public QWidget {
 	Q_OBJECT
 public:
     ChartWidget(QWidget* parent = nullptr);
 
-    void setMap(A3D::MapChart3D);
-
-    inline A3D::SurfaceChartEntity* chart() const { return m_chart; }
-
+	A3D::SurfaceChartEntity::RenderVariants renderVariants() const;
+	void setRenderVariants(A3D::SurfaceChartEntity::RenderVariants);
+	QColor markerColor() const;
+	void setMarkerColor(QColor);
     QColor worldColor() const;
     void setWorldColor(QColor);
 
+    A3D::MapChart3D map() const;
     void stop();
     void restart();
 
+    //A3D::SurfaceChartEntity * surfaceChart() const;
+public slots:
+
+    void setMap(A3D::MapChart3D const&);
+
 private:
     A3D::Scene* m_scene;
-    A3D::SurfaceChartEntity* m_chart;
+    A3D::SurfaceChartEntity* m_surfaceChart;
     A3D::View* m_view;
     A3D::KeyboardCameraController* m_keyCamController;
     A3D::ChartEditorController* m_chartEditorController;
     A3D::MapChart3D m_map;
     A3D::Cubemap* m_cubemap;
+
     QColor m_worldColor;
 
     QTimer m_timer;

@@ -10,12 +10,11 @@ class CalibrationWidget : public QWidget {
 public:
     explicit CalibrationWidget(QWidget* parent = nullptr);
 
-    A3D::SurfaceChartEntity* chart() const;
+    ChartWidget * chartWidget() const;
 
 private slots:
     void onSettingsButtonClicked();
-    void onMapUpdated(A3D::MapChart3D const&);
-    void onGeneralInfoChanged(GeneralInfo);
+    void onGeneralInfoChanged(GeneralInfo const&);
     void onDialogFinished(int);
 
 private:

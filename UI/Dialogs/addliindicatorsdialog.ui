@@ -24,8 +24,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>620</width>
-        <height>484</height>
+        <width>624</width>
+        <height>487</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -68,9 +68,7 @@
            <widget class="ChartIndicatorTypeWidget" name="indicatorTypeWidget" native="true"/>
           </item>
           <item>
-           <widget class="StringPrecisionWidget" name="labelDigitsWidget" native="true">
-            <layout class="QFormLayout" name="formLayout"/>
-           </widget>
+           <widget class="StringPrecisionWidget" name="labelDigitsWidget" native="true"/>
           </item>
          </layout>
         </widget>

@@ -160,9 +160,8 @@ int main(int argc, char* argv[]) {
 
     CalibrationWidget cal;
 
-    A3D::SurfaceChartEntity* autoUpChart = cal.chart();
 
-    autoUpChart->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
+    cal.chartWidget()->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
 
     A3D::MapChart3D autoUpMap;
 
@@ -242,13 +241,8 @@ int main(int argc, char* argv[]) {
         }
     );
 
-    if(!autoUpMap.isValid()) {
-        qDebug() << "AutoUp Map is not valid!";
-        return 1;
-    }
+	cal.chartWidget()->setMap(autoUpMap);
 
-    autoUpChart->setLabelDistances(QVector3D(0.1f, 0.1f, 0.1f));
-    autoUpChart->setChart(autoUpMap);
     w.setCentralWidget(&cal);
 	w.show();
 

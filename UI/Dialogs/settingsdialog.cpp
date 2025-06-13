@@ -21,7 +21,7 @@ void SettingsDialog::setGeneralInfo(GeneralInfo info) {
     ui.markerColorPicker->setColor(m_info.m_markerColor);
 }
 
-void SettingsDialog::setMap(A3D::MapChart3D& map) {
+void SettingsDialog::setMap(A3D::MapChart3D const& map) {
     ui.xAxisSettings->setAxisData(map.axisData(A3D::AXIS_X));
     ui.yAxisSettings->setAxisData(map.axisData(A3D::AXIS_Y));
     ui.zAxisSettings->setAxisData(map.axisData(A3D::AXIS_Z));
