@@ -160,9 +160,9 @@ int main(int argc, char* argv[]) {
 
     CalibrationWidget cal;
 
+    //cal.chartWidget()->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
 
-    cal.chartWidget()->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
-
+    /*
     A3D::MapChart3D autoUpMap;
 
     {
@@ -241,7 +241,54 @@ int main(int argc, char* argv[]) {
         }
     );
 
-	cal.chartWidget()->setMap(autoUpMap);
+
+    */
+
+    A3D::MapChart3D rpmGasToTargetPressure;
+
+    {
+
+        A3D::ChartAxisData axis_RPM;
+        axis_RPM.setMinMax(0, 4000);
+        axis_RPM.addEquidistantIndicatorsByStepSize(0, 4000, 1000, 0, A3D::CHAXIND_MAJOR_INDICATOR);
+        axis_RPM.addEquidistantIndicatorsByStepSize(500, 3500, 500, 0, A3D::CHAXIND_MINOR_INDICATOR);
+        axis_RPM.invert();
+        axis_RPM.setName("RPM");
+        rpmGasToTargetPressure.setAxisData(A3D::AXIS_X, axis_RPM);
+
+        A3D::ChartAxisData axis_Gas;
+        axis_Gas.setMinMax(0, 100);
+        axis_Gas.addEquidistantIndicatorsByStepSize(0.f, 100.f, 20.f, 0, A3D::CHAXIND_MAJOR_INDICATOR);
+        axis_Gas.invert();
+        axis_Gas.setName("Gas %");
+        rpmGasToTargetPressure.setAxisData(A3D::AXIS_Z, axis_Gas);
+
+        A3D::ChartAxisData axis_Pressure;
+        axis_Pressure.setMinMax(0, 2800);
+        axis_Pressure.addEquidistantIndicatorsByStepSize(0.f, 2800.f, 300.f, 0, A3D::CHAXIND_MAJOR_INDICATOR);
+        axis_Pressure.addEquidistantIndicatorsByStepSize(150.f, 2800.f, 150.f, 0, A3D::CHAXIND_MINOR_INDICATOR);
+        axis_Pressure.setName("Target Pressure");
+        rpmGasToTargetPressure.setAxisData(A3D::AXIS_Y, axis_Pressure);
+    }
+
+    rpmGasToTargetPressure.setChartPoints(
+        { 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000 }, { 0, 20, 40, 60, 80, 100 },
+        {
+            100, 200, 400, 800,  1600, 1800, 1900, 2000, // 1
+            150, 250, 450, 850,  1650, 1850, 2050, 2100, // 2
+            200, 300, 500, 900,  1700, 1900, 2100, 2200, // 3
+            300, 400, 550, 900,  1750, 1900, 2100, 2200, // 4
+            350, 450, 550, 950,  1800, 1900, 2150, 2200, // 5
+            400, 500, 500, 1000, 1800, 1900, 2150, 2200, // 6
+        }
+    );
+
+    if(!rpmGasToTargetPressure.isValid()) {
+        qDebug() << "Rpm Gas To Target Pressure Map is not valid!";
+        return 1;
+    }
+
+    cal.chartWidget()->setMap(rpmGasToTargetPressure);
 
     w.setCentralWidget(&cal);
 	w.show();
