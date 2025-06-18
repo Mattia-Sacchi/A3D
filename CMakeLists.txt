@@ -62,14 +62,13 @@ set(SOURCES
     UI/Widgets/chartaxissettings.cpp
     UI/Widgets/chartwidget.cpp
     UI/Widgets/indicatorspreviewwidget.cpp
-    UI/Widgets/listindicatorspreviewwidget.cpp
+    UI/Widgets/styledenumeratedindicatorpreviewwidget.cpp
     UI/Widgets/linearindicatorssettingswidget.cpp
     UI/Dialogs/settingsdialog.cpp
-    UI/Dialogs/addliindicatorsdialog.cpp
     UI/Dialogs/editliindicatorsdialog.cpp
     UI/Dialogs/incompatibilitydialog.cpp
     UI/Dialogs/editenumdialog.cpp
-    UI/Dialogs/addliindicatorsdialog.cpp
+    UI/Dialogs/addindicatorsdialog.cpp
     UI/Widgets/General/chartindicatortypewidget.cpp
     UI/Widgets/General/valuespreviewwidget.cpp
     UI/Widgets/General/stringprecisionwidget.cpp
@@ -135,14 +134,13 @@ set(HEADERS
     UI/Widgets/chartaxissettings.h
     UI/Widgets/chartwidget.h
     UI/Widgets/indicatorspreviewwidget.h
-    UI/Widgets/listindicatorspreviewwidget.h
+    UI/Widgets/styledenumeratedindicatorpreviewwidget.h
     UI/Widgets/linearindicatorssettingswidget.h
     UI/Dialogs/settingsdialog.h
-    UI/Dialogs/addliindicatorsdialog.h
     UI/Dialogs/editliindicatorsdialog.h
     UI/Dialogs/incompatibilitydialog.h
     UI/Dialogs/editenumdialog.h
-    UI/Dialogs/addliindicatorsdialog.h
+    UI/Dialogs/addindicatorsdialog.h
     UI/Widgets/General/chartindicatortypewidget.h
     UI/Widgets/General/valuespreviewwidget.h
     UI/Widgets/General/stringprecisionwidget.h
@@ -160,14 +158,13 @@ set(UI_FILES
     UI/Widgets/calibrationwidget.ui
     UI/Widgets/chartaxissettings.ui
     UI/Widgets/indicatorspreviewwidget.ui
-    UI/Widgets/listindicatorspreviewwidget.ui
+    UI/Widgets/styledenumeratedindicatorpreviewwidget.ui
     UI/Widgets/linearindicatorssettingswidget.ui
     UI/Dialogs/settingsdialog.ui
-    UI/Dialogs/addliindicatorsdialog.ui
     UI/Dialogs/editliindicatorsdialog.ui
     UI/Dialogs/incompatibilitydialog.ui
     UI/Dialogs/editenumdialog.ui
-    UI/Dialogs/addliindicatorsdialog.ui
+    UI/Dialogs/addindicatorsdialog.ui
     UI/Widgets/General/chartindicatortypewidget.ui
     UI/Widgets/General/valuespreviewwidget.ui
     UI/Widgets/General/stringprecisionwidget.ui

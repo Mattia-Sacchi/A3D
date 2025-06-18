@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ListIndicatorsPreviewWidget</class>
- <widget class="QWidget" name="ListIndicatorsPreviewWidget">
+ <class>StyledEnumeratedIndicatorsPreviewWidget</class>
+ <widget class="QWidget" name="StyledEnumeratedIndicatorsPreviewWidget">
   <property name="geometry">
    <rect>
     <x>0</x>

@@ -1,17 +1,17 @@
 #ifndef LISTINDICATORSPREVIEWWIDGET_H
 #define LISTINDICATORSPREVIEWWIDGET_H
 
-#include "ui_listindicatorspreviewwidget.h"
+#include "ui_styledenumeratedindicatorpreviewwidget.h"
 #include "../../A3D/chart.h"
 #include "../Dialogs/editenumdialog.h"
 
 class ChartAxisSettings;
 
-class ListIndicatorsPreviewWidget : public QWidget {
+class StyledEnumeratedIndicatorsPreviewWidget : public QWidget {
 	Q_OBJECT
 
 public:
-    explicit ListIndicatorsPreviewWidget(QWidget* parent = nullptr);
+    explicit StyledEnumeratedIndicatorsPreviewWidget(QWidget* parent = nullptr);
 
     void addIndicators(std::vector<A3D::ChartAxisIndicator> const&);
 
@@ -46,7 +46,7 @@ private:
     std::vector<A3D::ChartAxisIndicator> m_indicators;
     ChartAxisSettings* m_settings;
     EditEnumDialog m_dialog;
-    Ui::ListIndicatorsPreviewWidget ui;
+    Ui::StyledEnumeratedIndicatorsPreviewWidget ui;
 };
 
 #endif // LISTINDICATORSPREVIEWWIDGET_H

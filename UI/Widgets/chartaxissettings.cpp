@@ -65,7 +65,7 @@ A3D::ChartAxisData ChartAxisSettings::axisData() {
     case A3D::CHAXIS_ENUMERATED:
         {
             // Lo so che si può ottimizzare e così fa schifo, ma per ora mi interessa verderlo fungere!!!
-            std::vector<ListIndicatorsPreviewWidget::StyledIndicator> indicators = ui.EnumeratedPreviewWidget->enumeratedIndicators();
+            std::vector<StyledEnumeratedIndicatorsPreviewWidget::StyledIndicator> indicators = ui.EnumeratedPreviewWidget->enumeratedIndicators();
             std::vector<A3D::ChartAxisStyledEnumeratedIndicatorData> majorIndicators;
             std::vector<A3D::ChartAxisStyledEnumeratedIndicatorData> minorIndicators;
             for(size_t i = 0; i < indicators.size(); i++) {

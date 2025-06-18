@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AddLiIndicatorsDialog</class>
- <widget class="QDialog" name="AddLiIndicatorsDialog">
+ <class>AddIndicatorsDialog</class>
+ <widget class="QDialog" name="AddIndicatorsDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>644</width>
-    <height>539</height>
+    <width>647</width>
+    <height>571</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,8 +24,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>624</width>
-        <height>487</height>
+        <width>623</width>
+        <height>516</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -246,7 +246,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>AddLiIndicatorsDialog</receiver>
+   <receiver>AddIndicatorsDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -262,7 +262,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>AddLiIndicatorsDialog</receiver>
+   <receiver>AddIndicatorsDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

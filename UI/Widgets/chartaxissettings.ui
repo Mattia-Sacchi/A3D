@@ -85,7 +85,7 @@
     <widget class="LinearIndicatorsSettingsWidget" name="LinearPreviewWidget" native="true"/>
    </item>
    <item>
-    <widget class="ListIndicatorsPreviewWidget" name="EnumeratedPreviewWidget" native="true"/>
+    <widget class="StyledEnumeratedIndicatorsPreviewWidget" name="EnumeratedPreviewWidget" native="true"/>
    </item>
   </layout>
  </widget>
@@ -103,9 +103,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ListIndicatorsPreviewWidget</class>
+   <class>StyledEnumeratedIndicatorsPreviewWidget</class>
    <extends>QWidget</extends>
-   <header>listindicatorspreviewwidget.h</header>
+   <header>styledenumeratedindicatorpreviewwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -160,7 +160,7 @@ int main(int argc, char* argv[]) {
 
     CalibrationWidget cal;
 
-    //cal.chartWidget()->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
+    cal.chartWidget()->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
 
     /*
     A3D::MapChart3D autoUpMap;

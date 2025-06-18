@@ -1,14 +1,14 @@
-#include "addliindicatorsdialog.h"
-#include "ui_addliindicatorsdialog.h"
+#include "addindicatorsdialog.h"
+#include "ui_addindicatorsdialog.h"
 
-AddLiIndicatorsDialog::AddLiIndicatorsDialog(QWidget* parent)
+AddIndicatorsDialog::AddIndicatorsDialog(QWidget* parent)
 	: QDialog(parent),
-	  ui(new Ui::AddLiIndicatorsDialog),
+      ui(new Ui::AddIndicatorsDialog),
       m_mode(AM_BY_STEP),
       m_countMode(true) {
 	ui->setupUi(this);
 	setMode(m_mode);
-    setCountOrStepSizeMode(m_countMode);
+    onCountModeChanged(m_countMode);
 
     ui->stepSizeLabel->setMinimumWidth(ui->stepSizeLabel->fontMetrics().boundingRect("Indicators count").width());
     ui->stepSizeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
@@ -24,35 +24,21 @@ AddLiIndicatorsDialog::AddLiIndicatorsDialog(QWidget* parent)
 
 	ui->countSpinBox->setMaximum(A3D::MaxIndicators);
 
-    connect(ui->byStepRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onByStepButtonClicked);
-    connect(ui->rawEditRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onRawAddButtonClicked);
-    connect(ui->countRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onCountButtonClicked);
-    connect(ui->stepRadioButton, &QRadioButton::clicked, this, &AddLiIndicatorsDialog::onStepSizeButtonClicked);
-    connect(ui->labelDigitsWidget, &StringPrecisionWidget::stringPrecisionChanged, this, &AddLiIndicatorsDialog::onLabelDigitsChanged);
+    connect(ui->byStepRadioButton, &QRadioButton::toggled, this, &AddIndicatorsDialog::onModeChanged);
+    connect(ui->countRadioButton, &QRadioButton::toggled, this, &AddIndicatorsDialog::onCountModeChanged);
+    connect(ui->labelDigitsWidget, &StringPrecisionWidget::stringPrecisionChanged, this, &AddIndicatorsDialog::onLabelDigitsChanged);
 }
 
-void AddLiIndicatorsDialog::onRawAddButtonClicked() {
-	setMode(AM_RAW_ADD);
+void AddIndicatorsDialog::onModeChanged(bool mode) {
+    setMode(mode ? AM_BY_STEP : AM_RAW_ADD);
 }
 
-void AddLiIndicatorsDialog::onByStepButtonClicked() {
-	setMode(AM_BY_STEP);
-}
-
-void AddLiIndicatorsDialog::onCountButtonClicked() {
-	setCountOrStepSizeMode(true);
-}
-
-void AddLiIndicatorsDialog::onStepSizeButtonClicked() {
-	setCountOrStepSizeMode(false);
-}
-
-void AddLiIndicatorsDialog::onLabelDigitsChanged() {
+void AddIndicatorsDialog::onLabelDigitsChanged() {
     size_t digits = ui->labelDigitsWidget->getPrecision();
     ui->rawEditWidget->setStringPrecision(digits);
 }
 
-void AddLiIndicatorsDialog::setCountOrStepSizeMode(bool mode) {
+void AddIndicatorsDialog::onCountModeChanged(bool mode) {
 	m_countMode = mode;
     ui->stepSizeLabel->setHidden(m_countMode);
     ui->stepSizeDoubleSpinBox->setHidden(m_countMode);
@@ -60,7 +46,7 @@ void AddLiIndicatorsDialog::setCountOrStepSizeMode(bool mode) {
     ui->countLabel->setHidden(!m_countMode);
 }
 
-void AddLiIndicatorsDialog::setMode(AddMode mode) {
+void AddIndicatorsDialog::setMode(AddMode mode) {
 	m_mode = mode;
 
     switch(m_mode) {
@@ -76,11 +62,11 @@ void AddLiIndicatorsDialog::setMode(AddMode mode) {
     }
 }
 
-void AddLiIndicatorsDialog::setStyle(A3D::ChartAxisIndicatorStyle style) {
+void AddIndicatorsDialog::setStyle(A3D::ChartAxisIndicatorStyle style) {
     ui->generalSettings->setStyle(style);
 }
 
-std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::getIndicatorFromCount(size_t count) const {
+std::vector<A3D::ChartAxisIndicator> AddIndicatorsDialog::getIndicatorFromCount(size_t count) const {
     std::vector<A3D::ChartAxisIndicator> indicators;
     A3D::ChartAxisIndicatorType type   = ui->indicatorTypeWidget->type();
     size_t const stringPrecision       = ui->labelDigitsWidget->getPrecision();
@@ -99,7 +85,7 @@ std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::getIndicatorFromCoun
 }
 
 // TODO:  Normalize value when they arrive
-std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::indicators() const {
+std::vector<A3D::ChartAxisIndicator> AddIndicatorsDialog::indicators() const {
 	std::vector<A3D::ChartAxisIndicator> indicators;
     A3D::ChartAxisIndicatorType type   = ui->indicatorTypeWidget->type();
     int const stringPrecision          = ui->labelDigitsWidget->getPrecision();
@@ -151,6 +137,6 @@ std::vector<A3D::ChartAxisIndicator> AddLiIndicatorsDialog::indicators() const {
     return indicators;
 }
 
-AddLiIndicatorsDialog::~AddLiIndicatorsDialog() {
+AddIndicatorsDialog::~AddIndicatorsDialog() {
 	delete ui;
 }

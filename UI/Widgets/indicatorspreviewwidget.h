@@ -3,7 +3,7 @@
 
 #include "ui_indicatorspreviewwidget.h"
 #include "../../A3D/chart.h"
-#include "../Dialogs/addliindicatorsdialog.h"
+#include "../Dialogs/addindicatorsdialog.h"
 #include "../Dialogs/editliindicatorsdialog.h"
 
 class ChartAxisSettings;
@@ -37,7 +37,7 @@ private slots:
 private:
     void editIndicators(std::vector<A3D::ChartAxisIndicator> const&);
     ChartAxisSettings* m_settings;
-    AddLiIndicatorsDialog m_addDialog;
+    AddIndicatorsDialog m_addDialog;
     EditLiIndicatorsDialog m_editDialog;
     std::vector<A3D::ChartAxisIndicator> m_indicators;
     Ui::IndicatorsPreviewWidget ui;
