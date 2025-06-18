@@ -28,6 +28,8 @@ private:
 
     std::vector<A3D::ChartAxisIndicator> getIndicatorFromCount(size_t) const;
 
+    A3D::ChartAxisIndicator getIndicatorByValue(float value) const;
+
     void onModeChanged(bool);
 
     void onCountModeChanged(bool);

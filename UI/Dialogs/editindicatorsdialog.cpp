@@ -1,14 +1,14 @@
-#include "editliindicatorsdialog.h"
-#include "ui_editliindicatorsdialog.h"
+#include "editindicatorsdialog.h"
+#include "ui_editindicatorsdialog.h"
 
-EditLiIndicatorsDialog::EditLiIndicatorsDialog(QWidget* parent)
+EditIndicatorsDialog::EditIndicatorsDialog(QWidget* parent)
 	: QDialog(parent),
-      ui(new Ui::EditLiIndicatorsDialog) {
+	  ui(new Ui::EditIndicatorsDialog) {
     ui->setupUi(this);
 
-    connect(ui->stringPrecisionWidget, &StringPrecisionWidget::stringPrecisionChanged, this, &EditLiIndicatorsDialog::onLabelDigitsChanged);
-    reset();
+    connect(ui->stringPrecisionWidget, &StringPrecisionWidget::stringPrecisionChanged, ui->rawEditWidget, &ValuesPreviewWidget::setStringPrecision);
     ui->rawEditWidget->setEditingMode(true);
+    reset();
 }
 
 static size_t getPrecisionFromString(const QString text) {
@@ -20,19 +20,16 @@ static size_t getPrecisionFromString(const QString text) {
     return lst.at(1).size();
 }
 
-void EditLiIndicatorsDialog::setStyleNeeded(bool styleNeeded) {
+void EditIndicatorsDialog::setStyleNeeded(bool styleNeeded) {
+    m_styleNeeded = styleNeeded;
     ui->generalSettings->setHidden(!styleNeeded);
     ui->indicatorTypeWidget->setHidden(!styleNeeded);
-    m_styleNeeded = styleNeeded;
 }
 
-void EditLiIndicatorsDialog::onLabelDigitsChanged() {
-    size_t digits = ui->stringPrecisionWidget->getPrecision();
-    ui->rawEditWidget->setStringPrecision(digits);
-}
 
-void EditLiIndicatorsDialog::editIndicators(std::vector<A3D::ChartAxisIndicator> const& indicators) {
+void EditIndicatorsDialog::editIndicators(std::vector<A3D::ChartAxisIndicator> const& indicators) {
     size_t maxStringPrecision = 0;
+    m_indicators = indicators;
     for(size_t i = 0; i < indicators.size(); ++i) {
         ui->rawEditWidget->addValue(indicators.at(i).m_value);
         size_t prec = getPrecisionFromString(indicators.at(i).m_label);
@@ -40,20 +37,20 @@ void EditLiIndicatorsDialog::editIndicators(std::vector<A3D::ChartAxisIndicator>
             maxStringPrecision = prec;
     }
     ui->stringPrecisionWidget->setPrecision(maxStringPrecision);
-    m_indicators = indicators;
     open();
 }
 
-void EditLiIndicatorsDialog::setChartIndicatorsType(A3D::ChartAxisIndicatorType type) {
+void EditIndicatorsDialog::setChartIndicatorsType(A3D::ChartAxisIndicatorType type) {
     ui->indicatorTypeWidget->setType(type);
 }
 
-void EditLiIndicatorsDialog::setStyle(A3D::ChartAxisIndicatorStyle style) {
+void EditIndicatorsDialog::setStyle(A3D::ChartAxisIndicatorStyle style) {
     ui->generalSettings->setStyle(style);
     setStyleNeeded(true);
 }
 
-void EditLiIndicatorsDialog::reset() {
+void EditIndicatorsDialog::reset() {
+    setStyle(A3D::ChartAxisIndicatorStyle());
     setChartIndicatorsType(A3D::CHAXIND_MAJOR_INDICATOR);
     setStyleNeeded(false);
     m_indicators.clear();
@@ -61,7 +58,7 @@ void EditLiIndicatorsDialog::reset() {
 }
 
 // TODO:  Normalize value when they arrive
-std::vector<A3D::ChartAxisIndicator> EditLiIndicatorsDialog::indicators() {
+std::vector<A3D::ChartAxisIndicator> EditIndicatorsDialog::indicators() {
     std::vector<float> values    = ui->rawEditWidget->getValues();
     size_t const stringPrecision = ui->stringPrecisionWidget->getPrecision();
     for(size_t i = 0; i < values.size(); i++) {
@@ -82,6 +79,6 @@ std::vector<A3D::ChartAxisIndicator> EditLiIndicatorsDialog::indicators() {
     return m_indicators;
 }
 
-EditLiIndicatorsDialog::~EditLiIndicatorsDialog() {
+EditIndicatorsDialog::~EditIndicatorsDialog() {
 	delete ui;
 }

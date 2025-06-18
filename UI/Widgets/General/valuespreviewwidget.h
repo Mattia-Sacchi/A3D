@@ -13,12 +13,15 @@ public:
     void addValues(std::vector<float>);
 
     std::vector<float> getValues() const;
-    void setStringPrecision(size_t);
+
 	void addValue(float);
 
     void clear();
 
     inline void setEditingMode(bool enabled) { ui.addValueButton->setEnabled(!enabled); }
+
+public slots:
+    void setStringPrecision(size_t);
 private slots:
 
     void onAddButtonClicked();

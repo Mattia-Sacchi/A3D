@@ -19,7 +19,7 @@ public:
     void setPrecision(size_t);
 
 signals:
-    void stringPrecisionChanged();
+    void stringPrecisionChanged(size_t);
 private slots:
     void onValueChanged(int);
 

@@ -17,8 +17,8 @@ void StringPrecisionWidget::setPrecision(size_t val) {
     ui->stringPrecisionSpinBox->setValue(val);
 }
 
-void StringPrecisionWidget::onValueChanged(int) {
-    emit stringPrecisionChanged();
+void StringPrecisionWidget::onValueChanged(int val) {
+    emit stringPrecisionChanged(val);
 }
 
 StringPrecisionWidget::~StringPrecisionWidget() {

@@ -65,7 +65,7 @@ set(SOURCES
     UI/Widgets/styledenumeratedindicatorpreviewwidget.cpp
     UI/Widgets/linearindicatorssettingswidget.cpp
     UI/Dialogs/settingsdialog.cpp
-    UI/Dialogs/editliindicatorsdialog.cpp
+    UI/Dialogs/editindicatorsdialog.cpp
     UI/Dialogs/incompatibilitydialog.cpp
     UI/Dialogs/editenumdialog.cpp
     UI/Dialogs/addindicatorsdialog.cpp
@@ -137,7 +137,7 @@ set(HEADERS
     UI/Widgets/styledenumeratedindicatorpreviewwidget.h
     UI/Widgets/linearindicatorssettingswidget.h
     UI/Dialogs/settingsdialog.h
-    UI/Dialogs/editliindicatorsdialog.h
+    UI/Dialogs/editindicatorsdialog.h
     UI/Dialogs/incompatibilitydialog.h
     UI/Dialogs/editenumdialog.h
     UI/Dialogs/addindicatorsdialog.h
@@ -161,7 +161,7 @@ set(UI_FILES
     UI/Widgets/styledenumeratedindicatorpreviewwidget.ui
     UI/Widgets/linearindicatorssettingswidget.ui
     UI/Dialogs/settingsdialog.ui
-    UI/Dialogs/editliindicatorsdialog.ui
+    UI/Dialogs/editindicatorsdialog.ui
     UI/Dialogs/incompatibilitydialog.ui
     UI/Dialogs/editenumdialog.ui
     UI/Dialogs/addindicatorsdialog.ui

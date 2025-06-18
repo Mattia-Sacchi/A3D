@@ -1,19 +1,19 @@
-#ifndef EDITLIINDICATORSDIALOG_H
-#define EDITLIINDICATORSDIALOG_H
+#ifndef EDITINDICATORSDIALOG_H
+#define EDITINDICATORSDIALOG_H
 
 #include <QDialog>
 #include "../../A3D/chart.h"
 
 namespace Ui {
-class EditLiIndicatorsDialog;
+class EditIndicatorsDialog;
 }
 
-class EditLiIndicatorsDialog : public QDialog {
+class EditIndicatorsDialog : public QDialog {
 	Q_OBJECT
 
 public:
-    explicit EditLiIndicatorsDialog(QWidget* parent = nullptr);
-    ~EditLiIndicatorsDialog();
+    explicit EditIndicatorsDialog(QWidget* parent = nullptr);
+    ~EditIndicatorsDialog();
 
     void reset();
 
@@ -24,12 +24,11 @@ public:
     void editIndicators(std::vector<A3D::ChartAxisIndicator> const& indicators);
 
 private:
-    void onLabelDigitsChanged();
     void setStyleNeeded(bool);
     bool m_styleNeeded;
     std::vector<A3D::ChartAxisIndicator> m_indicators;
 
-    Ui::EditLiIndicatorsDialog* ui;
+    Ui::EditIndicatorsDialog* ui;
 };
 
 #endif // ADDLIINDICATORSDIALOG_H
