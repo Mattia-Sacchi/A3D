@@ -74,7 +74,8 @@ set(SOURCES
     UI/Widgets/General/stringprecisionwidget.cpp
     UI/Widgets/General/customframe.cpp
     UI/Widgets/General/chartaxisgeneralsettings.cpp
-    UI/Widgets/General//colorpickerform.cpp
+    UI/Widgets/General/colorpickerform.cpp
+    UI/Widgets/General/generalpreview.cpp
 )
 
 set(INCPATHS
@@ -146,7 +147,8 @@ set(HEADERS
     UI/Widgets/General/stringprecisionwidget.h
     UI/Widgets/General/customframe.h
     UI/Widgets/General/chartaxisgeneralsettings.h
-    UI/Widgets/General//colorpickerform.h
+    UI/Widgets/General/colorpickerform.h
+    UI/Widgets/General/generalpreview.h
 )
 
 set(RESOURCES
@@ -170,6 +172,7 @@ set(UI_FILES
     UI/Widgets/General/stringprecisionwidget.ui
     UI/Widgets/General/chartaxisgeneralsettings.ui
     UI/Widgets/General/colorpickerform.ui
+    UI/Widgets/General/generalpreview.ui
 )
  
 qt_add_big_resources(
@@ -184,7 +187,7 @@ qt_add_executable(${PROJECT_NAME}
     ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
     ${RESOURCES}
-    UI/Widgets/generalpreview.h UI/Widgets/generalpreview.cpp UI/Widgets/generalpreview.ui
+
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/UI/Widgets
