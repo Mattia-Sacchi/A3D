@@ -28,7 +28,8 @@ KeyboardCameraController::KeyboardCameraController(View* view)
 	  m_movementBaseSpeed(1.f, 1.f, 1.f),
 	  m_movementPreciseFactor(0.2f),
 	  m_movementQuickFactor(5.f),
-	  m_rotationBaseSpeed(60.f, 60.f, 60.f)
+      m_rotationBaseSpeed(60.f, 60.f, 60.f),
+      m_rotationAngle(0.01f)
 {
 	std::memset(m_actions, 0, sizeof(m_actions));
 }
@@ -57,6 +58,10 @@ void KeyboardCameraController::setBaseMovementSpeed(QVector3D speed) {
 
 void KeyboardCameraController::setBaseRotationSpeed(QVector3D speed) {
 	m_rotationBaseSpeed = speed;
+}
+
+void KeyboardCameraController::setHomePosition(QVector3D position) {
+    m_homePosition = position;
 }
 
 bool KeyboardCameraController::update(std::chrono::milliseconds deltaT) {
@@ -101,7 +106,19 @@ bool KeyboardCameraController::update(std::chrono::milliseconds deltaT) {
 	if(m_actions[ACT_LOOK_TILTRIGHT])
 		rotation.setZ(rotation.z() + 1.f);
 
-	movement *= m_movementBaseSpeed;
+    if(m_actions[ACT_ROTATE_DOWNWARD_AROUND_HOME])
+        rotateAroundHome(ACT_ROTATE_DOWNWARD_AROUND_HOME);
+
+    if(m_actions[ACT_ROTATE_UPWARD_AROUND_HOME])
+        rotateAroundHome(ACT_ROTATE_UPWARD_AROUND_HOME);
+
+    if(m_actions[ACT_ROTATE_RIGHT_AROUND_HOME])
+        rotateAroundHome(ACT_ROTATE_RIGHT_AROUND_HOME);
+
+    if(m_actions[ACT_ROTATE_LEFT_AROUND_HOME])
+        rotateAroundHome(ACT_ROTATE_LEFT_AROUND_HOME);
+
+    movement *= m_movementBaseSpeed;
 	rotation *= m_rotationBaseSpeed;
 
 	if(movement.isNull() && rotation.isNull())
@@ -141,6 +158,46 @@ bool KeyboardCameraController::eventFilter(QObject* o, QEvent* e) {
 	}
 
 	return QObject::eventFilter(o, e);
+}
+
+void KeyboardCameraController::setRotationAngle(float angle) {
+    m_rotationAngle = angle;
+}
+
+void KeyboardCameraController::rotateAroundHome(Action ac) {
+    if(!view())
+        return;
+
+    QVector3D pointer;
+    Camera& camera = view()->camera();
+    switch(ac) {
+    case ACT_ROTATE_LEFT_AROUND_HOME:
+        pointer = camera.right() * -1.f;
+        break;
+    case ACT_ROTATE_RIGHT_AROUND_HOME:
+        pointer = camera.right();
+        break;
+    case ACT_ROTATE_UPWARD_AROUND_HOME:
+        pointer = camera.up();
+        break;
+    case ACT_ROTATE_DOWNWARD_AROUND_HOME:
+        pointer = camera.up() * -1.f;
+        break;
+    default:
+        return;
+    }
+
+    QVector3D pos  = camera.position();
+    float distance = pos.distanceToPoint(m_homePosition);
+    pos += pointer * m_rotationAngle;
+
+    QVector3D dir = (pos - m_homePosition);
+    dir           = dir.normalized();
+
+    QVector3D newPosition = m_homePosition + dir * distance;
+
+    camera.setPosition(newPosition);
+    camera.setOrientationTarget(m_homePosition);
 }
 
 void KeyboardCameraController::updateActions() {

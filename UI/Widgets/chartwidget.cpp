@@ -12,8 +12,6 @@ ChartWidget::ChartWidget(QWidget* parent)
 	light.position             = QVector3D(0.5f, 10.f, 0.5f);
 	light.color                = QVector4D(1.f, 1.f, 1.f, 500.f);
 
-
-
 	m_view = new A3D::View(this);
 	m_view->camera().setPosition(QVector3D(2.f, 2.f, 2.f));
 	m_view->camera().setOrientationTarget(QVector3D(0.f, 0.f, 0.f));
@@ -34,6 +32,17 @@ ChartWidget::ChartWidget(QWidget* parent)
     m_keyCamController->addKeyBinding(Qt::Key_Space, A3D::KeyboardCameraController::ACT_MOVE_UPWARD);
     m_keyCamController->addKeyBinding(Qt::Key_Shift, A3D::KeyboardCameraController::ACT_MOVE_DOWNWARD);
 
+    m_keyCamController->addKeyBinding(Qt::Key_Left, A3D::KeyboardCameraController::ACT_ROTATE_LEFT_AROUND_HOME);
+    m_keyCamController->addKeyBinding(Qt::Key_Right, A3D::KeyboardCameraController::ACT_ROTATE_RIGHT_AROUND_HOME);
+    m_keyCamController->addKeyBinding(Qt::Key_Up, A3D::KeyboardCameraController::ACT_ROTATE_UPWARD_AROUND_HOME);
+    m_keyCamController->addKeyBinding(Qt::Key_Down, A3D::KeyboardCameraController::ACT_ROTATE_DOWNWARD_AROUND_HOME);
+
+    // Setto la home del keyCamController al centro del grafico
+    QMatrix4x4 mat   = m_view->calculateFullMatrix(m_surfaceChart, m_surfaceChart->model(), m_surfaceChart->model()->getGroup("Chart"));
+    QVector3D center = QVector3D(0.5f, 0.5f, 0.5f);
+    center           = mat.map(center);
+    m_keyCamController->setHomePosition(center);
+
     m_chartEditorController = new A3D::ChartEditorController(m_view);
 
     if(m_view->format().swapInterval() > 0)
@@ -52,26 +61,19 @@ ChartWidget::ChartWidget(QWidget* parent)
     layout()->addWidget(m_view);
 }
 
-
-
-
-A3D::SurfaceChartEntity::RenderVariants ChartWidget::renderVariants() const
-{
+A3D::SurfaceChartEntity::RenderVariants ChartWidget::renderVariants() const {
 	return m_surfaceChart->renderVariants();
 }
 
-void ChartWidget::setRenderVariants(A3D::SurfaceChartEntity::RenderVariants renderVariants)
-{
+void ChartWidget::setRenderVariants(A3D::SurfaceChartEntity::RenderVariants renderVariants) {
 	m_surfaceChart->setRenderVariants(renderVariants);
 }
 
-QColor ChartWidget::markerColor() const
-{
+QColor ChartWidget::markerColor() const {
 	return m_surfaceChart->markerColor();
 }
 
-void ChartWidget::setMarkerColor(QColor color)
-{
+void ChartWidget::setMarkerColor(QColor color) {
 	if(color.isValid())
 		m_surfaceChart->setMarkerColor(color);
 }
@@ -93,18 +95,14 @@ void ChartWidget::setWorldColor(QColor color) {
     m_cubemap->invalidateCache();
 }
 
-A3D::MapChart3D ChartWidget::map() const
-{
+A3D::MapChart3D ChartWidget::map() const {
     return m_surfaceChart->mapChart();
 }
 
-
-void ChartWidget::setMap(A3D::MapChart3D const& map)
-{
+void ChartWidget::setMap(A3D::MapChart3D const& map) {
 	if(map.isValid())
 		m_surfaceChart->setChart(map);
 }
-
 
 void ChartWidget::stop() {
 	m_timer.stop();

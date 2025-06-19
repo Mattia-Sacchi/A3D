@@ -9,7 +9,6 @@
 #include "../../A3D/keyboardcameracontroller.h"
 #include "../../A3D/charteditorcontroller.h"
 
-
 // This class is meant to be a wall between other projects and A3D
 // Data enters and settings enter and exit through here
 // The sanity of the input is checked here
@@ -44,7 +43,6 @@ private:
     A3D::Cubemap* m_cubemap;
 
     QColor m_worldColor;
-
     QTimer m_timer;
 };
 

@@ -37,6 +37,11 @@ public:
 		ACT_LOOK_TILTLEFT,  ///< Tilt the camera left
 		ACT_LOOK_TILTRIGHT, ///< Tilt the camera right
 
+        ACT_ROTATE_LEFT_AROUND_HOME,     ///< Rotate left around home position
+        ACT_ROTATE_RIGHT_AROUND_HOME,    ///< Rotate right around home position
+        ACT_ROTATE_UPWARD_AROUND_HOME,   ///< Rotate upward around home position
+        ACT_ROTATE_DOWNWARD_AROUND_HOME, ///< Rotate downward around home position
+
 		ACT_LOOK_HOME, ///< Reset camera to home position
 
 		ACT_COUNT, ///< Total number of actions
@@ -73,7 +78,7 @@ public:
 
 	/// @brief Sets the camera's home position.
 	/// @param[in] position World-space position to return to on "home" action.
-	void setHomePosition(QVector3D position);
+    void setHomePosition(QVector3D position);
 
 	/// @brief Updates controller state and applies camera motion.
 	/// @param[in] deltaT Time elapsed since last update in milliseconds.
@@ -85,6 +90,14 @@ public:
 	/// @param[in] event The event to process.
 	/// @return true if event was handled; false otherwise.
 	virtual bool eventFilter(QObject* obj, QEvent* event) override;
+
+    /// @brief Sets the default rotation angle
+    /// @param[in] angle used to move the camera during a rotation event
+    void setRotationAngle(float angle);
+
+    /// @brief Rotate the camera while looking at home position
+    /// @param[in] used to decide in which direction to rotate
+    void rotateAroundHome(Action);
 
 private:
 	/// @brief Evaluates current key statuses to update action flags.
@@ -100,6 +113,7 @@ private:
 
 	QVector3D m_rotationBaseSpeed; ///< Base speed for rotations
 	QVector3D m_homePosition;      ///< Home position for camera reset
+    float m_rotationAngle;
 };
 
 }
