@@ -36,6 +36,7 @@ ChartWidget::ChartWidget(QWidget* parent)
     m_keyCamController->addKeyBinding(Qt::Key_Right, A3D::KeyboardCameraController::ACT_ROTATE_RIGHT_AROUND_HOME);
     m_keyCamController->addKeyBinding(Qt::Key_Up, A3D::KeyboardCameraController::ACT_ROTATE_UPWARD_AROUND_HOME);
     m_keyCamController->addKeyBinding(Qt::Key_Down, A3D::KeyboardCameraController::ACT_ROTATE_DOWNWARD_AROUND_HOME);
+    m_keyCamController->rotateAroundHome(A3D::KeyboardCameraController::ACT_ROTATE_UPWARD_AROUND_HOME);
 
     // Setto la home del keyCamController al centro del grafico
     QMatrix4x4 mat   = m_view->calculateFullMatrix(m_surfaceChart, m_surfaceChart->model(), m_surfaceChart->model()->getGroup("Chart"));
