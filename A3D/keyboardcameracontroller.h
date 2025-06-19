@@ -91,10 +91,6 @@ public:
 	/// @return true if event was handled; false otherwise.
 	virtual bool eventFilter(QObject* obj, QEvent* event) override;
 
-    /// @brief Sets the default rotation angle
-    /// @param[in] angle used to move the camera during a rotation event
-    void setRotationAngle(float angle);
-
     /// @brief Rotate the camera while looking at home position
     /// @param[in] used to decide in which direction to rotate
     void rotateAroundHome(Action);
@@ -112,8 +108,9 @@ private:
 	float m_movementQuickFactor;   ///< Quick movement multiplier
 
 	QVector3D m_rotationBaseSpeed; ///< Base speed for rotations
-	QVector3D m_homePosition;      ///< Home position for camera reset
-    float m_rotationAngle;
+    QVector3D m_homePosition;      ///< Home position for camera reset
+
+    QVector2D m_rotationAngle;
 };
 
 }

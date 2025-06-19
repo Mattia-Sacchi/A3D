@@ -16,20 +16,15 @@ KeyboardCameraController::KeyboardCameraController(View* view)
 		{Qt::Key_Z, ACT_MOVE_DOWNWARD},
 		  
 		{Qt::Key_Shift, ACT_MOVE_QUICK},
-		{Qt::Key_Control, ACT_MOVE_PRECISE},
-		  
-		{Qt::Key_Left, ACT_LOOK_LEFT},		  
-		{Qt::Key_Right, ACT_LOOK_RIGHT},		  
-		{Qt::Key_Up, ACT_LOOK_UP},		  
-		{Qt::Key_Down, ACT_LOOK_DOWN},
+        {Qt::Key_Control, ACT_MOVE_PRECISE},
 		  
 		{Qt::Key_H, ACT_LOOK_HOME}
 	  },
 	  m_movementBaseSpeed(1.f, 1.f, 1.f),
 	  m_movementPreciseFactor(0.2f),
 	  m_movementQuickFactor(5.f),
-      m_rotationBaseSpeed(60.f, 60.f, 60.f),
-      m_rotationAngle(0.01f)
+      m_rotationBaseSpeed(1.f,1.f,1.f),
+      m_rotationAngle(0.f,45.f)
 {
 	std::memset(m_actions, 0, sizeof(m_actions));
 }
@@ -160,41 +155,41 @@ bool KeyboardCameraController::eventFilter(QObject* o, QEvent* e) {
 	return QObject::eventFilter(o, e);
 }
 
-void KeyboardCameraController::setRotationAngle(float angle) {
-    m_rotationAngle = angle;
-}
-
 void KeyboardCameraController::rotateAroundHome(Action ac) {
     if(!view())
         return;
 
-    QVector3D pointer;
+    QVector2D pointer;
     Camera& camera = view()->camera();
     switch(ac) {
     case ACT_ROTATE_LEFT_AROUND_HOME:
-        pointer = camera.right() * -1.f;
+        pointer = QVector2D(1.f, 0.f);
         break;
     case ACT_ROTATE_RIGHT_AROUND_HOME:
-        pointer = camera.right();
+        pointer = QVector2D(-1.f, 0.f);
         break;
     case ACT_ROTATE_UPWARD_AROUND_HOME:
-        pointer = camera.up();
+        pointer = QVector2D(0.f, 1.f);
         break;
     case ACT_ROTATE_DOWNWARD_AROUND_HOME:
-        pointer = camera.up() * -1.f;
+        pointer = QVector2D(0.f, -1.f);
         break;
     default:
         return;
     }
 
-    QVector3D pos  = camera.position();
-    float distance = pos.distanceToPoint(m_homePosition);
-    pos += pointer * m_rotationAngle;
+    m_rotationAngle += pointer * QVector2D(m_rotationBaseSpeed.x(), m_rotationBaseSpeed.y());
 
-    QVector3D dir = (pos - m_homePosition);
-    dir           = dir.normalized();
+    float sinX = sin((m_rotationAngle.x() / 360.f) * M_PI * 2);
+    float sinY = sin((m_rotationAngle.y() / 360.f) * M_PI * 2);
+    float cosX = cos((m_rotationAngle.x() / 360.f) * M_PI * 2);
+    float cosY = cos((m_rotationAngle.y() / 360.f) * M_PI * 2);
 
-    QVector3D newPosition = m_homePosition + dir * distance;
+    QVector3D newPosition = QVector3D(cosY * cosX, sinY, cosY * sinX);
+    float distance        = camera.position().distanceToPoint(m_homePosition);
+    newPosition.normalize();
+    newPosition *= distance;
+    newPosition += m_homePosition;
 
     camera.setPosition(newPosition);
     camera.setOrientationTarget(m_homePosition);

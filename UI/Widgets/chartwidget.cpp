@@ -42,6 +42,7 @@ ChartWidget::ChartWidget(QWidget* parent)
     QVector3D center = QVector3D(0.5f, 0.5f, 0.5f);
     center           = mat.map(center);
     m_keyCamController->setHomePosition(center);
+    m_view->camera().setOrientationTarget(center);
 
     m_chartEditorController = new A3D::ChartEditorController(m_view);
 
