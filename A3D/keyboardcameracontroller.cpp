@@ -186,9 +186,8 @@ void KeyboardCameraController::rotateAroundHome(Action ac) {
     float cosY = cos((m_rotationAngle.y() / 360.f) * M_PI * 2);
 
     QVector3D newPosition = QVector3D(cosY * cosX, sinY, cosY * sinX);
-    float distance        = camera.position().distanceToPoint(m_homePosition);
     newPosition.normalize();
-    newPosition *= distance;
+    newPosition *= camera.position().distanceToPoint(m_homePosition);
     newPosition += m_homePosition;
 
     camera.setPosition(newPosition);
