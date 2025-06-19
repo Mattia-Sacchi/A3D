@@ -184,6 +184,7 @@ qt_add_executable(${PROJECT_NAME}
     ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
     ${RESOURCES}
+    UI/Widgets/generalpreview.h UI/Widgets/generalpreview.cpp UI/Widgets/generalpreview.ui
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/UI/Widgets
