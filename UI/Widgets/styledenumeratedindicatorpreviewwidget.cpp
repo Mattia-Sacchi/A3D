@@ -5,22 +5,12 @@
 #include "chartaxissettings.h"
 
 StyledEnumeratedIndicatorsPreviewWidget::StyledEnumeratedIndicatorsPreviewWidget(QWidget* parent)
-    : QWidget(parent) {
-	ui.setupUi(this);
+    : GeneralPreview(parent) {
 
-    ui.previewWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
-
-    connect(ui.previewWidget, &QListWidget::doubleClicked, this, &StyledEnumeratedIndicatorsPreviewWidget::onItemDoubleClicked);
-    connect(ui.previewWidget, &QListWidget::itemSelectionChanged, this, &StyledEnumeratedIndicatorsPreviewWidget::onItemSelectionChanged);
-    connect(ui.addIndicatorsButton, &QPushButton::clicked, this, &StyledEnumeratedIndicatorsPreviewWidget::onAddButtonClicked);
-    connect(ui.removeIndicatorsButton, &QPushButton::clicked, this, &StyledEnumeratedIndicatorsPreviewWidget::onRemoveButtonClicked);
-    connect(ui.editIndicatorsButton, &QPushButton::clicked, this, &StyledEnumeratedIndicatorsPreviewWidget::onEditIndicartorsClicked);
+    GeneralPreview::onItemSelectionChanged();
 
     connect(&m_dialog, &QDialog::accepted, this, &StyledEnumeratedIndicatorsPreviewWidget::onEditAccepted);
-
-    ui.removeIndicatorsButton->setEnabled(false);
-    ui.editIndicatorsButton->setEnabled(false);
-
+    connect(this, &GeneralPreview::removedItem, this, &StyledEnumeratedIndicatorsPreviewWidget::onRemoveItem);
     QWidget* parentWidget = parent;
     while(parentWidget) {
         ChartAxisSettings* settings = qobject_cast<ChartAxisSettings*>(parentWidget);
@@ -30,8 +20,7 @@ StyledEnumeratedIndicatorsPreviewWidget::StyledEnumeratedIndicatorsPreviewWidget
         }
         parentWidget = parentWidget->parentWidget();
     }
-
-    ui.previewWidget->setMinimumHeight(300);
+    previewWidget()->setMinimumHeight(300);
 }
 
 void StyledEnumeratedIndicatorsPreviewWidget::addIndicators(std::vector<A3D::ChartAxisIndicator> const& indicators) {
@@ -57,24 +46,24 @@ void StyledEnumeratedIndicatorsPreviewWidget::addIndicators(std::vector<A3D::Cha
     });
     // Devo farlo comunque, perché è come mi arrivano
 
-    ui.previewWidget->clear();
+    previewWidget()->clear();
 
     for(size_t i = 0; i < m_indicators.size(); i++) {
         A3D::ChartAxisIndicator indicator = m_indicators[i];
-        size_t index                      = ui.previewWidget->count();
+        size_t index                      = previewWidget()->count();
         indicator.m_value                 = i;
         QString text                      = indicator.m_label;
 
-        QListWidgetItem* newWidget = new QListWidgetItem(ui.previewWidget);
+        QListWidgetItem* newWidget = new QListWidgetItem(previewWidget());
 
-        CustomFrame* frame = new CustomFrame(ui.previewWidget, indicator.m_style.m_indicatorColor, indicator.m_type);
+        CustomFrame* frame = new CustomFrame(previewWidget(), indicator.m_style.m_indicatorColor, indicator.m_type);
         frame->setValues(text, index);
         frame->setFormats(indicator.m_style.m_labelColor, indicator.m_style.m_labelFont);
 
         newWidget->setSizeHint(frame->sizeHint());
 
-        ui.previewWidget->setItemWidget(newWidget, frame);
-        ui.previewWidget->addItem(newWidget);
+        previewWidget()->setItemWidget(newWidget, frame);
+        previewWidget()->addItem(newWidget);
     }
 }
 
@@ -94,29 +83,11 @@ void StyledEnumeratedIndicatorsPreviewWidget::onAddButtonClicked() {
     A3D::ChartAxisIndicator indicator;
     indicator.m_type  = A3D::CHAXIND_MAJOR_INDICATOR;
     indicator.m_label = "Lorem Ipsum";
+    indicator.m_value = previewWidget()->count();
     if(m_settings)
         indicator.m_style = m_settings->style();
 
     addIndicators({ indicator });
-}
-
-void StyledEnumeratedIndicatorsPreviewWidget::onRemoveButtonClicked() {
-    QList<QListWidgetItem*> itemsToRemove = ui.previewWidget->selectedItems();
-
-    for(int i = ui.previewWidget->count() - 1; i >= 0; --i) {
-        QListWidgetItem* item = ui.previewWidget->item(i);
-        if(!itemsToRemove.contains(item))
-            continue;
-        // Qt documentation says that this is the correct way
-        delete ui.previewWidget->takeItem(i);
-        m_indicators.erase(m_indicators.begin() + i);
-    }
-
-    for(size_t i = 0; i < ui.previewWidget->count(); i++) {
-        QWidget* w               = ui.previewWidget->itemWidget(ui.previewWidget->item(i));
-        CustomFrame* customFrame = qobject_cast<CustomFrame*>(w);
-        customFrame->setNumber(i);
-    }
 }
 
 void StyledEnumeratedIndicatorsPreviewWidget::onItemDoubleClicked(QModelIndex const& index) {
@@ -126,21 +97,20 @@ void StyledEnumeratedIndicatorsPreviewWidget::onItemDoubleClicked(QModelIndex co
     m_dialog.open();
 }
 
-void StyledEnumeratedIndicatorsPreviewWidget::onEditIndicartorsClicked() {
+void StyledEnumeratedIndicatorsPreviewWidget::onEditIndicatorsClicked() {
 
-    QList<QListWidgetItem*> selectedItems = ui.previewWidget->selectedItems();
+    QList<QListWidgetItem*> selectedItems = previewWidget()->selectedItems();
 
     if(selectedItems.count() > 1 || !selectedItems.count())
         return;
 
     QListWidgetItem* current = selectedItems.first();
 
-    for(size_t i = 0; i < ui.previewWidget->count(); i++) {
-        QListWidgetItem* item = ui.previewWidget->item(i);
+    for(size_t i = 0; i < previewWidget()->count(); i++) {
+        QListWidgetItem* item = previewWidget()->item(i);
         if(item == current) {
             m_dialog.editIndicator({ i, m_indicators[i] });
             m_dialog.open();
-
             return;
         }
     }
@@ -149,7 +119,7 @@ void StyledEnumeratedIndicatorsPreviewWidget::onEditIndicartorsClicked() {
 void StyledEnumeratedIndicatorsPreviewWidget::onEditAccepted() {
     EditEnumDialog::IndicatorIterator it = m_dialog.indicator();
 
-    QWidget* w               = ui.previewWidget->itemWidget(ui.previewWidget->item(it.index));
+    QWidget* w               = previewWidget()->itemWidget(previewWidget()->item(it.index));
     CustomFrame* customFrame = qobject_cast<CustomFrame*>(w);
     QString text             = it.indicator.m_label;
     customFrame->setText(text);
@@ -158,23 +128,28 @@ void StyledEnumeratedIndicatorsPreviewWidget::onEditAccepted() {
     m_indicators[it.index] = it.indicator;
 }
 
-void StyledEnumeratedIndicatorsPreviewWidget::onItemSelectionChanged() {
-    int count   = ui.previewWidget->selectedItems().count();
-    bool result = count > 0;
-    if(count == 1)
-        ui.removeIndicatorsButton->setText("Remove indicator");
-    else if(count > 1)
-        ui.removeIndicatorsButton->setText("Remove indicators");
+void StyledEnumeratedIndicatorsPreviewWidget::onRemoveItem(size_t index) {
+    m_indicators.erase(m_indicators.begin() + index);
 
-    ui.editIndicatorsButton->setEnabled(count == 1);
-    ui.removeIndicatorsButton->setEnabled(result);
-
-    for(int i = 0; i < ui.previewWidget->count(); ++i) {
-        QListWidgetItem* item = ui.previewWidget->item(i);
-        CustomFrame* frame    = qobject_cast<CustomFrame*>(ui.previewWidget->itemWidget(item));
-        if(!frame)
-            continue;
-
-        frame->setHighlighted(item->isSelected());
+    for(size_t i = 0; i < previewWidget()->count(); i++) {
+        QWidget* w               = previewWidget()->itemWidget(previewWidget()->item(i));
+        CustomFrame* customFrame = qobject_cast<CustomFrame*>(w);
+        customFrame->setNumber(i);
     }
+}
+
+bool StyledEnumeratedIndicatorsPreviewWidget::isAddEnabled() const {
+    return true;
+}
+
+bool StyledEnumeratedIndicatorsPreviewWidget::isEditEnabled() const {
+    return true;
+}
+
+bool StyledEnumeratedIndicatorsPreviewWidget::isMultiEditEnabled() const {
+    return false;
+}
+
+bool StyledEnumeratedIndicatorsPreviewWidget::isRemoveEnabled() const {
+    return true;
 }

@@ -16,9 +16,7 @@ int main(int argc, char* argv[]) {
 	QApplication a(argc, argv);
 	QMainWindow w;
 
-    /*
-	A3D::SurfaceChartEntity* torqueRestitutionChart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
-	torqueRestitutionChart->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
+    CalibrationWidget torqueRestitutionCal;
 
 	A3D::MapChart3D torqueRestitutionTimeMap;
 
@@ -65,16 +63,11 @@ int main(int argc, char* argv[]) {
 		qDebug() << "TorqueResitution Map is not valid!";
 		return 1;
 	}
+    torqueRestitutionCal.chartWidget()->setMap(torqueRestitutionTimeMap);
 
-	torqueRestitutionChart->setChart(torqueRestitutionTimeMap);
-	torqueRestitutionChart->setLabelDistances(QVector3D(0.1f, 0.1f, 0.1f));
-	torqueRestitutionChart->setPosition(QVector3D(2, 0, 0));
-    */
-    /*
-    A3D::SurfaceChartEntity* histoChart = s->emplaceChildEntity<A3D::SurfaceChartEntity>();
-	histoChart->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
-	histoChart->setPosition(QVector3D(0, 2, 0));
+    CalibrationWidget histoCal;
 
+    histoCal.chartWidget()->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
 	A3D::MapChart3D histoMap;
 
 	{
@@ -150,19 +143,16 @@ int main(int argc, char* argv[]) {
 	histoMap.setChartPoints({ 0, 1, 2, 3, 4 }, { 0, 1 }, { -32, -10, 0, 10, 32, 21, 15, 0, -15, -21 });
 
 	if(!histoMap.isValid()) {
-		qDebug() << "AutoUp Map is not valid!";
+        qDebug() << "Histo Map is not valid!";
 		return 1;
 	}
 
-	histoChart->setChart(histoMap);
-	histoChart->setLabelDistances(QVector3D(0.1f, 0.1f, 0.1f));
-    */
+    histoCal.chartWidget()->setMap(histoMap);
 
-    CalibrationWidget cal;
+    CalibrationWidget autoUpCal;
 
-    cal.chartWidget()->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
+    autoUpCal.chartWidget()->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
 
-    /*
     A3D::MapChart3D autoUpMap;
 
     {
@@ -241,8 +231,16 @@ int main(int argc, char* argv[]) {
         }
     );
 
+    if(!autoUpMap.isValid()) {
+        qDebug() << "AutoUp Map is not valid!";
+        return 1;
+    }
 
-    */
+    autoUpCal.chartWidget()->setMap(autoUpMap);
+
+    CalibrationWidget rpmGasToTargetPressureCal;
+
+    rpmGasToTargetPressureCal.chartWidget()->setRenderVariants(A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS);
 
     A3D::MapChart3D rpmGasToTargetPressure;
 
@@ -288,9 +286,17 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    cal.chartWidget()->setMap(rpmGasToTargetPressure);
+    rpmGasToTargetPressureCal.chartWidget()->setMap(rpmGasToTargetPressure);
 
-    w.setCentralWidget(&cal);
+    QWidget* widget = new QWidget(&w);
+    QGridLayout* layout;
+    widget->setLayout(layout = new QGridLayout);
+    layout->addWidget(&torqueRestitutionCal, 0, 0);
+    layout->addWidget(&histoCal, 0, 1);
+    layout->addWidget(&autoUpCal, 1, 0);
+    layout->addWidget(&rpmGasToTargetPressureCal, 1, 1);
+
+    w.setCentralWidget(widget);
 	w.show();
 
 	int rv = a.exec();

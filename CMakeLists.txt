@@ -159,8 +159,6 @@ set(RESOURCES
 set(UI_FILES
     UI/Widgets/calibrationwidget.ui
     UI/Widgets/chartaxissettings.ui
-    UI/Widgets/indicatorspreviewwidget.ui
-    UI/Widgets/styledenumeratedindicatorpreviewwidget.ui
     UI/Widgets/linearindicatorssettingswidget.ui
     UI/Dialogs/settingsdialog.ui
     UI/Dialogs/editindicatorsdialog.ui

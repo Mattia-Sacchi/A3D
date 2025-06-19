@@ -1,13 +1,13 @@
 #ifndef LISTINDICATORSPREVIEWWIDGET_H
 #define LISTINDICATORSPREVIEWWIDGET_H
 
-#include "ui_styledenumeratedindicatorpreviewwidget.h"
 #include "../../A3D/chart.h"
 #include "../Dialogs/editenumdialog.h"
+#include "General/generalpreview.h"
 
 class ChartAxisSettings;
 
-class StyledEnumeratedIndicatorsPreviewWidget : public QWidget {
+class StyledEnumeratedIndicatorsPreviewWidget : public GeneralPreview {
 	Q_OBJECT
 
 public:
@@ -32,21 +32,21 @@ public:
 
 private slots:
 
-    void onAddButtonClicked();
+    virtual void onAddButtonClicked() override;
 
-    void onEditIndicartorsClicked();
-    void onItemDoubleClicked(QModelIndex const&);
+    virtual void onEditIndicatorsClicked() override;
+    virtual void onItemDoubleClicked(QModelIndex const&) override;
     void onEditAccepted();
-
-    void onRemoveButtonClicked();
-
-    void onItemSelectionChanged();
+    void onRemoveItem(size_t);
 
 private:
+    virtual bool isAddEnabled() const override;
+    virtual bool isEditEnabled() const override;
+    virtual bool isMultiEditEnabled() const override;
+    virtual bool isRemoveEnabled() const override;
     std::vector<A3D::ChartAxisIndicator> m_indicators;
     ChartAxisSettings* m_settings;
     EditEnumDialog m_dialog;
-    Ui::StyledEnumeratedIndicatorsPreviewWidget ui;
 };
 
 #endif // LISTINDICATORSPREVIEWWIDGET_H

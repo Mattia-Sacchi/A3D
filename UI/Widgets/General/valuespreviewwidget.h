@@ -3,7 +3,6 @@
 
 #include "../../A3D/chart.h"
 #include "generalpreview.h"
-#include "ui_generalpreview.h"
 
 class ValuesPreviewWidget : public GeneralPreview {
 	Q_OBJECT
@@ -19,14 +18,12 @@ public:
 
     void clear();
 
-    void setEditingMode(bool enabled = true);
-
 public slots:
     void setStringPrecision(size_t);
 private slots:
-
-    void onAddButtonClicked();
-    void onRemoveButtonClicked();
+    virtual void onAddButtonClicked() override;
+    inline virtual void onItemDoubleClicked(QModelIndex const&) override {}
+    inline virtual void onEditIndicatorsClicked() override {}
 
 private:
     virtual bool isAddEnabled() const override;

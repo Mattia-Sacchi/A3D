@@ -11,16 +11,35 @@ GeneralPreview::GeneralPreview(QWidget* parent)
 
     connect(ui->previewWidget, &QListWidget::itemSelectionChanged, this, &GeneralPreview::onItemSelectionChanged);
     connect(ui->removeIndicatorsButton, &QPushButton::clicked, this, &GeneralPreview::onRemoveButtonClicked);
+    connect(ui->previewWidget, &QListWidget::doubleClicked, this, &GeneralPreview::onItemDoubleClickedProxy);
+    connect(ui->addIndicatorsButton, &QPushButton::clicked, this, &GeneralPreview::onAddButtonClickedProxy);
+    connect(ui->editIndicatorsButton, &QPushButton::clicked, this, &GeneralPreview::onEditIndicatorsClickedProxy);
+}
+
+QListWidget* GeneralPreview::previewWidget() const {
+    return ui->previewWidget;
 }
 
 GeneralPreview::~GeneralPreview() {
 	delete ui;
 }
 
+void GeneralPreview::onAddButtonClickedProxy() {
+    onAddButtonClicked();
+}
+
+void GeneralPreview::onItemDoubleClickedProxy(QModelIndex const& index) {
+    onItemDoubleClicked(index);
+}
+
+void GeneralPreview::onEditIndicatorsClickedProxy() {
+    onEditIndicatorsClicked();
+}
+
 void GeneralPreview::onRemoveButtonClicked() {
     QList<QListWidgetItem*> itemsToRemove = ui->previewWidget->selectedItems();
 
-    for(size_t i = ui->previewWidget->count() - 1; i >= 0; --i) {
+    for(int i = ui->previewWidget->count() - 1; i >= 0; --i) {
         QListWidgetItem* item = ui->previewWidget->item(i);
         if(!itemsToRemove.contains(item))
             continue;

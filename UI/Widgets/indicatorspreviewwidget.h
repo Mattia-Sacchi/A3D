@@ -1,14 +1,14 @@
 #ifndef INDICATORSPREVIEWWIDGET_H
 #define INDICATORSPREVIEWWIDGET_H
 
-#include "ui_indicatorspreviewwidget.h"
 #include "../../A3D/chart.h"
 #include "../Dialogs/addindicatorsdialog.h"
 #include "../Dialogs/editindicatorsdialog.h"
+#include "generalpreview.h"
 
 class ChartAxisSettings;
 
-class IndicatorsPreviewWidget : public QWidget {
+class IndicatorsPreviewWidget : public GeneralPreview {
 	Q_OBJECT
 
 public:
@@ -21,26 +21,25 @@ public:
 
 private slots:
     // Add
-    void onAddButtonClicked();
+    virtual void onAddButtonClicked() override;
     void onAddDialogAccepted();
 
     // Edit
-    void onItemDoubleClicked(QModelIndex const&);
-    void onEditIndicatorsClicked();
+    virtual void onItemDoubleClicked(QModelIndex const&) override;
+    virtual void onEditIndicatorsClicked() override;
     void onEditDialogFinished();
-
-    // Remove
-    void onRemoveButtonClicked();
-
-    void onItemSelectionChanged();
+    void onRemoveItem(size_t);
 
 private:
+    virtual bool isAddEnabled() const override;
+    virtual bool isEditEnabled() const override;
+    virtual bool isMultiEditEnabled() const override;
+    virtual bool isRemoveEnabled() const override;
     void editIndicators(std::vector<A3D::ChartAxisIndicator> const&);
     ChartAxisSettings* m_settings;
     AddIndicatorsDialog m_addDialog;
     EditIndicatorsDialog m_editDialog;
     std::vector<A3D::ChartAxisIndicator> m_indicators;
-    Ui::IndicatorsPreviewWidget ui;
 };
 
 #endif // INDICATORSPREVIEWWIDGET_H
