@@ -168,7 +168,6 @@ set(UI_FILES
     UI/Dialogs/editenumdialog.ui
     UI/Dialogs/addindicatorsdialog.ui
     UI/Widgets/General/chartindicatortypewidget.ui
-    UI/Widgets/General/valuespreviewwidget.ui
     UI/Widgets/General/stringprecisionwidget.ui
     UI/Widgets/General/chartaxisgeneralsettings.ui
     UI/Widgets/General/colorpickerform.ui

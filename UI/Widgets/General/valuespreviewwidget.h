@@ -1,10 +1,11 @@
 #ifndef VALUESPREVIEWWIDGET_H
 #define VALUESPREVIEWWIDGET_H
 
-#include "ui_valuespreviewwidget.h"
 #include "../../A3D/chart.h"
+#include "generalpreview.h"
+#include "ui_generalpreview.h"
 
-class ValuesPreviewWidget : public QWidget {
+class ValuesPreviewWidget : public GeneralPreview {
 	Q_OBJECT
 
 public:
@@ -18,7 +19,7 @@ public:
 
     void clear();
 
-    inline void setEditingMode(bool enabled) { ui.addValueButton->setEnabled(!enabled); }
+    void setEditingMode(bool enabled = true);
 
 public slots:
     void setStringPrecision(size_t);
@@ -26,10 +27,12 @@ private slots:
 
     void onAddButtonClicked();
     void onRemoveButtonClicked();
-    void onItemSelectionChanged();
 
 private:
-	Ui::ValuesPreviewWidget ui;
+    virtual bool isAddEnabled() const override;
+    virtual bool isEditEnabled() const override;
+    virtual bool isMultiEditEnabled() const override;
+    virtual bool isRemoveEnabled() const override;
 };
 
 #endif // VALUESPREVIEWWIDGET_H

@@ -13,15 +13,20 @@ class GeneralPreview : public QWidget {
 public:
     explicit GeneralPreview(QWidget* parent = nullptr);
 	~GeneralPreview();
-
-private slots:
+signals:
+    void removedItem(size_t index);
+public slots:
     void onItemSelectionChanged();
+private slots:
+    void onRemoveButtonClicked();
 
 private:
-    virtual bool isAddEnabled()       = 0;
-    virtual bool isEditEnabled()      = 0;
-    virtual bool isMultiEditEnabled() = 0;
-    virtual bool isRemoveEnabled()    = 0;
+    virtual bool isAddEnabled() const       = 0;
+    virtual bool isEditEnabled() const      = 0;
+    virtual bool isMultiEditEnabled() const = 0;
+    virtual bool isRemoveEnabled() const    = 0;
+
+protected:
     Ui::GeneralPreview* ui;
 };
 

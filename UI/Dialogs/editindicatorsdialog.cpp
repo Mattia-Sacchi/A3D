@@ -7,7 +7,6 @@ EditIndicatorsDialog::EditIndicatorsDialog(QWidget* parent)
     ui->setupUi(this);
 
     connect(ui->stringPrecisionWidget, &StringPrecisionWidget::stringPrecisionChanged, ui->rawEditWidget, &ValuesPreviewWidget::setStringPrecision);
-    ui->rawEditWidget->setEditingMode(true);
     reset();
 }
 
@@ -26,10 +25,9 @@ void EditIndicatorsDialog::setStyleNeeded(bool styleNeeded) {
     ui->indicatorTypeWidget->setHidden(!styleNeeded);
 }
 
-
 void EditIndicatorsDialog::editIndicators(std::vector<A3D::ChartAxisIndicator> const& indicators) {
     size_t maxStringPrecision = 0;
-    m_indicators = indicators;
+    m_indicators              = indicators;
     for(size_t i = 0; i < indicators.size(); ++i) {
         ui->rawEditWidget->addValue(indicators.at(i).m_value);
         size_t prec = getPrecisionFromString(indicators.at(i).m_label);
