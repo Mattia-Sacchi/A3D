@@ -84,6 +84,10 @@ QColor ChartWidget::worldColor() const {
 	return m_worldColor;
 }
 
+std::map<A3D::KeyboardCameraController::Action, Qt::Key> ChartWidget::getKeyBindings() {
+    return m_keyCamController->getKeyBindings();
+}
+
 void ChartWidget::setWorldColor(QColor color) {
     if(color == m_worldColor || !color.isValid())
         return;
@@ -95,6 +99,10 @@ void ChartWidget::setWorldColor(QColor color) {
     m_cubemap->setCubemapFace(A3D::Cubemap::CF_POS_Y, m_worldColor);
     m_cubemap->setCubemapFace(A3D::Cubemap::CF_POS_Z, m_worldColor);
     m_cubemap->invalidateCache();
+}
+
+void ChartWidget::setKeyBindings(std::map<Qt::Key, A3D::KeyboardCameraController::Action> bindings) {
+    m_keyCamController->setKeyBindings(bindings);
 }
 
 A3D::MapChart3D ChartWidget::map() const {

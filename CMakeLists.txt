@@ -184,6 +184,7 @@ qt_add_executable(${PROJECT_NAME}
     ${UI_FILES}
     ${COMPILED_RESOURCE_FILES}
     ${RESOURCES}
+    UI/Dialogs/editshortcutsdialog.h UI/Dialogs/editshortcutsdialog.cpp UI/Dialogs/editshortcutsdialog.ui
 
 )
 

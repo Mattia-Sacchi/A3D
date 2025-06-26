@@ -23,7 +23,8 @@ KeyboardCameraController::KeyboardCameraController(View* view)
 	  m_movementBaseSpeed(1.f, 1.f, 1.f),
 	  m_movementPreciseFactor(0.2f),
 	  m_movementQuickFactor(5.f),
-      m_rotationBaseSpeed(1.f,1.f,1.f),
+      m_rotationBaseSpeed(60.f,60.f,60.f),
+      m_rotationRevolutionSpeed(1.f,1.f,1.f),
       m_rotationAngle(0.f,45.f)
 {
 	std::memset(m_actions, 0, sizeof(m_actions));
@@ -53,6 +54,10 @@ void KeyboardCameraController::setBaseMovementSpeed(QVector3D speed) {
 
 void KeyboardCameraController::setBaseRotationSpeed(QVector3D speed) {
 	m_rotationBaseSpeed = speed;
+}
+
+void KeyboardCameraController::setRevolutionRotationSpeed(QVector3D speed) {
+    m_rotationRevolutionSpeed = speed;
 }
 
 void KeyboardCameraController::setHomePosition(QVector3D position) {
@@ -155,6 +160,14 @@ bool KeyboardCameraController::eventFilter(QObject* o, QEvent* e) {
 	return QObject::eventFilter(o, e);
 }
 
+std::map<KeyboardCameraController::Action, Qt::Key> KeyboardCameraController::getKeyBindings() {
+    std::map<KeyboardCameraController::Action, Qt::Key> temp;
+    temp.clear();
+    for(const auto& [key, action]: m_keyBindings)
+        temp[action] = key;
+    return temp;
+}
+
 void KeyboardCameraController::rotateAroundHome(Action ac) {
     if(!view())
         return;
@@ -178,7 +191,7 @@ void KeyboardCameraController::rotateAroundHome(Action ac) {
         return;
     }
 
-    m_rotationAngle += pointer * QVector2D(m_rotationBaseSpeed.x(), m_rotationBaseSpeed.y());
+    m_rotationAngle += pointer * QVector2D(m_rotationRevolutionSpeed.x(), m_rotationRevolutionSpeed.y());
 
     float sinX = sin((m_rotationAngle.x() / 360.f) * M_PI * 2);
     float sinY = sin((m_rotationAngle.y() / 360.f) * M_PI * 2);

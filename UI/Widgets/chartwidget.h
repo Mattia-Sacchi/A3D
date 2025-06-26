@@ -27,7 +27,8 @@ public:
     A3D::MapChart3D map() const;
     void stop();
     void restart();
-
+    void setKeyBindings(std::map<Qt::Key, A3D::KeyboardCameraController::Action>);
+    std::map<A3D::KeyboardCameraController::Action, Qt::Key> getKeyBindings();
     //A3D::SurfaceChartEntity * surfaceChart() const;
 public slots:
 

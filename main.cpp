@@ -11,6 +11,7 @@
 #include "A3D/charteditorcontroller.h"
 #include "keyeventmanager.h"
 #include "../Widgets/calibrationwidget.h"
+#include "editshortcutsdialog.h"
 
 int main(int argc, char* argv[]) {
 	QApplication a(argc, argv);
@@ -288,7 +289,11 @@ int main(int argc, char* argv[]) {
 
     rpmGasToTargetPressureCal.chartWidget()->setMap(rpmGasToTargetPressure);
 
-    QWidget* widget = new QWidget(&w);
+    QWidget* centralWidget     = new QWidget(&w);
+    QVBoxLayout* centralLayout = new QVBoxLayout(centralWidget);
+    centralWidget->setLayout(centralLayout);
+
+    QWidget* widget = new QWidget(centralWidget);
     QGridLayout* layout;
     widget->setLayout(layout = new QGridLayout);
     layout->addWidget(&torqueRestitutionCal, 0, 0);
@@ -296,7 +301,26 @@ int main(int argc, char* argv[]) {
     layout->addWidget(&autoUpCal, 1, 0);
     layout->addWidget(&rpmGasToTargetPressureCal, 1, 1);
 
-    w.setCentralWidget(widget);
+    centralLayout->addWidget(widget);
+
+    QPushButton* button = new QPushButton(centralWidget);
+    button->setText("Edit shortcuts");
+
+    EditShortcutsDialog* dialog = new EditShortcutsDialog(centralWidget);
+
+    dialog->setSequence(histoCal.chartWidget()->getKeyBindings());
+
+    QObject::connect(dialog, &EditShortcutsDialog::shortcutsChanged, [&](std::map<Qt::Key, A3D::KeyboardCameraController::Action> seq) {
+        histoCal.setKeyBindings(seq);
+        torqueRestitutionCal.setKeyBindings(seq);
+        rpmGasToTargetPressureCal.setKeyBindings(seq);
+        autoUpCal.setKeyBindings(seq);
+    });
+
+    QObject::connect(button, &QPushButton::clicked, dialog, &QDialog::open);
+    centralLayout->addWidget(button);
+
+    w.setCentralWidget(centralWidget);
 	w.show();
 
 	int rv = a.exec();

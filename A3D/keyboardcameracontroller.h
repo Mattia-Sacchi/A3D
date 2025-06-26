@@ -76,6 +76,10 @@ public:
 	/// @param[in] speed Base rotation speed around each axis.
 	void setBaseRotationSpeed(QVector3D speed = QVector3D(1.f, 1.f, 1.f));
 
+    /// @brief Sets the base rotation speed vector.
+    /// @param[in] speed Base rotation speed around each axis.
+    void setRevolutionRotationSpeed(QVector3D speed = QVector3D(1.f, 1.f, 1.f));
+
 	/// @brief Sets the camera's home position.
 	/// @param[in] position World-space position to return to on "home" action.
     void setHomePosition(QVector3D position);
@@ -95,6 +99,8 @@ public:
     /// @param[in] used to decide in which direction to rotate
     void rotateAroundHome(Action);
 
+    std::map<Action, Qt::Key> getKeyBindings();
+
 private:
 	/// @brief Evaluates current key statuses to update action flags.
 	void updateActions();
@@ -107,8 +113,9 @@ private:
 	float m_movementPreciseFactor; ///< Precise movement multiplier
 	float m_movementQuickFactor;   ///< Quick movement multiplier
 
-	QVector3D m_rotationBaseSpeed; ///< Base speed for rotations
-    QVector3D m_homePosition;      ///< Home position for camera reset
+    QVector3D m_rotationBaseSpeed;       ///< Base speed for rotations
+    QVector3D m_rotationRevolutionSpeed; ///< Revolution speed for rotations around home position
+    QVector3D m_homePosition;            ///< Home position for camera reset
 
     QVector2D m_rotationAngle;
 };

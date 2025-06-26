@@ -11,9 +11,12 @@ CalibrationWidget::CalibrationWidget(QWidget* parent)
     connect(ui.settingsButton, &QPushButton::clicked, this, &CalibrationWidget::onSettingsButtonClicked);
 }
 
-ChartWidget * CalibrationWidget::chartWidget() const
-{
+ChartWidget* CalibrationWidget::chartWidget() const {
     return ui.chartWidget;
+}
+
+void CalibrationWidget::setKeyBindings(std::map<Qt::Key, A3D::KeyboardCameraController::Action> sequences) {
+    ui.chartWidget->setKeyBindings(sequences);
 }
 
 void CalibrationWidget::onSettingsButtonClicked() {
@@ -28,8 +31,7 @@ void CalibrationWidget::onSettingsButtonClicked() {
     m_settingsDialog->open();
 }
 
-void CalibrationWidget::onDialogFinished(int)
-{
+void CalibrationWidget::onDialogFinished(int) {
     ui.chartWidget->restart();
 }
 

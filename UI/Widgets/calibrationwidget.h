@@ -10,8 +10,8 @@ class CalibrationWidget : public QWidget {
 public:
     explicit CalibrationWidget(QWidget* parent = nullptr);
 
-    ChartWidget * chartWidget() const;
-
+    ChartWidget* chartWidget() const;
+    void setKeyBindings(std::map<Qt::Key, A3D::KeyboardCameraController::Action>);
 private slots:
     void onSettingsButtonClicked();
     void onGeneralInfoChanged(GeneralInfo const&);
