@@ -2,6 +2,7 @@
 #include <QStyleOptionButton>
 #include <QMouseEvent>
 #include <QStyle>
+#include <QPainterPath>
 
 CustomFrame::CustomFrame(QWidget* parent, QColor borderColor, A3D::ChartAxisIndicatorType type)
     : QFrame(parent),
@@ -108,15 +109,20 @@ void CustomFrame::leaveEvent(QEvent* event) {
 
 void CustomFrame::paintEvent(QPaintEvent* event) {
 
-    // Disegna il bordo
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
+	// Disegna il bordo
+	QFrame::paintEvent(event); // Chiama il paintEvent base per mantenere il comportamento predefinito
 
-    painter.setBrush(palette().button());
-    painter.fillRect(rect(), Qt::SolidPattern);
+	QPainter painter(this);
+	painter.setRenderHint(QPainter::Antialiasing);
 
-    painter.setPen(QPen(m_borderColor, m_borderSize)); // Spessore 2px
-    painter.drawRect(rect().adjusted(1, 1, -2, -2));
+	// Crea il path stondato
+	QPainterPath path;
+	const int radius = 10; // Raggio degli angoli stondati
+	QRectF borderRect = rect().adjusted(1, 1, -2, -2);
+	path.addRoundedRect(borderRect, radius, radius);
 
-    QFrame::paintEvent(event);
+	// Disegna il bordo stondato
+	painter.setPen(QPen(m_borderColor, m_borderSize));
+	painter.setBrush(Qt::NoBrush);
+	painter.drawPath(path);
 }

@@ -18,7 +18,7 @@ find_package(Qt6 REQUIRED COMPONENTS
 # Sources
 set(SOURCES
     main.cpp
-    keyeventmanager.cpp
+
     A3D/entitycontroller.cpp
     A3D/keyboardcameracontroller.cpp
     A3D/linegroup.cpp
@@ -91,7 +91,7 @@ set(DEFINES
 # Headers
 set(HEADERS
     Dependencies/stb/stb_image.h
-    keyeventmanager.h
+
     A3D/entitycontroller.h
     A3D/keyboardcameracontroller.h
     A3D/linegroup.h

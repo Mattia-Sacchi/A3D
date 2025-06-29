@@ -4,6 +4,7 @@
 #include "ui_calibrationwidget.h"
 #include "../Dialogs/settingsdialog.h"
 #include "../../A3D/chart.h"
+
 class CalibrationWidget : public QWidget {
     Q_OBJECT
 
@@ -11,6 +12,9 @@ public:
     explicit CalibrationWidget(QWidget* parent = nullptr);
 
     ChartWidget * chartWidget() const;
+
+	void setName(QString);
+	QString name() const;
 
 private slots:
     void onSettingsButtonClicked();

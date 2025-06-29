@@ -28,6 +28,9 @@ public:
     void stop();
     void restart();
 
+	void setName(QString name);
+	QString name() const;
+
     //A3D::SurfaceChartEntity * surfaceChart() const;
 public slots:
 

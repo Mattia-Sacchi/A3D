@@ -4,12 +4,8 @@
 #include <QDir>
 #include <QTimer>
 #include "A3D/common.h"
-#include "A3D/view.h"
-#include "A3D/keyboardcameracontroller.h"
 #include "A3D/surfacechartentity.h"
 #include "A3D/chart.h"
-#include "A3D/charteditorcontroller.h"
-#include "keyeventmanager.h"
 #include "../Widgets/calibrationwidget.h"
 
 int main(int argc, char* argv[]) {
@@ -64,6 +60,7 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
     torqueRestitutionCal.chartWidget()->setMap(torqueRestitutionTimeMap);
+    torqueRestitutionCal.setName("Torque restitution");
 
     CalibrationWidget histoCal;
 
@@ -148,6 +145,7 @@ int main(int argc, char* argv[]) {
 	}
 
     histoCal.chartWidget()->setMap(histoMap);
+    histoCal.setName("Positions");
 
     CalibrationWidget autoUpCal;
 
@@ -236,7 +234,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    autoUpCal.chartWidget()->setMap(autoUpMap);
+	autoUpCal.chartWidget()->setMap(autoUpMap);
+	autoUpCal.setName("Auto upshift");
 
     CalibrationWidget rpmGasToTargetPressureCal;
 
@@ -295,6 +294,8 @@ int main(int argc, char* argv[]) {
     layout->addWidget(&histoCal, 0, 1);
     layout->addWidget(&autoUpCal, 1, 0);
     layout->addWidget(&rpmGasToTargetPressureCal, 1, 1);
+
+    rpmGasToTargetPressureCal.setName("Fuel Pump Target Pressure");
 
     w.setCentralWidget(widget);
 	w.show();

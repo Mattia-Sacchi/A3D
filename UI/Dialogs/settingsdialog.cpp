@@ -6,6 +6,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::onSettingsAccepted);
     ui.worldColorPicker->setText("World color:");
     ui.markerColorPicker->setText("Marker color:");
+    ui.chartNameLineEdit->setMaxLength(32);
 }
 
 void SettingsDialog::setGeneralInfo(GeneralInfo info) {
@@ -16,6 +17,8 @@ void SettingsDialog::setGeneralInfo(GeneralInfo info) {
         ui.normalRadioButton->setChecked(true);
     else if((m_info.m_variants & A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS) == A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS)
         ui.histRadioButton->setChecked(true);
+
+    ui.chartNameLineEdit->setText(info.m_chartName);
 
     ui.worldColorPicker->setColor(m_info.m_worldColor);
     ui.markerColorPicker->setColor(m_info.m_markerColor);
@@ -41,10 +44,14 @@ void SettingsDialog::onSettingsAccepted() {
         variants |= A3D::SurfaceChartEntity::RV_NONE;
     if(ui.histRadioButton->isChecked())
         variants |= A3D::SurfaceChartEntity::RV_HISTOGRAM_ENUMERATIONS;
-    if(m_info.m_worldColor != ui.worldColorPicker->color() || m_info.m_markerColor != ui.markerColorPicker->color() || variants != m_info.m_variants) {
+    if(m_info.m_worldColor != ui.worldColorPicker->color()
+       || m_info.m_markerColor != ui.markerColorPicker->color()
+       || variants != m_info.m_variants
+       || m_info.m_chartName != ui.chartNameLineEdit->text()) {
         m_info.m_markerColor = ui.markerColorPicker->color();
         m_info.m_worldColor  = ui.worldColorPicker->color();
         m_info.m_variants    = variants;
+        m_info.m_chartName = ui.chartNameLineEdit->text();
         emit generalInfoChanged(m_info);
     }
 

@@ -45,6 +45,16 @@ SurfaceChartEntity::SurfaceChartEntity(Entity* parent)
 	}
 }
 
+void SurfaceChartEntity::setName(QString name)
+{
+	m_name = name;
+}
+
+QString SurfaceChartEntity::name() const
+{
+	return m_name;
+}
+
 void SurfaceChartEntity::setChart(MapChart3D map) {
 	m_mapChart = std::move(map);
 	updateSurfaceMesh();

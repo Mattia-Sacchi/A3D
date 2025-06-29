@@ -24,7 +24,7 @@ KeyboardCameraController::KeyboardCameraController(View* view)
 	  m_movementPreciseFactor(0.2f),
 	  m_movementQuickFactor(5.f),
       m_rotationBaseSpeed(1.f,1.f,1.f),
-      m_rotationAngle(0.f,45.f)
+      m_rotationAngle(45.f,45.f)
 {
 	std::memset(m_actions, 0, sizeof(m_actions));
 }

@@ -20,6 +20,10 @@ public:
 
 	SurfaceChartEntity(Entity* parent = nullptr);
 
+	// Store the name in this class in case it will be displayed one day
+	void setName(QString);
+	QString name() const;
+
 	void setChart(MapChart3D map);
 	MapChart3D const& mapChart() const;
 	MapChart3D& mapChart();
@@ -83,6 +87,7 @@ private:
 	QVector2D m_marker;
 	LineGroup* m_markerLineGroup;
 	std::uint32_t m_editFilterMask;
+	QString m_name;
 };
 
 }

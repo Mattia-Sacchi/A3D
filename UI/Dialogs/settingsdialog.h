@@ -6,6 +6,7 @@
 #include "../../A3D/surfacechartentity.h"
 
 struct GeneralInfo {
+    QString m_chartName;
     QColor m_worldColor;
     QColor m_markerColor;
     A3D::SurfaceChartEntity::RenderVariants m_variants;
