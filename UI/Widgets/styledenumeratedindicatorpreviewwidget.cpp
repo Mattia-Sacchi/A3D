@@ -1,5 +1,4 @@
 #include "styledenumeratedindicatorpreviewwidget.h"
-#include "General/chartaxisgeneralsettings.h"
 #include <QPainter>
 #include "General/customframe.h"
 #include "chartaxissettings.h"

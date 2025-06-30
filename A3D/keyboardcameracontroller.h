@@ -8,7 +8,7 @@
 #include "common.h"
 #include "viewcontroller.h"
 #include <QObject>
-#include <set>
+
 
 namespace A3D {
 

@@ -19,6 +19,17 @@ void CalibrationWidget::setKeyBindings(std::map<Qt::Key, A3D::KeyboardCameraCont
     ui.chartWidget->setKeyBindings(sequences);
 }
 
+void CalibrationWidget::setName(QString name)
+{
+	ui.nameLabel->setText(name);
+	ui.chartWidget->setName(name);
+}
+
+QString CalibrationWidget::name() const
+{
+    return ui.chartWidget->name();
+}
+
 void CalibrationWidget::onSettingsButtonClicked() {
     ui.chartWidget->stop();
     m_settingsDialog->setMap(ui.chartWidget->map());

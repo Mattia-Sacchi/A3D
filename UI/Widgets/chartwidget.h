@@ -29,6 +29,10 @@ public:
     void restart();
     void setKeyBindings(std::map<Qt::Key, A3D::KeyboardCameraController::Action>);
     std::map<A3D::KeyboardCameraController::Action, Qt::Key> getKeyBindings();
+
+	void setName(QString name);
+	QString name() const;
+
     //A3D::SurfaceChartEntity * surfaceChart() const;
 public slots:
 

@@ -4,6 +4,7 @@
 #include "ui_calibrationwidget.h"
 #include "../Dialogs/settingsdialog.h"
 #include "../../A3D/chart.h"
+
 class CalibrationWidget : public QWidget {
     Q_OBJECT
 
@@ -12,6 +13,11 @@ public:
 
     ChartWidget* chartWidget() const;
     void setKeyBindings(std::map<Qt::Key, A3D::KeyboardCameraController::Action>);
+
+
+	void setName(QString);
+	QString name() const;
+
 private slots:
     void onSettingsButtonClicked();
     void onGeneralInfoChanged(GeneralInfo const&);

@@ -27,6 +27,8 @@ ChartWidget::ChartWidget(QWidget* parent)
 	m_surfaceChart->setPosition(QVector3D(0.f, 0.f, 0.f));
 	m_surfaceChart->setLabelDistances(QVector3D(0.1f, 0.1f, 0.1f));
 
+	m_chartEditorController = new A3D::ChartEditorController(m_view);
+
     m_keyCamController = new A3D::KeyboardCameraController(m_view);
     m_keyCamController->setBaseMovementSpeed(QVector3D(9.f, 9.f, 9.f));
     m_keyCamController->addKeyBinding(Qt::Key_Space, A3D::KeyboardCameraController::ACT_MOVE_UPWARD);
@@ -36,16 +38,14 @@ ChartWidget::ChartWidget(QWidget* parent)
     m_keyCamController->addKeyBinding(Qt::Key_Right, A3D::KeyboardCameraController::ACT_ROTATE_RIGHT_AROUND_HOME);
     m_keyCamController->addKeyBinding(Qt::Key_Up, A3D::KeyboardCameraController::ACT_ROTATE_UPWARD_AROUND_HOME);
     m_keyCamController->addKeyBinding(Qt::Key_Down, A3D::KeyboardCameraController::ACT_ROTATE_DOWNWARD_AROUND_HOME);
-    m_keyCamController->rotateAroundHome(A3D::KeyboardCameraController::ACT_ROTATE_UPWARD_AROUND_HOME);
 
     // Setto la home del keyCamController al centro del grafico
     QMatrix4x4 mat   = m_view->calculateFullMatrix(m_surfaceChart, m_surfaceChart->model(), m_surfaceChart->model()->getGroup("Chart"));
     QVector3D center = QVector3D(0.5f, 0.5f, 0.5f);
     center           = mat.map(center);
     m_keyCamController->setHomePosition(center);
-    m_view->camera().setOrientationTarget(center);
 
-    m_chartEditorController = new A3D::ChartEditorController(m_view);
+
 
     if(m_view->format().swapInterval() > 0)
         m_timer.setInterval(0);
@@ -122,9 +122,13 @@ void ChartWidget::restart() {
 	m_timer.start(20);
 }
 
-/*
-A3D::SurfaceChartEntity * ChartWidget::surfaceChart() const
+void ChartWidget::setName(QString name)
 {
-	return m_surfaceChart;
+	m_surfaceChart->setName(name);
 }
-*/
+
+QString ChartWidget::name() const
+{
+	return m_surfaceChart->name();
+}
+
