@@ -49,7 +49,7 @@ void CustomFrame::setAsButton() {
 
 void CustomFrame::setFormats(QColor color, QFont font) {
     QPalette palette = m_label.palette();
-    m_label.setForegroundRole(QPalette::WindowText);
+    // m_label.setForegroundRole(QPalette::WindowText);
     palette.setColor(QPalette::WindowText, color);
     m_label.setPalette(palette);
 
@@ -117,7 +117,7 @@ void CustomFrame::paintEvent(QPaintEvent* event) {
 
 	// Crea il path stondato
 	QPainterPath path;
-	const int radius = 10; // Raggio degli angoli stondati
+    const int radius  = 10; // Raggio degli angoli stondati
 	QRectF borderRect = rect().adjusted(1, 1, -2, -2);
 	path.addRoundedRect(borderRect, radius, radius);
 
