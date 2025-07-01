@@ -24,7 +24,10 @@ IncompatibilityDialog::IncompatibilityDialog(QWidget* parent, std::vector<Indica
     for(size_t i = 0; i < infos.size(); i++) {
         IndicatorInfo& info = infos[i];
         QString buttonName  = info.m_style.m_labelFont.family();
-        CustomFrame* btn    = new CustomFrame(this, info.m_style.m_indicatorColor, info.m_type);
+
+        if(buttonName.isEmpty())
+            buttonName = "System default font";
+        CustomFrame* btn = new CustomFrame(this, info.m_style.m_indicatorColor, info.m_type);
 
         btn->setFormats(info.m_style.m_labelColor, info.m_style.m_labelFont);
         btn->setText(buttonName);
